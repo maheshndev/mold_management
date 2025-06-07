@@ -243,7 +243,3 @@ app_license = "mit"
 # }
 
 
-whitelisted_methods = [
-    "mold_management.api.get_mold_data",
-    "mold_management.api.get_maintenance_alerts",
-]
