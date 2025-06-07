@@ -242,3 +242,8 @@ app_license = "mit"
 # 	"Logging DocType Name": 30  # days to retain logs
 # }
 
+
+whitelisted_methods = [
+    "mold_management.api.get_mold_data",
+    "mold_management.api.get_maintenance_alerts",
+]

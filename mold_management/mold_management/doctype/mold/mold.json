@@ -1,0 +1,107 @@
+{
+ "actions": [],
+ "allow_rename": 1,
+ "creation": "2025-06-06 14:52:11.985603",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "name",
+  "mold_name",
+  "mold_type",
+  "products_parts",
+  "location",
+  "last_maintenance_date",
+  "current_usage_count",
+  "column_break_arav",
+  "next_maintenance_due",
+  "mold_life",
+  "status"
+ ],
+ "fields": [
+  {
+   "fieldname": "name",
+   "fieldtype": "Data",
+   "label": "Mold ID",
+   "hidden": 1
+  },
+  {
+   "fieldname": "mold_name",
+   "fieldtype": "Data",
+   "label": "Mold Name"
+  },
+  {
+   "fieldname": "mold_type",
+   "fieldtype": "Link",
+   "label": "Mold Type",
+   "options": "Mold Type"
+  },
+  {
+   "fieldname": "products_parts",
+   "fieldtype": "Link",
+   "label": "Products/Parts",
+   "options": "Item"
+  },
+  {
+   "fieldname": "location",
+   "fieldtype": "Select",
+   "label": "Location",
+   "options": "\nTool Room\nOn Machine\nUnder Maintenance"
+  },
+  {
+   "fieldname": "last_maintenance_date",
+   "fieldtype": "Date",
+   "label": "Last Maintenance Date"
+  },
+  {
+   "fieldname": "current_usage_count",
+   "fieldtype": "Data",
+   "label": "Current Usage Count"
+  },
+  {
+   "fieldname": "column_break_arav",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "next_maintenance_due",
+   "fieldtype": "Date",
+   "label": "Next Maintenance Due"
+  },
+  {
+   "fieldname": "mold_life",
+   "fieldtype": "Data",
+   "label": "Mold Life"
+  },
+  {
+   "fieldname": "status",
+   "fieldtype": "Select",
+   "label": "Status",
+   "options": "\nAvailable\nIn Use\nUnder Maintenance\nIdle\nScrapped\nPlanned"
+  }
+ ],
+ "grid_page_length": 50,
+ "index_web_pages_for_search": 1,
+ "links": [],
+ "modified": "2025-06-06 14:55:50.547284",
+ "modified_by": "Administrator",
+ "module": "Mold Management",
+ "name": "Mold",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  }
+ ],
+ "row_format": "Dynamic",
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": []
+}
