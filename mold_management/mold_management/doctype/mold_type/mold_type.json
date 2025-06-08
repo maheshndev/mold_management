@@ -1,6 +1,7 @@
 {
  "actions": [],
  "allow_rename": 1,
+ "autoname": "format:MLD-TP-{#####}",
  "creation": "2025-06-06 14:50:49.339209",
  "doctype": "DocType",
  "engine": "InnoDB",
@@ -31,10 +32,11 @@
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2025-06-08 13:48:15.702132",
+ "modified": "2025-06-08 14:20:23.058826",
  "modified_by": "Administrator",
  "module": "Mold Management",
  "name": "Mold Type",
+ "naming_rule": "Expression",
  "owner": "Administrator",
  "permissions": [
   {

@@ -1,6 +1,7 @@
 {
  "actions": [],
  "allow_rename": 1,
+ "autoname": "field:products_parts",
  "creation": "2025-06-08 13:27:19.230688",
  "doctype": "DocType",
  "engine": "InnoDB",
@@ -11,17 +12,20 @@
   {
    "fieldname": "products_parts",
    "fieldtype": "Link",
+   "in_list_view": 1,
    "label": "Products/Parts",
-   "options": "Item"
+   "options": "Item",
+   "unique": 1
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2025-06-08 13:28:04.704287",
+ "modified": "2025-06-08 14:21:56.735513",
  "modified_by": "Administrator",
  "module": "Mold Management",
  "name": "Items",
+ "naming_rule": "By fieldname",
  "owner": "Administrator",
  "permissions": [
   {
@@ -38,7 +42,9 @@
   }
  ],
  "row_format": "Dynamic",
+ "show_title_field_in_link": 1,
  "sort_field": "modified",
  "sort_order": "DESC",
- "states": []
+ "states": [],
+ "title_field": "products_parts"
 }

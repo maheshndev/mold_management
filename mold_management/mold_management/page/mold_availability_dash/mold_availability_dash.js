@@ -10,7 +10,7 @@ frappe.pages['mold-availability-dash'].on_page_load = async function (wrapper) {
     page.set_title(__('Mold Availability Dashboard'));
 
       // Filters
-    const filters_wrapper = $('<div class="flex flex-wrap gap-4 mb-4"></div>').appendTo(page.body);
+    const filters_wrapper = $('<div class="mx-5 flex flex-wrap gap-4 mb-4"></div>').appendTo(page.body);
     const filters = {
         date_range: frappe.ui.form.make_control({
             parent: filters_wrapper,
@@ -64,7 +64,7 @@ frappe.pages['mold-availability-dash'].on_page_load = async function (wrapper) {
     };
 
     // Status cards
-    const cards_wrapper = $('<div class="flex flex-wrap gap-4 mb-6"></div>').appendTo(page.body);
+    const cards_wrapper = $('<div class="mx-5 flex flex-wrap gap-4 mb-6"></div>').appendTo(page.body);
     const status_counts = await frappe.db.get_list('Mold', {
         fields: ['status'],
         limit: 1000
@@ -79,7 +79,6 @@ frappe.pages['mold-availability-dash'].on_page_load = async function (wrapper) {
         { title: 'Total Molds', count: total },
         { title: 'Molds Available', count: available },
         { title: 'Molds In Use', count: in_use },
-        { title: 'Molds In Use', count: in_use },
         { title: 'Molds Is Planned', count: mold_is_planned }
     ];
 
@@ -93,7 +92,7 @@ frappe.pages['mold-availability-dash'].on_page_load = async function (wrapper) {
  		
 
     // Two-column layout (60-40 split)
-    const two_col_wrapper = $(`<div class="row m-2"></div>`).appendTo(page.body);
+    const two_col_wrapper = $(`<div class="m-5 row m-2"></div>`).appendTo(page.body);
     const left_col = $(`<div class="cal-2 m-1"></div>`).appendTo(two_col_wrapper);
     const right_col = $(`<div class="cal-2 m-1"></div>`).appendTo(two_col_wrapper);
 
