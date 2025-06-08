@@ -174,7 +174,7 @@ frappe.pages['mold-availability-dash'].on_page_load = async function (wrapper) {
         </table>
     </div>`).appendTo(left_col);
 
-    const alerts = await frappe.db.get_list('Mold Maintenance', {
+    const alerts = await frappe.db.get_list('Mold', {
         fields: ['name', 'last_maintenance_date', 'next_maintenance_due', 'current_usage_count'],
         limit: 10
     });

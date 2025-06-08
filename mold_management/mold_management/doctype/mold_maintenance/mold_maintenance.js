@@ -7,7 +7,6 @@ frappe.ui.form.on("Mold Maintenance", {
 			return {
 				filters: {
 					company: frm.doc.company,
-					docstatus: 1,
 				},
 			};
 		});

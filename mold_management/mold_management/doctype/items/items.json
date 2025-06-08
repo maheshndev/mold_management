@@ -6,26 +6,18 @@
  "doctype": "DocType",
  "engine": "InnoDB",
  "field_order": [
-  "item_code",
-  "item_name"
+  "products_parts"
  ],
  "fields": [
   {
-   "fieldname": "item_code",
+   "fieldname": "products_parts",
    "fieldtype": "Link",
    "in_list_view": 1,
-   "label": "Item Code",
-   "options": "Item",
-   "unique": 1
-  },
-  {
-   "fieldname": "item_name",
-   "fieldtype": "Link",
-   "in_list_view": 1,
-   "label": "Item Name",
+   "label": "Products / Parts",
    "options": "Item",
    "unique": 1
   }
+  
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,

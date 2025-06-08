@@ -88,6 +88,12 @@
    "fieldtype": "Data",
    "hidden": 1,
    "label": "Mold ID"
+  },
+  {
+   "fieldname": "company",
+   "fieldtype": "Link",
+   "options": "Company",
+   "label": "Company"
   }
  ],
  "grid_page_length": 50,
