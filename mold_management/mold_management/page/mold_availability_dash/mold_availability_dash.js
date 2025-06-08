@@ -174,7 +174,7 @@ frappe.pages['mold-availability-dash'].on_page_load = async function (wrapper) {
         </table>
     </div>`).appendTo(left_col);
 
-    const alerts = await frappe.db.get_list('Mold', {
+    const alerts = await frappe.db.get_list('Mold Maintenance', {
         fields: ['name', 'last_maintenance_date', 'next_maintenance_due', 'current_usage_count'],
         limit: 10
     });
@@ -187,7 +187,7 @@ frappe.pages['mold-availability-dash'].on_page_load = async function (wrapper) {
                 <td>${row.next_maintenance_due || ''}</td>
                 <td>${row.current_usage_count || ''}</td>
                 <td>
-                    <button class="btn btn-xs btn-primary" onclick="frappe.set_route('Form', 'Asset Maintenance', '')">Schedule</button>
+                    <button class="btn btn-xs btn-primary" onclick="frappe.set_route('Form', 'Mold Maintenance', '')">Schedule</button>
                     <button class="btn btn-xs btn-warning" onclick="frappe.set_route('Form', 'Mold', '')">Clean</button>
                 </td>
             </tr>
@@ -199,7 +199,7 @@ frappe.pages['mold-availability-dash'].on_page_load = async function (wrapper) {
         <h4 class="text-lg font-semibold mb-2">Quick Actions</h4>
         <ul class="space-y-2">
             <li><a class="text-blue-600 hover:underline" href="mold/new-mold-zkkmvibbqa"><i class="fa fa-plus-circle"></i> Add New Mold</a></li>
-            <li><a class="text-blue-600 hover:underline" href="asset-maintenance/new-asset-maintenance-zkkmvibbqa"><i class="fa fa-calendar"></i> Schedule Maintenance</a></li>
+            <li><a class="text-blue-600 hover:underline" href="mold-maintenance/new-mold-maintenance-zkkmvibbqa"><i class="fa fa-calendar"></i> Schedule Maintenance</a></li>
             <li><a class="text-blue-600 hover:underline" href="mold"><i class="fa fa-chart-line"></i> Mold Performance Report</a></li>
             <li><a class="text-blue-600 hover:underline" href="mold"><i class="fa fa-broom"></i> Request Cleaning</a></li>
         </ul>

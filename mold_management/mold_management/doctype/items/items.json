@@ -1,19 +1,28 @@
 {
  "actions": [],
  "allow_rename": 1,
- "autoname": "field:products_parts",
+ "autoname": "field:item_name",
  "creation": "2025-06-08 13:27:19.230688",
  "doctype": "DocType",
  "engine": "InnoDB",
  "field_order": [
-  "products_parts"
+  "item_code",
+  "item_name"
  ],
  "fields": [
   {
-   "fieldname": "products_parts",
+   "fieldname": "item_code",
    "fieldtype": "Link",
    "in_list_view": 1,
-   "label": "Products/Parts",
+   "label": "Item Code",
+   "options": "Item",
+   "unique": 1
+  },
+  {
+   "fieldname": "item_name",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Item Name",
    "options": "Item",
    "unique": 1
   }
