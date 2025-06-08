@@ -5,7 +5,7 @@
  "doctype": "DocType",
  "engine": "InnoDB",
  "field_order": [
-  "name",
+  "mold_id",
   "mold_name",
   "mold_type",
   "products_parts",
@@ -15,15 +15,11 @@
   "column_break_arav",
   "next_maintenance_due",
   "mold_life",
-  "status"
+  "status",
+  "maximum_usage_count",
+  "total_shots"
  ],
  "fields": [
-  {
-   "fieldname": "name",
-   "fieldtype": "Data",
-   "label": "Mold ID",
-   "hidden": 1
-  },
   {
    "fieldname": "mold_name",
    "fieldtype": "Data",
@@ -39,7 +35,7 @@
    "fieldname": "products_parts",
    "fieldtype": "Link",
    "label": "Products/Parts",
-   "options": "Item"
+   "options": "Items"
   },
   {
    "fieldname": "location",
@@ -76,12 +72,28 @@
    "fieldtype": "Select",
    "label": "Status",
    "options": "\nAvailable\nIn Use\nUnder Maintenance\nIdle\nScrapped\nPlanned"
+  },
+  {
+   "fieldname": "maximum_usage_count",
+   "fieldtype": "Data",
+   "label": "Maximum Usage Count"
+  },
+  {
+   "fieldname": "total_shots",
+   "fieldtype": "Data",
+   "label": "Total Shots"
+  },
+  {
+   "fieldname": "mold_id",
+   "fieldtype": "Data",
+   "hidden": 1,
+   "label": "Mold ID"
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2025-06-06 14:55:50.547284",
+ "modified": "2025-06-08 13:48:44.274966",
  "modified_by": "Administrator",
  "module": "Mold Management",
  "name": "Mold",

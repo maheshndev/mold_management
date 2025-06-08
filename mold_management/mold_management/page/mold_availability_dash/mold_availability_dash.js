@@ -2,7 +2,8 @@ frappe.pages['mold-availability-dash'].on_page_load = async function (wrapper) {
     const page = frappe.ui.make_app_page({
         parent: wrapper,
         title: 'Mold Availability Dashboard',
-        single_column: false
+        single_column: true,
+        
     });
 
     // Page title
@@ -72,12 +73,14 @@ frappe.pages['mold-availability-dash'].on_page_load = async function (wrapper) {
     const total = status_counts.length;
     const available = status_counts.filter(m => m.status === 'Available').length;
     const in_use = status_counts.filter(m => m.status === 'In Use').length;
-	
+    const mold_is_planned = status_counts.filter(m => m.status === 'Planned').length;
 
     const card_data = [
         { title: 'Total Molds', count: total },
         { title: 'Molds Available', count: available },
-        { title: 'Molds In Use', count: in_use }
+        { title: 'Molds In Use', count: in_use },
+        { title: 'Molds In Use', count: in_use },
+        { title: 'Molds Is Planned', count: mold_is_planned }
     ];
 
     card_data.forEach(card => {
