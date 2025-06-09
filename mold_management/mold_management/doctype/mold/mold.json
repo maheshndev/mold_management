@@ -5,7 +5,7 @@
  "doctype": "DocType",
  "engine": "InnoDB",
  "field_order": [
-  "mold_id",
+  "mold_no",
   "mold_name",
   "mold_type",
   "products_parts",
@@ -26,6 +26,7 @@
    "label": "Mold Name"
   },
   {
+   "fetchfrom": "mold_type.mold_type_name",
    "fieldname": "mold_type",
    "fieldtype": "Link",
    "label": "Mold Type",
@@ -86,7 +87,6 @@
   {
    "fieldname": "mold_no",
    "fieldtype": "Data",
-   "hidden": 1,
    "label": "Mold No"
   },
   {
