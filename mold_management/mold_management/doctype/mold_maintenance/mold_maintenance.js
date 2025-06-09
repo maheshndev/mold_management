@@ -11,14 +11,14 @@ frappe.ui.form.on("Mold Maintenance", {
 			};
 		});
 
-		frm.set_query("assign_to", "mold_maintenance_tasks", function (doc) {
-			return {
-				query: "mold_management.mold_management.doctype.mold_maintenance.mold_maintenance.get_team_members",
-				filters: {
-					maintenance_team: doc.maintenance_team,
-				},
-			};
-		});
+		// frm.set_query("assign_to", "mold_maintenance_tasks", function (doc) {
+		// 	return {
+		// 		query: "mold_management.mold_management.doctype.mold_maintenance.mold_maintenance.get_team_members",
+		// 		filters: {
+		// 			maintenance_team: doc.maintenance_team,
+		// 		},
+		// 	};
+		// });
 
 		frm.set_indicator_formatter("maintenance_status", function (doc) {
 			let indicator = "blue";
