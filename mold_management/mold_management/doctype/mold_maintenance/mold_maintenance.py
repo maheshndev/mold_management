@@ -27,7 +27,7 @@ class MoldMaintenance(Document):
 		products_parts: DF.ReadOnly | None
 		maintenance_manager: DF.Data | None
 		maintenance_manager_name: DF.ReadOnly | None
-		maintenance_team: DF.Link
+		maintenance_team: DF.Literal["In-house", "Out-source"]
 	# end: auto-generated types
 
 	def validate(self):
@@ -54,7 +54,7 @@ class MoldMaintenance(Document):
 		for task in self.get("mold_maintenance_tasks"):
 			tasks_names.append(task.name)
 			update_maintenance_log(
-				mold_maintenance=self.name, products_parts=self.products_parts, task=task
+				mold_maintenance=self.name, products_parts=self.products_parts, task=task, maintenance_team=self.maintenance_team
 			)
 		mold_maintenance_orders = frappe.get_all(
 			"Mold Maintenance Order",
@@ -121,7 +121,7 @@ def calculate_next_due_date(
 	return next_due_date
 
 
-def update_maintenance_log(mold_maintenance, products_parts, task):
+def update_maintenance_log(mold_maintenance, products_parts, task, maintenance_team):
 	mold_maintenance_order = frappe.get_value(
 		"Mold Maintenance Order",
 		{
@@ -146,6 +146,7 @@ def update_maintenance_log(mold_maintenance, products_parts, task):
 				"periodicity": str(task.periodicity),
 				"maintenance_type": task.maintenance_type,
 				"due_date": task.next_due_date,
+				"maintenance_team": maintenance_team
 			}
 		)
 		mold_maintenance_order.insert()
@@ -157,6 +158,7 @@ def update_maintenance_log(mold_maintenance, products_parts, task):
 		maintenance_log.periodicity = str(task.periodicity)
 		maintenance_log.maintenance_type = task.maintenance_type
 		maintenance_log.due_date = task.next_due_date
+		maintenance_log.maintenance_team = maintenance_team
 		maintenance_log.save()
 
 
