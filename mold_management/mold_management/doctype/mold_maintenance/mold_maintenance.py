@@ -19,12 +19,13 @@ class MoldMaintenance(Document):
 		from frappe.types import DF
 
 		from mold_management.mold_management.doctype.mold_maintenance_task.mold_maintenance_task import MoldMaintenanceTask
+		from mold_management.mold_management.doctype.required_parts.required_parts import RequiredParts
 
 		mold_type: DF.ReadOnly | None
 		mold_maintenance_tasks: DF.Table[MoldMaintenanceTask]
 		mold_name: DF.Link
 		company: DF.Link
-		products_parts: DF.ReadOnly | None
+		required_parts: DF.Table[RequiredParts] | None
 		maintenance_manager: DF.Data | None
 		maintenance_manager_name: DF.ReadOnly | None
 		maintenance_team: DF.Literal["In-house", "Out-source"]
@@ -54,7 +55,7 @@ class MoldMaintenance(Document):
 		for task in self.get("mold_maintenance_tasks"):
 			tasks_names.append(task.name)
 			update_maintenance_log(
-				mold_maintenance=self.name, products_parts=self.products_parts, task=task, maintenance_team=self.maintenance_team
+				mold_maintenance=self.name, required_parts=self.required_parts, task=task, maintenance_team=self.maintenance_team
 			)
 		mold_maintenance_orders = frappe.get_all(
 			"Mold Maintenance Order",
@@ -121,7 +122,7 @@ def calculate_next_due_date(
 	return next_due_date
 
 
-def update_maintenance_log(mold_maintenance, products_parts, task, maintenance_team):
+def update_maintenance_log(mold_maintenance, required_parts, task, maintenance_team):
 	mold_maintenance_order = frappe.get_value(
 		"Mold Maintenance Order",
 		{
@@ -137,7 +138,7 @@ def update_maintenance_log(mold_maintenance, products_parts, task, maintenance_t
 				"doctype": "Mold Maintenance Order",
 				"mold_maintenance": mold_maintenance,
 				"mold_name": mold_maintenance,
-				"products_parts": products_parts,
+				"required_parts.item": required_parts.item,
 				"task": task.name,
 				"has_certificate": task.certificate_required,
 				"description": task.description,

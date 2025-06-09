@@ -63,9 +63,11 @@
    "fieldtype": "Column Break"
   },
   {
-   "fetch_from": "mold_maintenance.required_parts",
-   "fieldname": "products_parts",
-   "label": "Products Parts"
+   
+   "fieldname": "required_parts",
+   "label": "Required Parts",
+   "fieldtype": "Table",
+   "options": "Required Parts"
   },
   {
    "fieldname": "section_break_5",

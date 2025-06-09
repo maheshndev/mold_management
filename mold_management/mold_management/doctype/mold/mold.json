@@ -25,6 +25,7 @@
    "fieldtype": "Data",
    "label": "Mold Name"
   },
+  
   {
    "fetchfrom": "mold_type.mold_type_name",
    "fieldname": "mold_type",
@@ -55,8 +56,38 @@
    "label": "Current Usage Count"
   },
   {
+   "fieldname": "mold_temperature",
+   "fieldtype": "Float",
+   "label": "Mold Temperature"
+   
+  },
+  {
+   "fieldname": "ejection_pressure",
+   "fieldtype": "Float",
+   "label": "Ejection Pressure"
+   
+  },
+  {
    "fieldname": "column_break_arav",
    "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "cycle_time",
+   "fieldtype": "Float",
+   "label": "Cycle Time"
+   
+  },
+  {
+   "fieldname": "surface_defects_rate",
+   "fieldtype": "Float",
+   "label": "Surface Defects Rate"
+   
+  },
+  {
+   "fieldname": "shot_count",
+   "fieldtype": "Float",
+   "label": "Shot Count (Life Tracker)"
+   
   },
   {
    "fieldname": "next_maintenance_due",
