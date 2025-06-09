@@ -9,6 +9,7 @@ from frappe.query_builder import DocType
 from frappe.utils import getdate, nowdate, today
 
 from mold_management.mold_management.doctype.mold_maintenance.mold_maintenance import calculate_next_due_date
+from mold_management.mold_management.doctype.required_parts.required_parts import RequiredParts
 
 
 class MoldMaintenanceOrder(Document):
@@ -30,7 +31,7 @@ class MoldMaintenanceOrder(Document):
 		description: DF.ReadOnly | None
 		due_date: DF.Date | None
 		has_certificate: DF.Check
-		products_parts: DF.ReadOnly | None
+		required_parts: DF.Table[RequiredParts] | None
 		maintenance_status: DF.Literal["Planned", "Completed", "Cancelled", "Overdue"]
 		maintenance_type: DF.ReadOnly | None
 		naming_series: DF.Literal["ACC-AML-.YYYY.-"]

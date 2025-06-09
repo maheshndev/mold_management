@@ -1,6 +1,7 @@
 {
  "actions": [],
  "allow_rename": 1,
+ "autoname": "format:MLS-{#####}",
  "creation": "2025-06-08 13:35:56.136163",
  "doctype": "DocType",
  "engine": "InnoDB",
@@ -48,10 +49,11 @@
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2025-06-08 13:49:51.826474",
- "modified_by": "Administrator",
+ "modified": "2025-06-09 13:29:20.935712",
+ "modified_by": "admin@gmail.com",
  "module": "Mold Management",
  "name": "Molds",
+ "naming_rule": "Expression",
  "owner": "Administrator",
  "permissions": [
   {

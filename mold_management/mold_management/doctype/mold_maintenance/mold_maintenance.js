@@ -19,6 +19,7 @@ frappe.ui.form.on("Mold Maintenance", {
 		// 		},
 		// 	};
 		// });
+		
 
 		frm.set_indicator_formatter("maintenance_status", function (doc) {
 			let indicator = "blue";
