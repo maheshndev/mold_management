@@ -74,17 +74,24 @@ frappe.pages['mold-availability-dash'].on_page_load = async function (wrapper) {
     const available = status_counts.filter(m => m.status === 'Available').length;
     const in_use = status_counts.filter(m => m.status === 'In Use').length;
     const mold_is_planned = status_counts.filter(m => m.status === 'Planned').length;
-
+    const mold_is_idle = status_counts.filter(m => m.status === 'Idle').length;
+    const mold_is_scrapped = status_counts.filter(m => m.status === 'Scrapped').length;
+    const mold_under_maintenance= status_counts.filter(m => m.status === 'Under Maintenance').length;
+    
     const card_data = [
         { title: 'Total Molds', count: total },
         { title: 'Molds Available', count: available },
         { title: 'Molds In Use', count: in_use },
-        { title: 'Molds Is Planned', count: mold_is_planned }
+        { title: 'Molds Planned', count: mold_is_planned },
+        {title: 'Molds Idle', count: mold_is_idle},
+        {title: 'Molds Scrapped', count: mold_is_scrapped},
+        {title: 'Molds Under Maintenance', count: mold_under_maintenance}
+
     ];
 
     card_data.forEach(card => {
-        $(`<div class="card p-4 m-2 bg-white rounded shadow min-w-[250px]">
-            <h4 class="text-gray-600 text-sm">${card.title}</h4>
+        $(`<div class="card p-3 m-2 bg-white rounded shadow min-w-[250px]">
+            <h4 class="text-gray-600 ">${card.title}</h4>
             <div class="text-lg font-bold">${card.count}</div>
         </div>`).appendTo(cards_wrapper);
     });
@@ -92,7 +99,7 @@ frappe.pages['mold-availability-dash'].on_page_load = async function (wrapper) {
  		
 
     // Two-column layout (60-40 split)
-    const two_col_wrapper = $(`<div class="m-5 row m-2"></div>`).appendTo(page.body);
+    const two_col_wrapper = $(`<div class="m-5 row"></div>`).appendTo(page.body);
     const left_col = $(`<div class="cal-2 m-1"></div>`).appendTo(two_col_wrapper);
     const right_col = $(`<div class="cal-2 m-1"></div>`).appendTo(two_col_wrapper);
 

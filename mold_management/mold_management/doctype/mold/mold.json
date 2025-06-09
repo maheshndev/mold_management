@@ -84,10 +84,10 @@
    "label": "Total Shots"
   },
   {
-   "fieldname": "mold_id",
+   "fieldname": "mold_no",
    "fieldtype": "Data",
    "hidden": 1,
-   "label": "Mold ID"
+   "label": "Mold No"
   },
   {
    "fieldname": "company",
