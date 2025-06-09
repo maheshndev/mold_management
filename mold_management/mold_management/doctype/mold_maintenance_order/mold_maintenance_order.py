@@ -38,6 +38,7 @@ class MoldMaintenanceOrder(Document):
 		task: DF.Link | None
 		task_assignee_email: DF.Data | None
 		task_name: DF.Data | None
+		maintenance_team: DF.Literal["In-house", "Out-source"]
 	# end: auto-generated types
 
 	def validate(self):

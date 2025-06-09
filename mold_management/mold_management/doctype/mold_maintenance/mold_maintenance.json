@@ -30,6 +30,12 @@
    "unique": 1
   },
   {
+   "fieldname": "maintenance_team",
+   "fieldtype": "Select",
+   "label": "Maintenance Team",
+   "options": "\nIn-house\nOut-source"
+  },
+  {
    "fetch_from": "mold_name.mold_type",
    "fieldname": "mold_type",
    "fieldtype": "Read Only",
@@ -52,16 +58,8 @@
    "options": "Company",
    "reqd": 1
   },
-  {
-   "fieldname": "section_break_6",
-   "fieldtype": "Section Break"
-  },
-  
-  {
-   "fieldname": "column_break_9",
-   "fieldtype": "Column Break"
-  },
-  
+ 
+ 
   {
    "fieldname": "section_break_8",
    "fieldtype": "Section Break",
@@ -73,7 +71,19 @@
    "label": "Maintenance Tasks",
    "options": "Mold Maintenance Task",
    "reqd": 1
+  },
+   {
+   "fieldname": "section_break_6",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "required_parts",
+   "fieldtype": "Table",
+   "label": "Required Parts",
+   "options": "Required Parts"
+   
   }
+
  ],
  "links": [],
  "modified": "2020-05-28 20:28:32.993823",
