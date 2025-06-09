@@ -21,16 +21,16 @@ frappe.pages['mold-availability-dash'].on_page_load = async function (wrapper) {
             },
             render_input: true
         }),
-        products_parts: frappe.ui.form.make_control({
-            parent: filters_wrapper,
-            df: {
-                label: 'Product Part',
-                fieldtype: 'Link',
-                fieldname: 'products_parts',
-                options: 'Item'
-            },
-            render_input: true
-        }),
+        // required_parts: frappe.ui.form.make_control({
+        //     parent: filters_wrapper,
+        //     df: {
+        //         label: 'Product Part',
+        //         fieldtype: 'Link',
+        //         fieldname: 'required_parts',
+        //         options: 'Item'
+        //     },
+        //     render_input: true
+        // }),
         mold_type: frappe.ui.form.make_control({
             parent: filters_wrapper,
             df: {
@@ -122,9 +122,9 @@ frappe.pages['mold-availability-dash'].on_page_load = async function (wrapper) {
     async function refresh_table() {
         let filters_obj = {};
 
-        if (filters.products_parts.get_value()) {
-            filters_obj.products_parts = filters.products_parts.get_value();
-        }
+        // if (filters.products_parts.get_value()) {
+        //     filters_obj.products_parts = filters.products_parts.get_value();
+        // }
         if (filters.mold_type.get_value()) {
             filters_obj.mold_type = filters.mold_type.get_value();
         }

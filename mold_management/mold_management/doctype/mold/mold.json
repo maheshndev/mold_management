@@ -27,7 +27,7 @@
   },
   
   {
-   "fetchfrom": "mold_type.mold_type_name",
+   "fetchfrom": "mold_type",
    "fieldname": "mold_type",
    "fieldtype": "Link",
    "label": "Mold Type",
@@ -59,7 +59,6 @@
    "fieldname": "mold_temperature",
    "fieldtype": "Float",
    "label": "Mold Temperature"
-   
   },
   {
    "fieldname": "ejection_pressure",
