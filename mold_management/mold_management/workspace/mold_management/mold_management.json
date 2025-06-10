@@ -241,6 +241,13 @@
    "label": "Mold Availability Dashboard",
    "link_to": "mold-availability-dash",
    "type": "Page"
+  },
+  {
+   "color": "Grey",
+   "doc_view": "List",
+   "label": "Predictive Dashboard",
+   "link_to": "predictive-dash",
+   "type": "Page"
   }
  ],
  "title": "Mold Management",
