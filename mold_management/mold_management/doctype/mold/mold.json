@@ -17,7 +17,9 @@
   "mold_life",
   "status",
   "maximum_usage_count",
-  "total_shots"
+  "total_shots",
+  "tab_break_1",
+  "critical_parameters"
  ],
  "fields": [
   {
@@ -95,6 +97,17 @@
    "fieldtype": "Link",
    "options": "Company",
    "label": "Company"
+  },
+  {
+    "fieldname":"tab_break_1",
+    "fieldtype":"Tab Break",
+    "label":"Critical Parameters"
+  },
+  {
+    "fieldname":"critical_parameters",
+    "fieldtype":"Table",
+    "label":"Critical Parameters",
+    "options":"Parameters Table"
   }
  ],
  "grid_page_length": 50,
