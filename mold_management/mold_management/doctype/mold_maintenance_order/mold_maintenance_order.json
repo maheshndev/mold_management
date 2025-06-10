@@ -27,7 +27,9 @@
   "description",
   "column_break_9",
   "actions_performed",
-  "amended_from"
+  "amended_from",
+  "section_break_7",
+  "parts"
  ],
  "fields": [
   {
@@ -163,6 +165,18 @@
    "fieldtype": "Data",
    "label": "Task Assignee Email",
    "read_only": 1
+  },
+  {
+   "fieldname": "section_break_7",
+   "fieldtype": "Section Break",
+   "label": "Required Parts"
+  },
+  {
+   "fieldname": "parts",
+   "fieldtype": "Table",
+   "label": "Parts",
+   "options": "Required Parts"
+   
   }
  ],
  "index_web_pages_for_search": 1,

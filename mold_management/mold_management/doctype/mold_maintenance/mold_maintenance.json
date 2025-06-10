@@ -13,7 +13,9 @@
   "maintenance_manager",
   "maintenance_manager_name",
   "section_break_6",
-  "mold_maintenance_tasks"
+  "mold_maintenance_tasks",
+  "section_break_7",
+  "required_parts"
  ],
  "fields": [
   {
@@ -56,8 +58,19 @@
    "label": "Maintenance Tasks",
    "options": "Mold Maintenance Task",
    "reqd": 1
+  },
+  {
+   "fieldname": "section_break_7",
+   "fieldtype": "Section Break",
+   "label": "Required Parts"
+  },
+  {
+   "fieldname": "required_parts",
+   "fieldtype": "Table",
+   "label": "Required Parts",
+   "options": "Required Parts"
+   
   }
-
  ],
  "links": [],
  "modified": "2020-05-28 20:28:32.993823",
