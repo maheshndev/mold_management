@@ -1,0 +1,20 @@
+{
+ "content": null,
+ "creation": "2025-06-06 16:46:33.776142",
+ "docstatus": 0,
+ "doctype": "Page",
+ "icon": "git-branch",
+ "idx": 0,
+ "modified": "2025-06-06 16:46:33.776142",
+ "modified_by": "Administrator",
+ "module": "Mold Management",
+ "name": "predictive-dash",
+ "owner": "Administrator",
+ "page_name": "predictive-dash",
+ "roles": [],
+ "script": null,
+ "standard": "Yes",
+ "style": null,
+ "system_page": 0,
+ "title": "Predictive Dashboard"
+}
