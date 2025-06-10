@@ -1,4 +1,5 @@
 {
+ "app": "mold_management",
  "charts": [],
  "content": "[{\"id\":\"NVV-IvR9SL\",\"type\":\"header\",\"data\":{\"text\":\"<span class=\\\"h4\\\">Mold Management</span>\",\"col\":12}},{\"id\":\"hIBEm5YQIB\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Mold Availability Dashboard\",\"col\":3}},{\"id\":\"XeJ2MRlpKd\",\"type\":\"spacer\",\"data\":{\"col\":12}},{\"id\":\"5LgiKoc6G9\",\"type\":\"card\",\"data\":{\"card_name\":\"Mold Management\",\"col\":4}},{\"id\":\"z1hZKeflsl\",\"type\":\"card\",\"data\":{\"card_name\":\"Mold Other\",\"col\":4}}]",
  "creation": "2025-06-08 17:51:04.348546",
@@ -242,5 +243,6 @@
    "type": "Page"
   }
  ],
- "title": "Mold Management"
+ "title": "Mold Management",
+ "type": "Workspace"
 }
