@@ -62,14 +62,7 @@
    "fieldname": "column_break_2",
    "fieldtype": "Column Break"
   },
-  {
-   
-   "fieldname": "required_parts",
-   "label": "Required Parts",
-   "fieldtype": "Table",
-   "options": "Required Parts"
-  },
-  {
+{
    "fieldname": "section_break_5",
    "fieldtype": "Section Break",
    "label": "Maintenance Details"

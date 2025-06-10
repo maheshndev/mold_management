@@ -19,7 +19,7 @@ class MoldMaintenance(Document):
 		from frappe.types import DF
 
 		from mold_management.mold_management.doctype.mold_maintenance_task.mold_maintenance_task import MoldMaintenanceTask
-		from mold_management.mold_management.doctype.required_parts.required_parts import RequiredParts
+		#from mold_management.mold_management.doctype.required_parts.required_parts import RequiredParts
 
 		mold_type: DF.ReadOnly | None
 		mold_maintenance_tasks: DF.Table[MoldMaintenanceTask]
@@ -138,7 +138,7 @@ def update_maintenance_log(mold_maintenance, required_parts, task, maintenance_t
 				"doctype": "Mold Maintenance Order",
 				"mold_maintenance": mold_maintenance,
 				"mold_name": mold_maintenance,
-				"required_parts.item": required_parts.item,
+				#"required_parts.item": required_parts.item,
 				"task": task.name,
 				"has_certificate": task.certificate_required,
 				"description": task.description,
