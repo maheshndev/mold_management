@@ -1,7 +1,7 @@
 {
  "actions": [],
  "allow_rename": 1,
- "autoname": "field:parameter",
+ "autoname": "format:MP-T-{#####}",
  "creation": "2025-06-09 16:42:51.927626",
  "doctype": "DocType",
  "editable_grid": 1,
@@ -16,8 +16,7 @@
    "fieldtype": "Link",
    "in_list_view": 1,
    "label": "Parameter",
-   "options": "Critical Paramerter",
-   "unique": 1
+   "options": "Critical Paramerter"
   },
   {
    "fieldname": "value",
@@ -30,11 +29,11 @@
  "index_web_pages_for_search": 1,
  "istable": 1,
  "links": [],
- "modified": "2025-06-10 11:46:39.686262",
+ "modified": "2025-06-10 12:53:41.024805",
  "modified_by": "Administrator",
  "module": "Mold Management",
  "name": "Parameters Table",
- "naming_rule": "By fieldname",
+ "naming_rule": "Expression",
  "owner": "Administrator",
  "permissions": [],
  "row_format": "Dynamic",
