@@ -33,7 +33,7 @@ frappe.ui.form.on("Molds Parameter", {
             callback: function(r) {
                 if (r.message) {
                     // Set value field in the same child row
-                    frappe.model.set_value(cdt, cdn, "value", r.message.value);
+                    //frappe.model.set_value(cdt, cdn, "value", r.message.value);
 
                     // You can set more fields if needed
                     // frappe.model.set_value(cdt, cdn, "description", r.message.description);
@@ -62,7 +62,7 @@ frappe.ui.form.on("Molds Parameter", {
                 console.log(r)
                 if (r.message) {
                    
-                    frappe.model.set_value(cdt, cdn, "value", r.message.value);
+                 //   frappe.model.set_value(cdt, cdn, "value", r.message.value);
 
                    
                 }

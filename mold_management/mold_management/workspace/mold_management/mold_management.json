@@ -1,4 +1,5 @@
 {
+ "app": "mold_management",
  "charts": [],
  "content": "[{\"id\":\"NVV-IvR9SL\",\"type\":\"header\",\"data\":{\"text\":\"<span class=\\\"h4\\\">Mold Management</span>\",\"col\":12}},{\"id\":\"hIBEm5YQIB\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Mold Availability Dashboard\",\"col\":3}},{\"id\":\"XeJ2MRlpKd\",\"type\":\"spacer\",\"data\":{\"col\":12}},{\"id\":\"5LgiKoc6G9\",\"type\":\"card\",\"data\":{\"card_name\":\"Mold Management\",\"col\":4}}]",
  "creation": "2025-06-08 17:51:04.348546",
@@ -107,7 +108,7 @@
    "hidden": 0,
    "is_query_report": 0,
    "label": "Mold Management",
-   "link_count": 8,
+   "link_count": 9,
    "link_type": "DocType",
    "onboard": 0,
    "type": "Card Break"
@@ -191,9 +192,19 @@
    "link_type": "DocType",
    "onboard": 0,
    "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Mold Parameter",
+   "link_count": 0,
+   "link_to": "Mold Parameter",
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Link"
   }
  ],
- "modified": "2025-06-08 18:02:30.563989",
+ "modified": "2025-06-10 09:57:25.715986",
  "modified_by": "Administrator",
  "module": "Mold Management",
  "name": "Mold Management",
@@ -213,5 +224,6 @@
    "type": "Page"
   }
  ],
- "title": "Mold Management"
+ "title": "Mold Management",
+ "type": "Workspace"
 }
