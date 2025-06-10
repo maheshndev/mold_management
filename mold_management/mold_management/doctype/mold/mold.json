@@ -7,7 +7,6 @@
  "field_order": [
   "mold_no",
   "mold_name",
-  "mold_no",
   "mold_type",
   "products_parts",
   "location",
@@ -28,7 +27,7 @@
   },
   {
    "fieldname": "mold_no",
-   "fieldtype": "Float",
+   "fieldtype": "Data",
    "label": "Mold No"
   },
   
@@ -62,37 +61,8 @@
    "label": "Current Usage Count"
   },
   {
-   "fieldname": "mold_temperature",
-   "fieldtype": "Float",
-   "label": "Mold Temperature"
-  },
-  {
-   "fieldname": "ejection_pressure",
-   "fieldtype": "Float",
-   "label": "Ejection Pressure"
-   
-  },
-  {
    "fieldname": "column_break_arav",
    "fieldtype": "Column Break"
-  },
-  {
-   "fieldname": "cycle_time",
-   "fieldtype": "Float",
-   "label": "Cycle Time"
-   
-  },
-  {
-   "fieldname": "surface_defects_rate",
-   "fieldtype": "Float",
-   "label": "Surface Defects Rate"
-   
-  },
-  {
-   "fieldname": "shot_count",
-   "fieldtype": "Float",
-   "label": "Shot Count (Life Tracker)"
-   
   },
   {
    "fieldname": "next_maintenance_due",
@@ -119,11 +89,6 @@
    "fieldname": "total_shots",
    "fieldtype": "Data",
    "label": "Total Shots"
-  },
-  {
-   "fieldname": "mold_no",
-   "fieldtype": "Data",
-   "label": "Mold No"
   },
   {
    "fieldname": "company",
