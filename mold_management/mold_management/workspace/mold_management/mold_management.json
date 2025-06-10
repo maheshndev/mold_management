@@ -1,6 +1,6 @@
 {
  "charts": [],
- "content": "[{\"id\":\"NVV-IvR9SL\",\"type\":\"header\",\"data\":{\"text\":\"<span class=\\\"h4\\\">Mold Management</span>\",\"col\":12}},{\"id\":\"hIBEm5YQIB\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Mold Availability Dashboard\",\"col\":3}},{\"id\":\"XeJ2MRlpKd\",\"type\":\"spacer\",\"data\":{\"col\":12}},{\"id\":\"5LgiKoc6G9\",\"type\":\"card\",\"data\":{\"card_name\":\"Mold Management\",\"col\":4}}]",
+ "content": "[{\"id\":\"NVV-IvR9SL\",\"type\":\"header\",\"data\":{\"text\":\"<span class=\\\"h4\\\">Mold Management</span>\",\"col\":12}},{\"id\":\"hIBEm5YQIB\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Mold Availability Dashboard\",\"col\":3}},{\"id\":\"XeJ2MRlpKd\",\"type\":\"spacer\",\"data\":{\"col\":12}},{\"id\":\"5LgiKoc6G9\",\"type\":\"card\",\"data\":{\"card_name\":\"Mold Management\",\"col\":4}},{\"id\":\"z1hZKeflsl\",\"type\":\"card\",\"data\":{\"card_name\":\"Mold Other\",\"col\":4}}]",
  "creation": "2025-06-08 17:51:04.348546",
  "custom_blocks": [],
  "docstatus": 0,
@@ -106,8 +106,47 @@
   {
    "hidden": 0,
    "is_query_report": 0,
+   "label": "Mold Other",
+   "link_count": 3,
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Card Break"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Mold Parameter",
+   "link_count": 0,
+   "link_to": "Mold Parameter",
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Critical Paramerter",
+   "link_count": 0,
+   "link_to": "Critical Paramerter",
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Parameter",
+   "link_count": 0,
+   "link_to": "Parameter",
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
    "label": "Mold Management",
-   "link_count": 8,
+   "link_count": 7,
    "link_type": "DocType",
    "onboard": 0,
    "type": "Card Break"
@@ -181,19 +220,9 @@
    "link_type": "DocType",
    "onboard": 0,
    "type": "Link"
-  },
-  {
-   "hidden": 0,
-   "is_query_report": 0,
-   "label": "Required Parts",
-   "link_count": 0,
-   "link_to": "Required Parts",
-   "link_type": "DocType",
-   "onboard": 0,
-   "type": "Link"
   }
  ],
- "modified": "2025-06-08 18:02:30.563989",
+ "modified": "2025-06-10 10:19:51.428436",
  "modified_by": "Administrator",
  "module": "Mold Management",
  "name": "Mold Management",
