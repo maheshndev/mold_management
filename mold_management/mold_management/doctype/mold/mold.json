@@ -5,7 +5,7 @@
  "doctype": "DocType",
  "engine": "InnoDB",
  "field_order": [
-  "mold_id",
+  "mold_no",
   "mold_name",
   "mold_no",
   "mold_type",
@@ -33,6 +33,7 @@
   },
   
   {
+   "fetchfrom": "mold_type",
    "fieldname": "mold_type",
    "fieldtype": "Link",
    "label": "Mold Type",
@@ -64,7 +65,6 @@
    "fieldname": "mold_temperature",
    "fieldtype": "Float",
    "label": "Mold Temperature"
-   
   },
   {
    "fieldname": "ejection_pressure",
@@ -121,10 +121,9 @@
    "label": "Total Shots"
   },
   {
-   "fieldname": "mold_id",
+   "fieldname": "mold_no",
    "fieldtype": "Data",
-   "hidden": 1,
-   "label": "Mold ID"
+   "label": "Mold No"
   },
   {
    "fieldname": "company",

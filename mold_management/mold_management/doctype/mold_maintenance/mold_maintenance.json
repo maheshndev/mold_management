@@ -9,14 +9,10 @@
   "mold_name",
   "mold_type",
   "company",
-  "column_break_3",
-  "products_parts",
-  "section_break_6",
   "maintenance_team",
-  "column_break_9",
   "maintenance_manager",
   "maintenance_manager_name",
-  "section_break_8",
+  "section_break_6",
   "mold_maintenance_tasks"
  ],
  "fields": [
@@ -41,27 +37,16 @@
    "fieldtype": "Read Only",
    "label": "Mold Type"
   },
-  {
-   "fetch_from": "mold_name.products_parts",
-   "fieldname": "products_parts",
-   "fieldtype": "Read Only",
-   "label": "Products Parts"
-  },
-  {
-   "fieldname": "column_break_3",
-   "fieldtype": "Column Break"
-  },
+
   {
    "fieldname": "company",
    "fieldtype": "Link",
    "label": "Company",
    "options": "Company",
    "reqd": 1
-  },
- 
- 
+  }, 
   {
-   "fieldname": "section_break_8",
+   "fieldname": "section_break_6",
    "fieldtype": "Section Break",
    "label": "Tasks"
   },
@@ -71,17 +56,6 @@
    "label": "Maintenance Tasks",
    "options": "Mold Maintenance Task",
    "reqd": 1
-  },
-   {
-   "fieldname": "section_break_6",
-   "fieldtype": "Section Break"
-  },
-  {
-   "fieldname": "required_parts",
-   "fieldtype": "Table",
-   "label": "Required Parts",
-   "options": "Required Parts"
-   
   }
 
  ],
