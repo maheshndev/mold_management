@@ -11,6 +11,7 @@
   "naming_series",
   "mold_name",
   "maintenance_team",
+  "company",
   "section_break_5",
   "task",
   "task_name",
@@ -176,13 +177,18 @@
    "fieldtype": "Table",
    "label": "Parts",
    "options": "Required Parts"
-   
+  },
+  {
+   "fieldname": "company",
+   "fieldtype": "Link",
+   "label": "Company",
+   "options": "Company"
   }
  ],
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2024-09-24 15:12:37.497853",
+ "modified": "2025-06-11 12:18:26.641807",
  "modified_by": "Administrator",
  "module": "Mold Management",
  "name": "Mold Maintenance Order",
@@ -205,8 +211,10 @@
    "write": 1
   }
  ],
+ "row_format": "Dynamic",
  "sort_field": "modified",
  "sort_order": "DESC",
+ "states": [],
  "track_changes": 1,
  "track_seen": 1
 }

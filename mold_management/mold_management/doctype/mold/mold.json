@@ -1,5 +1,6 @@
 {
  "actions": [],
+ "allow_import": 1,
  "allow_rename": 1,
  "creation": "2025-06-06 14:52:11.985603",
  "doctype": "DocType",
@@ -25,11 +26,11 @@
  ],
  "fields": [
   {
-    "fieldname":"tab_break_2",
-    "fieldtype":"Tab Break",
-    "label":"Details"
+   "fieldname": "tab_break_2",
+   "fieldtype": "Tab Break",
+   "label": "Details"
   },
-    {
+  {
    "fieldname": "mold_name",
    "fieldtype": "Data",
    "label": "Mold Name"
@@ -39,9 +40,7 @@
    "fieldtype": "Data",
    "label": "Mold No"
   },
-  
   {
-   "fetchfrom": "mold_type",
    "fieldname": "mold_type",
    "fieldtype": "Link",
    "label": "Mold Type",
@@ -102,25 +101,25 @@
   {
    "fieldname": "company",
    "fieldtype": "Link",
-   "options": "Company",
-   "label": "Company"
+   "label": "Company",
+   "options": "Company"
   },
   {
-    "fieldname":"tab_break_1",
-    "fieldtype":"Tab Break",
-    "label":"Critical Parameters"
+   "fieldname": "tab_break_1",
+   "fieldtype": "Tab Break",
+   "label": "Critical Parameters"
   },
   {
-    "fieldname":"critical_parameters",
-    "fieldtype":"Table",
-    "label":"Critical Parameters",
-    "options":"Parameters Table"
+   "fieldname": "critical_parameters",
+   "fieldtype": "Table",
+   "label": "Critical Parameters",
+   "options": "Parameters Table"
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2025-06-08 13:48:44.274966",
+ "modified": "2025-06-10 14:46:43.203736",
  "modified_by": "Administrator",
  "module": "Mold Management",
  "name": "Mold",

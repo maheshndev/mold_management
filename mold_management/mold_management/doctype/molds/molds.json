@@ -1,5 +1,6 @@
 {
  "actions": [],
+ "allow_import": 1,
  "allow_rename": 1,
  "autoname": "format:MLS-{#####}",
  "creation": "2025-06-08 13:35:56.136163",
@@ -9,6 +10,7 @@
   "mold_no",
   "maximum_no_of_shots",
   "current_shots",
+  "company",
   "column_break_znwk",
   "mold_type",
   "description"
@@ -44,13 +46,19 @@
   {
    "fieldname": "column_break_znwk",
    "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "company",
+   "fieldtype": "Link",
+   "label": "Company",
+   "options": "Company"
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2025-06-09 13:29:20.935712",
- "modified_by": "admin@gmail.com",
+ "modified": "2025-06-11 12:14:58.870186",
+ "modified_by": "Administrator",
  "module": "Mold Management",
  "name": "Molds",
  "naming_rule": "Expression",

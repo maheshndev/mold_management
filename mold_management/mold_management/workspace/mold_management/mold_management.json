@@ -1,7 +1,7 @@
 {
  "app": "mold_management",
  "charts": [],
- "content": "[{\"id\":\"NVV-IvR9SL\",\"type\":\"header\",\"data\":{\"text\":\"<span class=\\\"h4\\\">Mold Management</span>\",\"col\":12}},{\"id\":\"hIBEm5YQIB\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Mold Availability Dashboard\",\"col\":3}},{\"id\":\"XeJ2MRlpKd\",\"type\":\"spacer\",\"data\":{\"col\":12}},{\"id\":\"5LgiKoc6G9\",\"type\":\"card\",\"data\":{\"card_name\":\"Mold Management\",\"col\":4}},{\"id\":\"z1hZKeflsl\",\"type\":\"card\",\"data\":{\"card_name\":\"Mold Other\",\"col\":4}}]",
+ "content": "[{\"id\":\"NVV-IvR9SL\",\"type\":\"header\",\"data\":{\"text\":\"<span class=\\\"h4\\\">Mold Management</span>\",\"col\":12}},{\"id\":\"hIBEm5YQIB\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Mold Availability Dashboard\",\"col\":3}},{\"id\":\"-CDTAzTYmw\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Predictive Dashboard\",\"col\":3}},{\"id\":\"XeJ2MRlpKd\",\"type\":\"spacer\",\"data\":{\"col\":12}},{\"id\":\"5LgiKoc6G9\",\"type\":\"card\",\"data\":{\"card_name\":\"Mold Management\",\"col\":4}},{\"id\":\"z1hZKeflsl\",\"type\":\"card\",\"data\":{\"card_name\":\"Mold Other\",\"col\":4}}]",
  "creation": "2025-06-08 17:51:04.348546",
  "custom_blocks": [],
  "docstatus": 0,
@@ -223,7 +223,7 @@
    "type": "Link"
   }
  ],
- "modified": "2025-06-10 10:19:51.428436",
+ "modified": "2025-06-10 13:37:37.819526",
  "modified_by": "Administrator",
  "module": "Mold Management",
  "name": "Mold Management",
@@ -235,6 +235,13 @@
  "roles": [],
  "sequence_id": 41.0,
  "shortcuts": [
+  {
+   "color": "Grey",
+   "doc_view": "List",
+   "label": "Predictive Dashboard",
+   "link_to": "predictive-dash",
+   "type": "Page"
+  },
   {
    "color": "Grey",
    "doc_view": "List",
