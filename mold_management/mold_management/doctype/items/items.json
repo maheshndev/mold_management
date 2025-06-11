@@ -1,12 +1,12 @@
 {
  "actions": [],
  "allow_rename": 1,
- "autoname": "field:item_name",
  "creation": "2025-06-08 13:27:19.230688",
  "doctype": "DocType",
  "engine": "InnoDB",
  "field_order": [
-  "products_parts"
+  "products_parts",
+  "company"
  ],
  "fields": [
   {
@@ -16,17 +16,21 @@
    "label": "Products / Parts",
    "options": "Item",
    "unique": 1
+  },
+  {
+   "fieldname": "company",
+   "fieldtype": "Link",
+   "label": "Company",
+   "options": "Company"
   }
-  
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2025-06-08 14:21:56.735513",
+ "modified": "2025-06-11 12:15:24.691113",
  "modified_by": "Administrator",
  "module": "Mold Management",
  "name": "Items",
- "naming_rule": "By fieldname",
  "owner": "Administrator",
  "permissions": [
   {

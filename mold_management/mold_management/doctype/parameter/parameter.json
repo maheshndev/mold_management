@@ -1,12 +1,14 @@
 {
  "actions": [],
+ "allow_import": 1,
  "allow_rename": 1,
  "autoname": "field:parameter_name",
  "creation": "2025-06-09 16:39:22.605116",
  "doctype": "DocType",
  "engine": "InnoDB",
  "field_order": [
-  "parameter_name"
+  "parameter_name",
+  "company"
  ],
  "fields": [
   {
@@ -14,13 +16,19 @@
    "fieldtype": "Data",
    "label": "Parameter Name",
    "unique": 1
+  },
+  {
+   "fieldname": "company",
+   "fieldtype": "Link",
+   "label": "Company",
+   "options": "Company"
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2025-06-09 17:19:21.379118",
- "modified_by": "admin@gmail.com",
+ "modified": "2025-06-11 12:13:34.155393",
+ "modified_by": "Administrator",
  "module": "Mold Management",
  "name": "Parameter",
  "naming_rule": "By fieldname",

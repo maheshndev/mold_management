@@ -1,12 +1,13 @@
 {
  "actions": [],
+ "allow_import": 1,
  "allow_rename": 1,
- "autoname": "field:name1",
  "creation": "2025-06-09 16:43:56.281201",
  "doctype": "DocType",
  "engine": "InnoDB",
  "field_order": [
-  "name1"
+  "name1",
+  "company"
  ],
  "fields": [
   {
@@ -15,16 +16,21 @@
    "in_list_view": 1,
    "label": "Name",
    "unique": 1
+  },
+  {
+   "fieldname": "company",
+   "fieldtype": "Link",
+   "label": "Company",
+   "options": "Company"
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2025-06-09 17:19:21.081427",
- "modified_by": "admin@gmail.com",
+ "modified": "2025-06-11 12:11:27.486675",
+ "modified_by": "Administrator",
  "module": "Mold Management",
  "name": "Critical Paramerter",
- "naming_rule": "By fieldname",
  "owner": "Administrator",
  "permissions": [
   {
