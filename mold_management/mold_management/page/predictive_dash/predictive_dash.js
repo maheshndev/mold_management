@@ -35,7 +35,6 @@ frappe.pages['predictive-dash'].on_page_load = async function (wrapper) {
 
     let index = 1;
     try {
-        // Fetch all Mold Parameter documents with suggestive_action
         const mold_parameters = await frappe.db.get_list('Mold Parameter', {
             fields: ['name', 'suggestive_action'],
             limit: 500
@@ -67,8 +66,10 @@ frappe.pages['predictive-dash'].on_page_load = async function (wrapper) {
                 else row_color = '#ffe0b9';                     // Orange
 
                 const suggestive_action = difference > 0 ? (param.suggestive_action || 'N/A') : 'N/A';
+
+                // Button with mold_no as data attribute
                 const action_button = difference > 0
-                    ? `<button class="btn btn-sm btn-primary" onclick="frappe.set_route('Form', 'Mold Maintenance', 'new')">Schedule</button>`
+                    ? `<button class="btn btn-sm btn-primary schedule-btn" data-mold="${mold_no}">Schedule</button>`
                     : '';
 
                 tbody.append(`
@@ -87,6 +88,15 @@ frappe.pages['predictive-dash'].on_page_load = async function (wrapper) {
                 index++;
             }
         }
+
+        // Schedule button click handler
+        content.on('click', '.schedule-btn', function () {
+            const moldNo = $(this).data('mold');
+            frappe.new_doc('Mold Maintenance', {
+                mold_name: moldNo
+            });
+        });
+
     } catch (error) {
         frappe.msgprint(__('Failed to load predictive data'));
         console.error(error);
