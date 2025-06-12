@@ -20,7 +20,8 @@
   "certificate_required",
   "section_break_9",
   "assign_to",
-  "column_break_10",
+  "assign_to_supplier",
+ "column_break_10",
   "assign_to_name",
   "section_break_10",
   "next_due_date",
@@ -103,6 +104,13 @@
    "in_list_view": 1,
    "label": "Assign To",
    "options": "User"
+  },
+  {
+   "fieldname": "assign_to_supplier",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Assign To Supplier",
+   "options": "Supplier"
   },
   {
    "fieldname": "column_break_10",

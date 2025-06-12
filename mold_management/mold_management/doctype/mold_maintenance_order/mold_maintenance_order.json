@@ -15,6 +15,7 @@
   "section_break_5",
   "task",
   "task_name",
+  "supplier",
   "maintenance_type",
   "periodicity",
   "has_certificate",
@@ -151,7 +152,7 @@
    "no_copy": 1,
    "options": "Mold Maintenance Order",
    "print_hide": 1,
-   "read_only": 1
+   "read_only": 1                         
   },
   {
    "fetch_from": "task.maintenance_task",
@@ -160,6 +161,15 @@
    "in_preview": 1,
    "label": "Task Name",
    "read_only": 1
+  },
+  {
+    "fetch_from": "task.assign_to_supplier",
+   "fieldname": "supplier",
+   "fieldtype": "Link",
+   "in_preview": 1,
+   "label": "Supplier Name",
+   "read_only": 1,
+   "options": "Supplier"
   },
   {
    "fieldname": "task_assignee_email",

@@ -53,7 +53,7 @@ class MoldMaintenance(Document):
 		for task in self.get("mold_maintenance_tasks"):
 			tasks_names.append(task.name)
 			update_maintenance_log(
-				mold_maintenance=self.name,  task=task, maintenance_team=self.maintenance_team
+				mold_maintenance=self.name,  task=task, maintenance_team=self.maintenance_team, required_parts= self.required_parts
 			)
 		mold_maintenance_orders = frappe.get_all(
 			"Mold Maintenance Order",
@@ -118,7 +118,7 @@ def calculate_next_due_date(
 	):
 		next_due_date = ""
 	return next_due_date
-def update_maintenance_log(mold_maintenance,  task, maintenance_team):
+def update_maintenance_log(mold_maintenance,  task, maintenance_team, required_parts):
 	mold_maintenance_order = frappe.get_value(
 		"Mold Maintenance Order",
 		{
@@ -137,13 +137,17 @@ def update_maintenance_log(mold_maintenance,  task, maintenance_team):
 				"has_certificate": task.certificate_required,
 				"description": task.description,
 				"assign_to_name": task.assign_to_name,
+				"supplier": task.assign_to_supplier,
 				"task_assignee_email": task.assign_to,
 				"periodicity": str(task.periodicity),
 				"maintenance_type": task.maintenance_type,
 				"due_date": task.next_due_date,
-				"maintenance_team": maintenance_team
+				"maintenance_team": maintenance_team,
+				"parts": required_parts
 			}
 		)
+	
+
 		mold_maintenance_order.insert()
 	else:
 		maintenance_log = frappe.get_doc("Mold Maintenance Order", mold_maintenance_order.name)
