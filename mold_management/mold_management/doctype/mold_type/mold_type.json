@@ -6,7 +6,6 @@
  "doctype": "DocType",
  "engine": "InnoDB",
  "field_order": [
-  "mold_type_id",
   "mold_type_name",
   "type",
   "company"
@@ -22,12 +21,6 @@
    "fieldtype": "Select",
    "label": "Type",
    "options": "\nInjection\nBlow\nCompression"
-  },
-  {
-   "fieldname": "mold_type_id",
-   "fieldtype": "Data",
-   "hidden": 1,
-   "label": "Mold Type ID"
   },
   {
    "fieldname": "company",

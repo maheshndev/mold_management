@@ -10,8 +10,6 @@
   "mold_type",
   "company",
   "maintenance_team",
-  "maintenance_manager",
-  "maintenance_manager_name",
   "section_break_6",
   "mold_maintenance_tasks",
   "section_break_7",
@@ -69,7 +67,6 @@
    "fieldtype": "Table",
    "label": "Required Parts",
    "options": "Required Parts"
-   
   }
  ],
  "links": [],
