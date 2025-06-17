@@ -1,6 +1,6 @@
 ### Mold Management
 
-For Mold Managment 
+Mold Management For Frappe Manufacturing 
 
 ### Installation
 
