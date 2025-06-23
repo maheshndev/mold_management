@@ -7,8 +7,7 @@
  "doctype": "DocType",
  "engine": "InnoDB",
  "field_order": [
-  "parameter_name",
-  "company"
+  "parameter_name"
  ],
  "fields": [
   {
@@ -16,12 +15,6 @@
    "fieldtype": "Data",
    "label": "Parameter Name",
    "unique": 1
-  },
-  {
-   "fieldname": "company",
-   "fieldtype": "Link",
-   "label": "Company",
-   "options": "Company"
   }
  ],
  "grid_page_length": 50,

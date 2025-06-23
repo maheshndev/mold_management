@@ -7,8 +7,7 @@
  "engine": "InnoDB",
  "field_order": [
   "mold_type_name",
-  "type",
-  "company"
+  "type"
  ],
  "fields": [
   {
@@ -21,12 +20,6 @@
    "fieldtype": "Select",
    "label": "Type",
    "options": "\nInjection\nBlow\nCompression"
-  },
-  {
-   "fieldname": "company",
-   "fieldtype": "Link",
-   "label": "Company",
-   "options": "Company"
   }
  ],
  "grid_page_length": 50,
