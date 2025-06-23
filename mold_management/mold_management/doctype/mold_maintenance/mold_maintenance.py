@@ -24,8 +24,6 @@ class MoldMaintenance(Document):
 		mold_maintenance_tasks: DF.Table[MoldMaintenanceTask]
 		mold_name: DF.Link
 		company: DF.Link
-		maintenance_manager: DF.Data | None
-		maintenance_manager_name: DF.ReadOnly | None
 		maintenance_team: DF.Literal["In-house", "Out-source"]
 	# end: auto-generated types
 

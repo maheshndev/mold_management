@@ -7,10 +7,10 @@
  "engine": "InnoDB",
  "field_order": [
   "tab_break_2",
+  "mold_type",
   "mold_no",
   "mold_name",
-  "mold_type",
-  "products_parts",
+  "cavity_count",
   "location",
   "last_maintenance_date",
   "current_usage_count",
@@ -31,9 +31,10 @@
    "label": "Details"
   },
   {
-   "fieldname": "mold_name",
-   "fieldtype": "Data",
-   "label": "Mold Name"
+   "fieldname": "mold_type",
+   "fieldtype": "Link",
+   "label": "Mold Type",
+   "options": "Mold Type"
   },
   {
    "fieldname": "mold_no",
@@ -41,16 +42,14 @@
    "label": "Mold No"
   },
   {
-   "fieldname": "mold_type",
-   "fieldtype": "Link",
-   "label": "Mold Type",
-   "options": "Mold Type"
+   "fieldname": "mold_name",
+   "fieldtype": "Data",
+   "label": "Mold Name"
   },
   {
-   "fieldname": "products_parts",
-   "fieldtype": "Link",
-   "label": "Products/Parts",
-   "options": "Items"
+    "fieldname": "cavity_count",
+    "fieldtype": "Float",
+    "label": "Cavity Count"
   },
   {
    "fieldname": "location",
