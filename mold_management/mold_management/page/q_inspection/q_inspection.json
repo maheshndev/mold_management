@@ -1,0 +1,20 @@
+{
+ "content": null,
+ "creation": "2025-07-01 11:20:19.873197",
+ "docstatus": 0,
+ "doctype": "Page",
+ "icon": "list",
+ "idx": 0,
+ "modified": "2025-07-01 11:20:19.873197",
+ "modified_by": "Administrator",
+ "module": "Mold Management",
+ "name": "q_inspection",
+ "owner": "Administrator",
+ "page_name": "q_inspection",
+ "roles": [],
+ "script": null,
+ "standard": "Yes",
+ "style": null,
+ "system_page": 0,
+ "title": "Quility Inspection Summary Table"
+}

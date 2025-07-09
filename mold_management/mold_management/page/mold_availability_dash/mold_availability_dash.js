@@ -3,14 +3,14 @@ frappe.pages['mold-availability-dash'].on_page_load = async function (wrapper) {
         parent: wrapper,
         title: 'Mold Availability Dashboard',
         single_column: true,
-        
+
     });
 
     // Page title
     page.set_title(__('Mold Availability Dashboard'));
 
-      // Filters
-    const filters_wrapper = $('<div class="mx-5 flex flex-wrap gap-4 mb-4"></div>').appendTo(page.body);
+    // Filters
+    const filters_wrapper = $('<div class="mx-4 flex flex-wrap gap-4 mb-4"></div>').appendTo(page.body);
     const filters = {
         date_range: frappe.ui.form.make_control({
             parent: filters_wrapper,
@@ -56,7 +56,7 @@ frappe.pages['mold-availability-dash'].on_page_load = async function (wrapper) {
             df: {
                 label: 'Status',
                 fieldtype: 'Select',
-                options: ['All', 'Available', 'In Use', 'Under Maintenance', 'Planned','Scrapped','Idle'].join('\n'),
+                options: ['All', 'Available', 'In Use', 'Under Maintenance', 'Planned', 'Scrapped', 'Idle'].join('\n'),
                 fieldname: 'status'
             },
             render_input: true
@@ -76,16 +76,16 @@ frappe.pages['mold-availability-dash'].on_page_load = async function (wrapper) {
     const mold_is_planned = status_counts.filter(m => m.status === 'Planned').length;
     const mold_is_idle = status_counts.filter(m => m.status === 'Idle').length;
     const mold_is_scrapped = status_counts.filter(m => m.status === 'Scrapped').length;
-    const mold_under_maintenance= status_counts.filter(m => m.status === 'Under Maintenance').length;
-    
+    const mold_under_maintenance = status_counts.filter(m => m.status === 'Under Maintenance').length;
+
     const card_data = [
         { title: 'Total Molds', count: total },
         { title: 'Molds Available', count: available },
         { title: 'Molds In Use', count: in_use },
         { title: 'Molds Planned', count: mold_is_planned },
-        {title: 'Molds Idle', count: mold_is_idle},
-        {title: 'Molds Scrapped', count: mold_is_scrapped},
-        {title: 'Molds Under Maintenance', count: mold_under_maintenance}
+        { title: 'Molds Idle', count: mold_is_idle },
+        { title: 'Molds Scrapped', count: mold_is_scrapped },
+        { title: 'Molds Under Maintenance', count: mold_under_maintenance }
 
     ];
 
@@ -96,7 +96,7 @@ frappe.pages['mold-availability-dash'].on_page_load = async function (wrapper) {
         </div>`).appendTo(cards_wrapper);
     });
 
- 		
+
 
     // Two-column layout (60-40 split)
     const two_col_wrapper = $(`<div class="m-5 row"></div>`).appendTo(page.body);
@@ -148,34 +148,34 @@ frappe.pages['mold-availability-dash'].on_page_load = async function (wrapper) {
             tbody.append('<tr><td colspan="5" class="text-center text-gray-500">No molds found.</td></tr>');
             return;
         }
-    // Cache to store mold_type_name by mold_type ID
-const moldTypeCache = {};
+        // Cache to store mold_type_name by mold_type ID
+        const moldTypeCache = {};
 
-// Helper to get mold_type_name with caching
-const getMoldTypeName = async (mold_type) => {
-    if (!mold_type) return '';
-    if (moldTypeCache[mold_type]) {
-        return moldTypeCache[mold_type];
-    }
-    try {
-        const doc = await frappe.db.get_doc('Mold Type', mold_type);
-        moldTypeCache[mold_type] = doc.mold_type_name;
-        return doc.mold_type_name;
-    } catch (err) {
-        moldTypeCache[mold_type] = '';
-        return '';
-    }
-};
+        // Helper to get mold_type_name with caching
+        const getMoldTypeName = async (mold_type) => {
+            if (!mold_type) return '';
+            if (moldTypeCache[mold_type]) {
+                return moldTypeCache[mold_type];
+            }
+            try {
+                const doc = await frappe.db.get_doc('Mold Type', mold_type);
+                moldTypeCache[mold_type] = doc.mold_type_name;
+                return doc.mold_type_name;
+            } catch (err) {
+                moldTypeCache[mold_type] = '';
+                return '';
+            }
+        };
 
-// Resolve all mold_type_name values in parallel with caching
-const moldTypeNames = await Promise.all(
-    mold_data.map(mold => getMoldTypeName(mold.mold_type))
-);
+        // Resolve all mold_type_name values in parallel with caching
+        const moldTypeNames = await Promise.all(
+            mold_data.map(mold => getMoldTypeName(mold.mold_type))
+        );
+        
 
-
-    mold_data.forEach((mold, index) => {
-       const mold_type_name = moldTypeNames[index] || '';
-        mold_table.find('tbody').append(`
+        mold_data.forEach((mold, index) => {
+            const mold_type_name = moldTypeNames[index] || '';
+            mold_table.find('tbody').append(`
             <tr>
                 <td>${mold.mold_no}</td>
                 <td>${mold.mold_name || ''}</td>
@@ -184,8 +184,8 @@ const moldTypeNames = await Promise.all(
                 <td>${mold.location || ''}</td>
             </tr>
         `);
-    });
-	}
+        });
+    }
     // Maintenance Alerts
     const maintenance_table = $(`<div class="card p-4 bg-white rounded shadow">
         <h4 class="text-lg font-semibold mb-2">Maintenance and Cleaning Alerts</h4>
@@ -202,26 +202,49 @@ const moldTypeNames = await Promise.all(
             <tbody></tbody>
         </table>
     </div>`).appendTo(left_col);
-
+     
+    
     const alerts = await frappe.db.get_list('Mold', {
         fields: ['mold_name', 'last_maintenance_date', 'next_maintenance_due', 'current_usage_count'],
         limit: 10
     });
-
+        
     alerts.forEach(row => {
         maintenance_table.find('tbody').append(`
             <tr>
-                <td>${row.mold_name}</td>
+                <td>${row.mold_name || ''}</td>
                 <td>${row.last_maintenance_date || ''}</td>
                 <td>${row.next_maintenance_due || ''}</td>
                 <td>${row.current_usage_count || ''}</td>
                 <td>
-                    <button class="btn btn-xs btn-primary" onclick="frappe.set_route('Form', 'Mold Maintenance', '')">Schedule</button>
-                    <button class="btn btn-xs btn-warning" onclick="frappe.set_route('Form', 'Mold', '')">Clean</button>
+                    <button class="btn btn-xs btn-primary schedule-btn" data-mold-name="${row.mold_name}">
+                        Schedule
+                    </button>
                 </td>
             </tr>
         `);
     });
+// Bind click event after rows are appended
+maintenance_table.find('.schedule-btn').on('click', function () {
+    const moldName = $(this).data('mold-name');
+
+    frappe.call({
+        method: "frappe.client.insert",
+        args: {
+            doc: {
+                doctype: "Mold Maintenance",
+                mold_name: moldName
+            }
+        },
+        callback: function (r) {
+            if (r.message) {
+                frappe.msgprint(`Mold Maintenance created for ${moldName}`);
+                // Optionally open the new document:
+                frappe.set_route("Form", "Mold Maintenance", r.message.name);
+            }
+        }
+    });
+});
 
     // Quick Actions
     const quick_actions = $(`<div class="card p-4 bg-white rounded shadow">
@@ -233,7 +256,7 @@ const moldTypeNames = await Promise.all(
             <li><a class="text-blue-600 hover:underline" href="mold"><i class="fa fa-broom"></i> Request Cleaning</a></li>
         </ul>
     </div>`).appendTo(right_col);
-//  Initial load
+    //  Initial load
     await refresh_table();
 
     // Refresh table on filter change
@@ -243,6 +266,6 @@ const moldTypeNames = await Promise.all(
 
     // Optionally, add a "Refresh" button
     page.add_inner_button('Refresh Table', refresh_table);
-    
+
 };
 

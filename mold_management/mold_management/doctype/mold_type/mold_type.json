@@ -1,6 +1,7 @@
 {
  "actions": [],
  "allow_rename": 1,
+ "allow_import": 1,
  "autoname": "format:MLD-TP-{#####}",
  "creation": "2025-06-06 14:50:49.339209",
  "doctype": "DocType",
@@ -13,7 +14,9 @@
   {
    "fieldname": "mold_type_name",
    "fieldtype": "Data",
-   "label": "Mold Type Name"
+   "label": "Mold Type Name",
+   "in_list_view": 1,
+   "in_global_search": 1
   },
   {
    "fieldname": "type",
@@ -48,5 +51,8 @@
  "row_format": "Dynamic",
  "sort_field": "modified",
  "sort_order": "DESC",
+ "search_fields": "mold_type_name",
+ "show_name_in_global_search": 1,
+ "title_field": "mold_type_name",
  "states": []
 }
