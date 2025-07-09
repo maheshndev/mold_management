@@ -1,7 +1,6 @@
 {
- "app": "mold_management",
  "charts": [],
- "content": "[{\"id\":\"NVV-IvR9SL\",\"type\":\"header\",\"data\":{\"text\":\"<span class=\\\"h4\\\">Mold Management</span>\",\"col\":12}},{\"id\":\"hIBEm5YQIB\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Mold Availability Dashboard\",\"col\":3}},{\"id\":\"-CDTAzTYmw\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Predictive Dashboard\",\"col\":3}},{\"id\":\"XeJ2MRlpKd\",\"type\":\"spacer\",\"data\":{\"col\":12}},{\"id\":\"5LgiKoc6G9\",\"type\":\"card\",\"data\":{\"card_name\":\"Mold Management\",\"col\":4}},{\"id\":\"z1hZKeflsl\",\"type\":\"card\",\"data\":{\"card_name\":\"Mold Other\",\"col\":4}}]",
+ "content": "[{\"id\":\"NVV-IvR9SL\",\"type\":\"header\",\"data\":{\"text\":\"<span class=\\\"h4\\\">Mold Management</span>\",\"col\":12}},{\"id\":\"hIBEm5YQIB\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Mold Availability Dashboard\",\"col\":3}},{\"id\":\"-CDTAzTYmw\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Predictive Dashboard\",\"col\":3}},{\"id\":\"s6Rkp798-b\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"In Process Inspection\",\"col\":3}},{\"id\":\"XeJ2MRlpKd\",\"type\":\"spacer\",\"data\":{\"col\":12}},{\"id\":\"5LgiKoc6G9\",\"type\":\"card\",\"data\":{\"card_name\":\"Mold Management\",\"col\":4}},{\"id\":\"z1hZKeflsl\",\"type\":\"card\",\"data\":{\"card_name\":\"Mold Other\",\"col\":4}}]",
  "creation": "2025-06-08 17:51:04.348546",
  "custom_blocks": [],
  "docstatus": 0,
@@ -223,7 +222,7 @@
    "type": "Link"
   }
  ],
- "modified": "2025-06-10 13:37:37.819526",
+ "modified": "2025-07-01 11:56:09.384282",
  "modified_by": "Administrator",
  "module": "Mold Management",
  "name": "Mold Management",
@@ -233,13 +232,13 @@
  "public": 1,
  "quick_lists": [],
  "roles": [],
- "sequence_id": 41.0,
+ "sequence_id": 36.0,
  "shortcuts": [
   {
    "color": "Grey",
    "doc_view": "List",
-   "label": "Predictive Dashboard",
-   "link_to": "predictive-dash",
+   "label": "In Process Inspection",
+   "link_to": "in-process-inspectio",
    "type": "Page"
   },
   {
@@ -257,6 +256,5 @@
    "type": "Page"
   }
  ],
- "title": "Mold Management",
- "type": "Workspace"
+ "title": "Mold Management"
 }
