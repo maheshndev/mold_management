@@ -21,8 +21,8 @@
   {
    "fieldname": "type",
    "fieldtype": "Select",
-   "label": "Type",
-   "options": "\nInjection\nBlow\nCompression"
+   "label": "Type Name",
+   "options": "Injection Molds\nBlow Molds\nCompression Molds\nTransfer Molds"
   }
  ],
  "grid_page_length": 50,
