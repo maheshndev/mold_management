@@ -80,7 +80,7 @@
   {
    "fieldname": "mold_life",
    "fieldtype": "Data",
-   "label": "Mold Life"
+   "label": "Mold Life (Years)"
   },
   {
    "fieldname": "status",
