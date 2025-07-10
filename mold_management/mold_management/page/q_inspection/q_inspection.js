@@ -14,7 +14,7 @@ frappe.pages['q_inspection'].on_page_load = function (wrapper) {
 			<div class="col-md-2"><select class="form-control" id="filter_shift"><option value="">Shift Type</option></select></div>
 			<div class="col-md-2"><button class="btn btn-primary" id="btn-refresh">Refresh</button></div>
 		</div>
-
+		
 		<div id="inspection-tables"></div>
 		<div id="pagination-controls" class="text-center mt-3"></div>
 	`).appendTo(page.body);
@@ -181,14 +181,12 @@ frappe.pages['q_inspection'].on_page_load = function (wrapper) {
 
 						if (reading.reading_value) {
 							visual[reading.specification] ||= {};
-							visual[reading.specification][slot] =
-								`${reading.reading_value}`;
+							visual[reading.specification][slot] = `${reading.reading_value}`;
 						}
 
 						if (reading.reading_1 != null && reading.reading_1 !== '') {
 							dimensional[reading.specification] ||= {};
-							dimensional[reading.specification][slot] =
-								`${reading.reading_1}`;
+							dimensional[reading.specification][slot] = `${reading.reading_1}`;
 						}
 					});
 
@@ -205,18 +203,49 @@ frappe.pages['q_inspection'].on_page_load = function (wrapper) {
 		const slots = getTimeSlots();
 
 		Object.keys(groupedData).forEach(ref => {
-			container.append(`<h4 class="mt-4">${frappe.utils.escape_html(ref)}</h4>`);
+			// Fetch document title for this reference_name
+			frappe.call({
+				method: "frappe.client.get",
+				args: {
+					doctype: "Job Card",
+					name: ref,
+					fields: ["operation"]
 
-			container.append(`<h5>Visual Parameters (reading_value)</h5>`);
-			container.append(renderTable(groupedData[ref].visual, slots));
+				},
+				callback({ message }) {
+					let title = frappe.utils.escape_html(ref);
+					if (message) {
+						if (message.title) {
+							title += ` — ${frappe.utils.escape_html(message.title)}`;
+						} else if (message.job_title) {
+							title += ` — ${frappe.utils.escape_html(message.operation)}`;
+						}
+					}
 
-			container.append(`<h5>Dimensional Parameters (reading_1)</h5>`);
-			container.append(renderTable(groupedData[ref].dimensional, slots));
+					const card = $(`
+						<div class="card mb-3">
+							<div class="card-header">
+								<h4 class="mb-0">${title}: ${message.operation}</h4>
+							</div>
+							<div class="card-body"></div>
+						</div>
+					`);
+					const cardBody = card.find('.card-body');
+					
+					cardBody.append(`<h4>Dimensional Parameters</h4>`);
+					cardBody.append(renderTable(groupedData[ref].dimensional, slots));
 
-			if (outOfShift[ref].length) {
-				container.append(`<h5 class="text-danger mt-3">Out of Shift Readings</h5>`);
-				container.append(renderOutOfShiftTable(outOfShift[ref]));
-			}
+					cardBody.append(`<h4>Visual Parameters</h4>`);
+					cardBody.append(renderTable(groupedData[ref].visual, slots));
+
+					if (outOfShift[ref].length) {
+						cardBody.append(`<h5 class="text-danger mt-3">Out of Shift Readings</h5>`);
+						cardBody.append(renderOutOfShiftTable(outOfShift[ref]));
+					}
+
+					container.append(card);
+				}
+			});
 		});
 	}
 
