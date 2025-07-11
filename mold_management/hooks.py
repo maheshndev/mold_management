@@ -1,8 +1,8 @@
 app_name = "mold_management"
 app_title = "Mold Management"
-app_publisher = "assimilate"
+app_publisher = "Assimilate Technologies"
 app_description = "For Mold Managment "
-app_email = "example@domain.com"
+app_email = "info@assimilatetechnologies.com"
 app_license = "mit"
 
 # Apps

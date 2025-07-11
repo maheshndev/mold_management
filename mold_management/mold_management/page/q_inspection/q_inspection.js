@@ -14,17 +14,40 @@ frappe.pages['q_inspection'].on_page_load = function (wrapper) {
 			<div class="col-md-2"><select class="form-control" id="filter_shift"><option value="">Shift Type</option></select></div>
 			<div class="col-md-2"><button class="btn btn-primary" id="btn-refresh">Refresh</button></div>
 		</div>
-
+		
 		<div id="inspection-tables"></div>
 		<div id="pagination-controls" class="text-center mt-3"></div>
 	`).appendTo(page.body);
 
 	let shift_start = 8, shift_end = 20;
 	let records_all = [], current_page = 1, page_size = 10;
+	let parameter_map = {};
 
 	$('#btn-refresh').on('click', () => load_data());
 
-	load_shift_types(load_data);
+	load_shift_types(() => {
+		load_parameters(() => {
+			load_data();
+		});
+	});
+
+	function load_parameters(callback) {
+		frappe.call({
+			method: "frappe.client.get_list",
+			args: {
+				doctype: "Quality Inspection Parameter",
+				fields: ["name", "parameter", "parameter_group"],
+				limit: 1000
+			},
+			callback({ message }) {
+				parameter_map = {};
+				message.forEach(row => {
+					parameter_map[row.name] = row.parameter_group;
+				});
+				callback && callback();
+			}
+		});
+	}
 
 	function load_shift_types(callback) {
 		frappe.call({
@@ -159,37 +182,32 @@ frappe.pages['q_inspection'].on_page_load = function (wrapper) {
 				callback({ message: { readings = [] } }) {
 					completed++;
 
-					groupedData[doc.reference_name] ||= { visual: {}, dimensional: {} };
+					groupedData[doc.reference_name] ||= { Dimensional: {}, Visual: {} };
 					outOfShift[doc.reference_name] ||= [];
 
 					readings.forEach(reading => {
 						const slot = getSlotLabel(doc.report_date, doc.custom_time);
 						const time = `${doc.report_date} ${doc.custom_time}`;
+						const param_group = parameter_map[reading.specification] || 'Unknown';
 
 						if (!slot) {
 							outOfShift[doc.reference_name].push({
 								specification: reading.specification,
 								reading_value: reading.reading_value,
 								reading_1: reading.reading_1,
-								time
+								time,
+								parameter_group: param_group
 							});
 							return;
 						}
 
-						const visual = groupedData[doc.reference_name].visual;
-						const dimensional = groupedData[doc.reference_name].dimensional;
-
-						if (reading.reading_value) {
-							visual[reading.specification] ||= {};
-							visual[reading.specification][slot] =
-								`${reading.reading_value}`;
+						if (!groupedData[doc.reference_name][param_group]) {
+							groupedData[doc.reference_name][param_group] = {};
 						}
 
-						if (reading.reading_1 != null && reading.reading_1 !== '') {
-							dimensional[reading.specification] ||= {};
-							dimensional[reading.specification][slot] =
-								`${reading.reading_1}`;
-						}
+						groupedData[doc.reference_name][param_group][reading.specification] ||= {};
+						groupedData[doc.reference_name][param_group][reading.specification][slot] =
+							reading.reading_value || reading.reading_1 || '-';
 					});
 
 					if (completed === records.length) {
@@ -205,18 +223,44 @@ frappe.pages['q_inspection'].on_page_load = function (wrapper) {
 		const slots = getTimeSlots();
 
 		Object.keys(groupedData).forEach(ref => {
-			container.append(`<h4 class="mt-4">${frappe.utils.escape_html(ref)}</h4>`);
+			frappe.call({
+				method: "frappe.client.get",
+				args: {
+					doctype: "Job Card",
+					name: ref,
+					fields: ["operation"]
+				},
+				callback({ message }) {
+					let title = frappe.utils.escape_html(ref);
+					if (message?.operation) {
+						title += ` — ${frappe.utils.escape_html(message.operation)}`;
+					}
 
-			container.append(`<h5>Visual Parameters (reading_value)</h5>`);
-			container.append(renderTable(groupedData[ref].visual, slots));
+					const card = $(`
+						<div class="card mb-3">
+							<div class="card-header">
+								<h4 class="mb-0">${title}</h4>
+							</div>
+							<div class="card-body"></div>
+						</div>
+					`);
+					const cardBody = card.find('.card-body');
 
-			container.append(`<h5>Dimensional Parameters (reading_1)</h5>`);
-			container.append(renderTable(groupedData[ref].dimensional, slots));
+					['Dimensional', 'Visual'].forEach(group => {
+						if (Object.keys(groupedData[ref][group] || {}).length) {
+							cardBody.append(`<h4>${group} Parameters</h4>`);
+							cardBody.append(renderTable(groupedData[ref][group], slots));
+						}
+					});
 
-			if (outOfShift[ref].length) {
-				container.append(`<h5 class="text-danger mt-3">Out of Shift Readings</h5>`);
-				container.append(renderOutOfShiftTable(outOfShift[ref]));
-			}
+					if (outOfShift[ref]?.length) {
+						cardBody.append(`<h5 class="text-danger mt-3">Out of Shift Readings</h5>`);
+						cardBody.append(renderOutOfShiftTable(outOfShift[ref]));
+					}
+
+					container.append(card);
+				}
+			});
 		});
 	}
 
@@ -249,7 +293,7 @@ frappe.pages['q_inspection'].on_page_load = function (wrapper) {
 
 		const thead = `
 			<thead>
-				<tr><th>Specification</th><th>Reading Value</th><th>Reading 1</th><th>Time</th></tr>
+				<tr><th>Parameter Group</th><th>Specification</th><th>Reading Value</th><th>Reading 1</th><th>Time</th></tr>
 			</thead>`;
 		table.append(thead);
 
@@ -257,6 +301,7 @@ frappe.pages['q_inspection'].on_page_load = function (wrapper) {
 		records.forEach(r => {
 			tbody.append(`
 				<tr>
+					<td>${frappe.utils.escape_html(r.parameter_group)}</td>
 					<td>${frappe.utils.escape_html(r.specification)}</td>
 					<td>${frappe.utils.escape_html(r.reading_value || '-')}</td>
 					<td>${frappe.utils.escape_html(r.reading_1 ?? '-')}</td>
