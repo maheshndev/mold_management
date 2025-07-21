@@ -2,6 +2,7 @@
  "actions": [],
  "allow_import": 1,
  "allow_rename": 1,
+ "autoname": "format:MLD-{#####}",
  "creation": "2025-06-06 14:52:11.985603",
  "doctype": "DocType",
  "engine": "InnoDB",
@@ -79,7 +80,7 @@
   {
    "fieldname": "mold_life",
    "fieldtype": "Data",
-   "label": "Mold Life"
+   "label": "Mold Life (Years)"
   },
   {
    "fieldname": "status",
@@ -121,6 +122,7 @@
  "modified": "2025-06-10 14:46:43.203736",
  "modified_by": "Administrator",
  "module": "Mold Management",
+ "naming_rule": "Expression",
  "name": "Mold",
  "owner": "Administrator",
  "permissions": [
@@ -140,5 +142,8 @@
  "row_format": "Dynamic",
  "sort_field": "modified",
  "sort_order": "DESC",
+ "search_fields": "mold_name",
+ "show_name_in_global_search": 1,
+ "title_field": "mold_name",
  "states": []
 }

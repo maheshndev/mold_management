@@ -36,7 +36,7 @@
  "modified_by": "Administrator",
  "module": "Mold Management",
  "name": "Mold Parameter",
- "owner": "admin@gmail.com",
+ "owner": "Administrator",
  "permissions": [
   {
    "create": 1,
