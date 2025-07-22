@@ -1,7 +1,7 @@
-frappe.pages['q_inspection'].on_page_load = function (wrapper) {
+frappe.pages['in-process-inspectio'].on_page_load = function (wrapper) {
 	const page = frappe.ui.make_app_page({
 		parent: wrapper,
-		title: 'Quality Inspection Summary Table',
+		title: 'In Process Quality Inspection',
 		single_column: true
 	});
 
