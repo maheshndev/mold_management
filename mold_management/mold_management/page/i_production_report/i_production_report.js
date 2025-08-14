@@ -1,177 +1,258 @@
 frappe.pages['i-production-report'].on_page_load = function (wrapper) {
-	const page = frappe.ui.make_app_page({
-		parent: wrapper,
-		title: 'Inspection Production Report',
-		single_column: true
-	});
+    const page = frappe.ui.make_app_page({
+        parent: wrapper,
+        title: 'Inspection Production Report',
+        single_column: true
+    });
 
-	$(`
-		<div class="row mb-4">
-			<div class="col-md-3"><input type="date" class="form-control" id="date"></div>
-			<div class="col-md-3"><button class="btn btn-primary w-100" id="btn-fetch">Fetch</button></div>
-		</div>
-		<div id="report-cards"></div>
-	`).appendTo(page.body);
+    page.add_field({
+        label: __('Date'),
+        fieldtype: 'Date',
+        fieldname: 'report_date',
+        default: frappe.datetime.get_today(),
+        onchange: () => load_data(get_selected_date())
+    });
 
-	$('#btn-fetch').on('click', () => load_data());
+    page.add_action_button(__('Refresh'), () => {
+        load_data(get_selected_date());
+    });
 
-	function load_data() {
-		const date = $('#date').val();
-		if (!date) {
-			frappe.msgprint(__('Please select a date.'));
-			return;
-		}
+    $('<div id="report-cards"></div>').appendTo(page.body);
 
-		frappe.call({
-			method: "frappe.client.get_list",
-			args: {
-				doctype: "Job Card",
-				fields: [
-					"name", "for_quantity", "total_completed_qty", "operation",
-					"production_item", "company", "custom_mold", "workstation"
-				],
-				filters: { modified: [">=", `${date} 00:00:00`] },
-				limit: 100,
-				ignore_permissions: 1
-			},
-			callback({ message: jobs }) {
-				if (!jobs.length) {
-					$('#report-cards').html('<p class="text-center">No Job Cards found</p>');
-					return;
-				}
+    const get_selected_date = () => page.fields_dict.report_date.get_value();
+    const show_message = (msg) => $('#report-cards').html(`<p class="text-muted">${msg}</p>`);
 
-				Promise.all(jobs.map(j => build_job_data(j))).then(cards => {
-					$('#report-cards').empty();
-					cards.forEach(c => $('#report-cards').append(c));
-				});
-			}
-		});
-	}
+    const fetch_list = async (doctype, filters, fields) => {
+        try {
+            const res = await frappe.call({
+                method: 'frappe.client.get_list',
+                args: { doctype, filters, fields, ignore_permissions: 1, limit: 100 }
+            });
+            return res.message || [];
+        } catch (error) {
+            console.error(`Error fetching ${doctype}:`, error);
+            return [];
+        }
+    };
 
-	async function build_job_data(jc) {
-		// Fetch child tables & linked data
-		const [job_details, mold_details, qinspections] = await Promise.all([
-			frappe.db.get_doc('Job Card', jc.name),
-			jc.mold ? frappe.db.get_doc('Mold', jc.mold) : {},
-			frappe.db.get_list('Quality Inspection', {
-				fields: [
-					'name', 'custom_time', 'reference_name', 'reference_type', 'item_code', 'batch_no'
-				],
-				filters: { reference_name: jc.name },
-				ignore_permissions: 1
-			})
-		]);
+    const fetch_doc = async (doctype, name) => {
+        try {
+            return await frappe.db.get_doc(doctype, name);
+        } catch (error) {
+            console.error(`Error fetching ${doctype} ${name}:`, error);
+            return {};
+        }
+    };
 
-		// Time Logs + Employees
-		let time_logs = (job_details.time_logs || []).map(tl => {
-			const dt = frappe.datetime.str_to_obj(tl.to_time);
-			return {
-				time: dt.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
-				complete_qty: tl.completed_qty
-			};
-		});
+    const fetch_value = async (doctype, name, field) => {
+        try {
+            const res = await frappe.db.get_value(doctype, name, field);
+            return res.message?.[field] || '';
+        } catch (error) {
+            console.error(`Error fetching value from ${doctype} ${name}:`, error);
+            return '';
+        }
+    };
 
-		let employees = (job_details.employees || []).map(e => e.employee_name).join(', ') || '-';
+    async function load_data(date) {
+        if (!date) {
+            frappe.msgprint(__('Please select a date.'));
+            return;
+        }
 
-		// Mold
-		const mold_no = mold_details.mold_no || '-';
-		const cavity_count = mold_details.cavity_count || '-';
+        show_message(`Loading data for ${date}...`);
 
-		// Quality Inspection Readings
-		let inspections_with_readings = await Promise.all(qinspections.map(async qi => {
-			let readings = await frappe.db.get_list('Quality Inspection Reading', {
-				fields: ['specification', 'reading_value', 'reading_1'],
-				filters: { parent: qi.name },
-				ignore_permissions: 1,
-				parent_doctype: "Quality Inspection"
-			});
-			qi.readings = readings || [];
-			qi.custom_time = convert_time(qi.custom_time);
-			return qi;
-		}));
+        try {
+            // Only safe DB fields
+            const jobs = await fetch_list('Job Card', {
+                modified: ['between', [`${date} 00:00:00`, `${date} 23:59:59`]]
+            }, [
+                'name', 'for_quantity', 'total_completed_qty',
+                'operation', 'production_item', 'company', 'workstation',
+                'first_counter', 'custom_cycle_time', 'custom_shift',
+                'custom_shift_target', 'custom_hourly_target',
+                'runner_weight', 'shot_weight', 'raw_material',
+                'material_batch', 'raw_material_grade',
+                'material_batch_grade', 'anti_static'
+            ]);
 
-		// Build card HTML
-		const card = $(`
-			<div class="card mb-3">
-				<div class="card-header">
-					<h5>${jc.name} - ${jc.operation}</h5>
-				</div>
-				<div class="card-body">
-					<div class="row mb-2">
-						<div class="col-md-3"><strong>Shift:</strong> - </div>
-						<div class="col-md-3"><strong>Date:</strong> - </div>
-						<div class="col-md-3"><strong>Machine:</strong> ${jc.workstation}</div>
-						<div class="col-md-3"><strong>Operator:</strong> ${employees}</div>
-					</div>
-					<div class="row mb-2">
-						<div class="col-md-3"><strong>Shot Weight:</strong> - </div>
-						<div class="col-md-3"><strong>Runner Weight:</strong> - </div>
-						<div class="col-md-3"><strong>Item Code No:</strong> ${jc.production_item}</div>
-						<div class="col-md-3"><strong>Total No Cavity:</strong> ${cavity_count}</div>
-					</div>
-					<div class="row mb-2">
-						<div class="col-md-3"><strong>Batch No:</strong> - </div>
-						<div class="col-md-3"><strong>Row Material:</strong> - </div>
-						<div class="col-md-3"><strong>Grade:</strong> - </div>
-						<div class="col-md-3"><strong>Mold:</strong> ${mold_no}</div>
-					</div>
+            $('#report-cards').empty();
 
-					<div class="table-responsive mt-3">
-						<table class="table table-bordered table-sm">
-							<thead>
-								<tr>
-									<th>Time</th>
-									<th>Ok Shots</th>
-									<th>Rejected Shots</th>
-									<th>Total Shots</th>
-									<th>Rejected Code</th>
-									<th>Remarks</th>
-								</tr>
-							</thead>
-							<tbody></tbody>
-						</table>
-					</div>
-				</div>
-			</div>
-		`);
+            if (!jobs.length) {
+                show_message(`No records found for ${date}.`);
+                return;
+            }
 
-		const tbody = card.find('tbody');
+            for (const j of jobs) {
+                // Get full doc to access mold, employees, time_logs
+                const jc = await fetch_doc('Job Card', j.name);
+                jc.employees = jc.employees || [];
+                jc.time_logs = jc.time_logs || [];
 
-		time_logs.forEach(tl => {
-			tbody.append(`
-				<tr>
-					<td>${tl.time}</td>
-					<td>${tl.complete_qty}</td>
-					<td>-</td>
-					<td>${jc.for_quantity}</td>
-					<td>-</td>
-					<td>-</td>
-				</tr>
-			`);
-		});
+                let mold = {};
+                if (jc.mold) {
+                    mold = await fetch_doc('Mold', jc.mold);
+                    mold.cavity_count = mold.cavity_count || '';
+                    mold.mold_no = mold.mold_no || '';
+                }
 
-		inspections_with_readings.forEach(qi => {
-			let rejected_spec = qi.readings.find(r => r.specification === 'Total Rej/Set Up Rej (set)');
-			let rejected_value = rejected_spec ? (rejected_spec.reading_value || rejected_spec.reading_1) : '-';
+                const insps = await fetch_list('Quality Inspection', { reference_name: j.name }, [
+                    'name', 'custom_time', 'reference_type', 'item_code', 'batch_no'
+                ]);
 
-			tbody.append(`
-				<tr>
-					<td>${qi.custom_time}</td>
-					<td>-</td>
-					<td>${rejected_value}</td>
-					<td>${jc.for_quantity}</td>
-					<td>-</td>
-					<td>-</td>
-				</tr>
-			`);
-		});
+                for (const insp of insps) {
+                    insp.readings = await fetch_list('Quality Inspection Reading', { parent: insp.name }, [
+                        'specification', 'reading_value', 'reading_1'
+                    ]) || [];
+                }
 
-		return card;
-	}
+                const product_name = j.production_item
+                    ? await fetch_value('Item', j.production_item, 'item_name')
+                    : '';
 
-	function convert_time(str) {
-		if (!str) return '-';
-		let dt = frappe.datetime.str_to_obj(`2020-01-01 ${str}`);
-		return dt.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-	}
+                $('#report-cards').append(
+                    build_report_card(j, jc, mold, insps, product_name, date)
+                );
+            }
+        } catch (err) {
+            console.error(err);
+            frappe.msgprint(__('Error loading data. Check console for details.'));
+        }
+    }
+
+    function build_report_card(j, jc, mold, insps, product_name, date) {
+    const operator_names = (jc.employees || []).map(e => e.employee_name).join(', ') || '';
+    const cavity_count = mold.cavity_count || '';
+    const mold_no = mold.mold_no || '';
+
+    return $(`
+        <div class="mt-3 shadow-sm p-3 bg-white">
+            <style>
+                body { font-family: Arial, sans-serif; }
+                table { width: 100%; border-collapse: collapse; margin-bottom: 20px; }
+                table, th, td { border: 1px solid black; }
+                th, td { padding: 8px; text-align: center; }
+                .section-title { background-color: #f2f2f2; font-weight: bold; }
+            </style>
+
+            <table>
+                <tr>
+                    <td colspan="2">ABC Manufacturing Pvt. Ltd.</td>
+                    <td colspan="5"><h3>Daily Production Report</h3></td>
+                    <td colspan="2">
+                        <li>Doc No: ${j.name}</li>
+                        <li>Rev No: 01</li>
+                        <li>Page: 1</li>
+                    </td>
+                </tr>
+            </table>
+
+            <table>
+                <tr>
+                    <td class="section-title">Shift Details</td><td>${j.custom_shift || ''}</td>
+                    <td class="section-title">Date</td><td>${date}</td>
+                    <td class="section-title">Machine No</td><td>${j.workstation || ''}</td>
+                </tr>
+                <tr>
+                    <td class="section-title">Product Name</td><td colspan="2">${product_name || ''}</td>
+                    <td class="section-title">Operator Name</td><td colspan="2">${operator_names}</td>
+                </tr>
+                <tr>
+                    <td class="section-title">Shot Weight</td><td>${j.shot_weight || ''}</td>
+                    <td class="section-title">Runner Weight</td><td>${j.runner_weight || ''}</td>
+                    <td class="section-title">Item Code No</td><td>${insps[0]?.item_code || ''}</td>
+                </tr>
+                <tr>
+                    <td class="section-title">Raw Material</td><td>${j.raw_material || ''}</td>
+                    <td class="section-title">Grade</td><td>${j.raw_material_grade || ''}</td>
+                    <td class="section-title">Batch No</td><td>${insps[0]?.batch_no || ''}</td>
+                </tr>
+                <tr>
+                    <td class="section-title">Masterbatch</td><td>${j.material_batch || ''}</td>
+                    <td class="section-title">Grade</td><td>${j.material_batch_grade || ''}</td>
+                    <td class="section-title">Batch No</td><td></td>
+                </tr>
+                <tr>
+                    <td class="section-title">First Counter</td><td>${j.first_counter || ''}</td>
+                    <td class="section-title">Cycle Time</td><td>${j.custom_cycle_time || ''}</td>
+                    <td class="section-title">Shift Target</td><td>${j.custom_shift_target || ''}</td>
+                </tr>
+                <tr>
+                    <td class="section-title">Total No Cavity</td><td>${cavity_count}</td>
+                    <td class="section-title">Running Cavity</td><td>${cavity_count}</td>
+                    <td class="section-title">Anti Static</td><td>${j.anti_static || ''}</td>
+                </tr>
+            </table>
+
+            <table>
+                <tr>
+                    <th>Time</th>
+                    <th>OK Shots</th>
+                    <th>Rej Shots</th>
+                    <th>Total Shots</th>
+                    <th>Rej Code</th>
+                    <th>Remarks</th>
+                </tr>
+                ${render_time_logs(jc.time_logs, j.for_quantity)}
+                ${render_quality_inspections(insps, j.for_quantity)}
+            </table>
+
+            <table>
+                <tr>
+                    <td class="section-title">Last Counter</td><td>${j.total_completed_qty || ''}</td>
+                    <td class="section-title">OK Shots</td><td>${j.total_completed_qty || ''}</td>
+                    <td class="section-title">Rej Shots</td><td></td>
+                    <td class="section-title">Total Shots</td><td>${j.for_quantity || ''}</td>
+                </tr>
+                <tr>
+                    <td class="section-title">RM Consumption</td><td></td>
+                    <td class="section-title">Lumps</td><td></td>
+                    <td class="section-title">Supervisor Sign</td><td colspan="3">Signed</td>
+                </tr>
+            </table>
+        </div>
+    `);
+}
+
+
+    const build_info_row = (label, value) =>
+        `<div class="col-md-3"><strong>${label}:</strong> ${value || ''}</div>`;
+
+    const render_time_logs = (logs, total) =>
+        (logs || []).map(tl => {
+            const time = tl.to_time
+                ? frappe.datetime.str_to_obj(tl.to_time).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+                : '';
+            return `
+                <tr>
+                    <td>${time}</td>
+                    <td>${tl.completed_qty || ''}</td>
+                    <td></td>
+                    <td>${total || ''}</td>
+                    <td></td>
+                    <td></td>
+                </tr>
+            `;
+        }).join('');
+
+    const render_quality_inspections = (insps, total) =>
+        (insps || []).map(qi => {
+            const time = qi.custom_time
+                ? frappe.datetime.str_to_obj(qi.custom_time).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+                : '';
+            const rd = qi.readings.find(r => r.specification === 'Total Rej/Set Up Rej (set)');
+            const rejected = rd ? (rd.reading_value || rd.reading_1 || '') : '';
+            return `
+                <tr>
+                    <td>${time}</td>
+                    <td></td>
+                    <td>${rejected}</td>
+                    <td>${total || ''}</td>
+                    <td>${rd?.specification || ''}</td>
+                    <td></td>
+                </tr>
+            `;
+        }).join('');
+
+    load_data(get_selected_date());
 };

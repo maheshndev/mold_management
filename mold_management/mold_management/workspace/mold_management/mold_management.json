@@ -106,45 +106,6 @@
   {
    "hidden": 0,
    "is_query_report": 0,
-   "label": "Mold Other",
-   "link_count": 3,
-   "link_type": "DocType",
-   "onboard": 0,
-   "type": "Card Break"
-  },
-  {
-   "hidden": 0,
-   "is_query_report": 0,
-   "label": "Mold Parameter",
-   "link_count": 0,
-   "link_to": "Mold Parameter",
-   "link_type": "DocType",
-   "onboard": 0,
-   "type": "Link"
-  },
-  {
-   "hidden": 0,
-   "is_query_report": 0,
-   "label": "Critical Paramerter",
-   "link_count": 0,
-   "link_to": "Critical Paramerter",
-   "link_type": "DocType",
-   "onboard": 0,
-   "type": "Link"
-  },
-  {
-   "hidden": 0,
-   "is_query_report": 0,
-   "label": "Parameter",
-   "link_count": 0,
-   "link_to": "Parameter",
-   "link_type": "DocType",
-   "onboard": 0,
-   "type": "Link"
-  },
-  {
-   "hidden": 0,
-   "is_query_report": 0,
    "label": "Mold Management",
    "link_count": 7,
    "link_type": "DocType",
@@ -269,9 +230,58 @@
    "link_type": "Page",
    "onboard": 0,
    "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Mold Other",
+   "link_count": 4,
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Card Break"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Mold Parameter",
+   "link_count": 0,
+   "link_to": "Mold Parameter",
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Critical Paramerter",
+   "link_count": 0,
+   "link_to": "Critical Paramerter",
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Parameter",
+   "link_count": 0,
+   "link_to": "Parameter",
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Daily Production",
+   "link_count": 0,
+   "link_to": "Daily Production",
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Link"
   }
  ],
- "modified": "2025-07-22 12:48:31.797674",
+ "modified": "2025-08-14 17:53:27.089754",
  "modified_by": "Administrator",
  "module": "Mold Management",
  "name": "Mold Management",
