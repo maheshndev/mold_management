@@ -63,7 +63,7 @@
  "modified": "2025-08-14 17:26:58.525335",
  "modified_by": "Administrator",
  "module": "Mold Management",
- "name": "Daily Production Hourly Data",
+ "name": "Production Shots Table",
  "owner": "Administrator",
  "permissions": [],
  "row_format": "Dynamic",

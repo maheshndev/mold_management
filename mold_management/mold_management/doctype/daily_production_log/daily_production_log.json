@@ -13,8 +13,11 @@
   "column_break_coua",
   "page_no",
   "section_break_ygeg",
+  "quality_inspection",
+  "job_card",
   "item_code",
   "product_name",
+  "mold",
   "column_break_eggj",
   "report_date",
   "operator",
@@ -67,7 +70,7 @@
    "fieldtype": "Link",
    "label": "Amended From",
    "no_copy": 1,
-   "options": "Daily Production",
+   "options": "Daily Production Log",
    "print_hide": 1,
    "read_only": 1,
    "search_index": 1
@@ -78,6 +81,7 @@
    "label": "First Counter"
   },
   {
+   "fetch_from": "quality_inspection.company",
    "fieldname": "company",
    "fieldtype": "Link",
    "label": "Company",
@@ -118,6 +122,7 @@
    "label": "Masterbatch Grade"
   },
   {
+   "fetch_from": "product_name.batch_number_series",
    "fieldname": "masterbatch_batch_no",
    "fieldtype": "Link",
    "label": "Masterbatch Batch No",
@@ -129,6 +134,7 @@
    "label": "Shift Target"
   },
   {
+   "fetch_from": "mold.cavity_count",
    "fieldname": "total_cavity",
    "fieldtype": "Int",
    "label": "Total No Cavity"
@@ -159,23 +165,27 @@
    "label": "Page No"
   },
   {
-   "fetch_from": "operator.default_shift",
+   "fetch_from": "quality_inspection.custom_shift",
    "fieldname": "shift",
    "fieldtype": "Link",
    "label": "Shift Details",
    "options": "Shift Type"
   },
   {
+   "fetch_from": "quality_inspection.report_date",
    "fieldname": "report_date",
    "fieldtype": "Date",
    "label": "Date"
   },
   {
+   "fetch_from": "job_card.workstation",
    "fieldname": "machine_no",
-   "fieldtype": "Data",
-   "label": "Machine No"
+   "fieldtype": "Link",
+   "label": "Machine No",
+   "options": "Workstation"
   },
   {
+   "fetch_from": "quality_inspection.item_code",
    "fieldname": "item_code",
    "fieldtype": "Link",
    "label": "Item Code No",
@@ -193,6 +203,7 @@
    "label": "Raw Material Grade"
   },
   {
+   "fetch_from": "raw_material.batch_number_series",
    "fieldname": "raw_material_batch_no",
    "fieldtype": "Link",
    "label": "Raw Material Batch No",
@@ -211,7 +222,7 @@
    "fieldname": "production_data",
    "fieldtype": "Table",
    "label": "Production Data",
-   "options": "Daily Production Hourly Data"
+   "options": "Production Shots Table"
   },
   {
    "fieldname": "section_break_sysq",
@@ -223,6 +234,7 @@
    "label": "Last Counter"
   },
   {
+   "fetch_from": "mold.total_shots",
    "fieldname": "total_shots",
    "fieldtype": "Data",
    "label": "Total Shots"
@@ -310,16 +322,35 @@
    "fieldtype": "Link",
    "label": "Operator",
    "options": "Employee"
+  },
+  {
+   "fieldname": "quality_inspection",
+   "fieldtype": "Link",
+   "label": "Quality Inspection",
+   "options": "Quality Inspection"
+  },
+  {
+   "fieldname": "mold",
+   "fieldtype": "Link",
+   "label": "Mold",
+   "options": "Mold"
+  },
+  {
+   "fetch_from": "quality_inspection.reference_name",
+   "fieldname": "job_card",
+   "fieldtype": "Link",
+   "label": "Job Card",
+   "options": "Job Card"
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2025-08-14 17:26:23.822911",
+ "modified": "2025-08-26 18:11:57.896670",
  "modified_by": "Administrator",
  "module": "Mold Management",
- "name": "Daily Production",
+ "name": "Daily Production Log",
  "naming_rule": "Expression",
  "owner": "Administrator",
  "permissions": [

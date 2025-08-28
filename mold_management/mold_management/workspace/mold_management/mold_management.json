@@ -186,7 +186,7 @@
    "hidden": 0,
    "is_query_report": 0,
    "label": "Reports",
-   "link_count": 4,
+   "link_count": 5,
    "link_type": "DocType",
    "onboard": 0,
    "type": "Card Break"
@@ -234,6 +234,16 @@
   {
    "hidden": 0,
    "is_query_report": 0,
+   "label": "Daily Production Report",
+   "link_count": 0,
+   "link_to": "daily-production-rep",
+   "link_type": "Page",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
    "label": "Mold Other",
    "link_count": 4,
    "link_type": "DocType",
@@ -273,15 +283,15 @@
   {
    "hidden": 0,
    "is_query_report": 0,
-   "label": "Daily Production",
+   "label": "Mold Production Log",
    "link_count": 0,
-   "link_to": "Daily Production",
+   "link_to": "Mold Production Log",
    "link_type": "DocType",
    "onboard": 0,
    "type": "Link"
   }
  ],
- "modified": "2025-08-14 17:53:27.089754",
+ "modified": "2025-08-26 13:26:14.814612",
  "modified_by": "Administrator",
  "module": "Mold Management",
  "name": "Mold Management",
