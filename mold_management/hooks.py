@@ -243,10 +243,14 @@ app_license = "mit"
 # }
 
 after_migrate = [
-    
+     "mold_management.patches.v0_1.add_naming_series_for_mould.execute"
     
 ]
 
+
+doctype_js = {
+    "Mould":"public/js/fetcehd_id_in_mould_code_field.js"
+}
 
 
 scheduler_events = {
@@ -256,8 +260,8 @@ scheduler_events = {
     
 }
 
-doc_events = {
-    "Mould": {
-        "before_insert": "mold_management.api.mould_code_generate_based_on_item_group_prefix.mould_code_generate_by_item_group_prefix"
-    }
-}
+# doc_events = {
+#     "Mould": {
+#         "before_insert": "mold_management.api.mould_code_generate_based_on_item_group_prefix.mould_code_generate_by_item_group_prefix"
+#     }
+# }
