@@ -243,13 +243,16 @@ app_license = "mit"
 # }
 
 after_migrate = [
-     "mold_management.patches.v0_1.add_naming_series_for_mould.execute"
+     "mold_management.patches.v0_1.add_naming_series_for_mould.execute",
+     "mold_management.patches.v0_1.add_fields_on_work_order_item_table.execute"
     
 ]
 
 
 doctype_js = {
-    "Mould":"public/js/fetcehd_id_in_mould_code_field.js"
+    "Mould":"public/js/fetcehd_id_in_mould_code_field.js",
+    "Item": "public/js/if_fixed_asset_hide_customer_provided_item_checkbox.js"
+    
 }
 
 
@@ -260,8 +263,8 @@ scheduler_events = {
     
 }
 
-# doc_events = {
-#     "Mould": {
-#         "before_insert": "mold_management.api.mould_code_generate_based_on_item_group_prefix.mould_code_generate_by_item_group_prefix"
-#     }
-# }
+doc_events = {
+    "Work Order": {
+        "on_submit": "mold_management.api.auto_mould_generated_based_on_work_order_submitted.create_mould_on_submit"
+    }
+}
