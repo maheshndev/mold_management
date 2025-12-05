@@ -2,7 +2,7 @@ import frappe
 from frappe.custom.doctype.custom_field.custom_field import create_custom_field
 
 def execute():
-    print("Adding custom fields to Work Order Item...")
+    print("Adding custom fields to Quotation Item...")
 
     fields = [
         {
@@ -59,7 +59,7 @@ def execute():
         },
         {
             "fieldname": "tool_life",
-            "label": "Tool Life (Year)",
+            "label": "Tool Life",
             "fieldtype": "Data",
             "insert_after": "total_shots",
             "fetch_from": "item_code.tool_life",
@@ -81,18 +81,17 @@ def execute():
             "fetch_from": "item_code.cold_runner_system",
         },
         {
-            "field_name": "mould_name",
+            "fieldname": "mould_name",
             "label": "Mould Name",
-            "field_type": "Data",
+            "fieldtype": "Data",
             "insert_after": "cold_runner_system",
-            "fetch_from": "item_code.mould_name"
-        }
-
+            "fetch_from": "item_code.mould_name",
+        },
     ]
 
     for field in fields:
         try:
-            create_custom_field("Work Order Item", field)
+            create_custom_field("Quotation Item", field)
             print(f"Created: {field['fieldname']}")
         except Exception as e:
             print(f"Skipping {field['fieldname']} (maybe exists) → {e}")

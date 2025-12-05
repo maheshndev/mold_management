@@ -244,14 +244,21 @@ app_license = "mit"
 
 after_migrate = [
      "mold_management.patches.v0_1.add_naming_series_for_mould.execute",
-     "mold_management.patches.v0_1.add_fields_on_work_order_item_table.execute"
+     "mold_management.patches.v0_1.add_mould_create_checkbox_field_on_work_order.execute",
+     "mold_management.patches.v0_1.create_fields_on_quotation_item_table.execute",
+     "mold_management.patches.v0_1.create_fields_on_sales_order_item.execute",
+     "mold_management.patches.v0_1.create_mould_field_on_job_card.execute",
+     "mold_management.patches.v0_1.create_field_is_mold_checkbox_on_jobcard.execute",
+     "mold_management.patches.v0_1.add_email_sent_90_field-on_mould.execute"
+    
     
 ]
 
 
 doctype_js = {
     "Mould":"public/js/fetcehd_id_in_mould_code_field.js",
-    "Item": "public/js/if_fixed_asset_hide_customer_provided_item_checkbox.js"
+    "Item": "public/js/if_fixed_asset_hide_customer_provided_item_checkbox.js",
+    "Work Order": "public/js/auto_mold_generation_based_on_work_order.js"
     
 }
 
@@ -263,8 +270,8 @@ scheduler_events = {
     
 }
 
-doc_events = {
-    "Work Order": {
-        "on_submit": "mold_management.api.auto_mould_generated_based_on_work_order_submitted.create_mould_on_submit"
-    }
-}
+# doc_events = {
+#     "Work Order": {
+#         "on_update": "mold_management.api.auto_mould_generated_based_on_work_order_submitted.create_mould_on_status_complete"
+#     }
+# }

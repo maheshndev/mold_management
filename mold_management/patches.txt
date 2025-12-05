@@ -7,3 +7,9 @@
 
 mold_management.patches.v0_1.add_naming_series_for_mould
 mold_management.patches.v0_1.add_fields_on_work_order_item_table
+mold_management.patches.v0_1.add_mould_create_checkbox_field_on_work_order
+mold_management.patches.v0_1.create_fields_on_quotation_item_table
+mold_management.patches.v0_1.create_fields_on_sales_order_item
+mold_management.patches.v0_1.create_mould_field_on_job_card
+mold_management.patches.v0_1.create_field_is_mold_checkbox_on_jobcard
+mold_management.patches.v0_1.add_email_sent_90_field-on_mould
