@@ -22,7 +22,7 @@ class MouldMaintenance(Document):
 
 		mold_type: DF.ReadOnly | None
 		mould_maintenance_tasks: DF.Table[MouldMaintenanceTask]
-		mold_name: DF.Link
+		mould_name: DF.Link
 		company: DF.Link
 		maintenance_team: DF.Literal["In-house", "Out-source"]
 	# end: auto-generated types
@@ -42,7 +42,7 @@ class MouldMaintenance(Document):
 		self.sync_maintenance_tasks()
 
 	def after_delete(self):
-		mold = frappe.get_doc("Mold", self.mold_name)
+		mold = frappe.get_doc("Mold", self.mould_name)
 		if mold.status == "Under Maintenance":
 			mold.set_status()
 
@@ -54,20 +54,20 @@ class MouldMaintenance(Document):
 				mould_maintenance=self.name,  task=task, maintenance_team=self.maintenance_team, required_parts= self.required_parts
 			)
 		mould_maintenance_orders = frappe.get_all(
-			"Mold Maintenance Order",
+			"Mould Maintenance Order",
 			fields=["name"],
 			filters={"mould_maintenance": self.name, "task": ("not in", tasks_names)},
 		)
 		if mould_maintenance_orders:
 			for mould_maintenance_order in mould_maintenance_orders:
-				maintenance_log = frappe.get_doc("Mold Maintenance Order", mould_maintenance_order.name)
+				maintenance_log = frappe.get_doc("Mould Maintenance Order", mould_maintenance_order.name)
 				maintenance_log.db_set("maintenance_status", "Cancelled")
 
 
 def assign_tasks(mould_maintenance_name, assign_to_member, maintenance_task, next_due_date):
 	team_member = frappe.db.get_value("User", assign_to_member, "email")
 	args = {
-		"doctype": "Mold Maintenance",
+		"doctype": "Mould Maintenance",
 		"assign_to": team_member,
 		"name": mould_maintenance_name,
 		"description": maintenance_task,
@@ -118,7 +118,7 @@ def calculate_next_due_date(
 	return next_due_date
 def update_maintenance_log(mould_maintenance,  task, maintenance_team, required_parts):
 	mould_maintenance_order = frappe.get_value(
-		"Mold Maintenance Order",
+		"Mould Maintenance Order",
 		{
 			"mould_maintenance": mould_maintenance,
 			"task": task.name,
@@ -128,9 +128,9 @@ def update_maintenance_log(mould_maintenance,  task, maintenance_team, required_
 	if not mould_maintenance_order:
 		mould_maintenance_order = frappe.get_doc(
 			{
-				"doctype": "Mold Maintenance Order",
+				"doctype": "Mould Maintenance Order",
 				"mould_maintenance": mould_maintenance,
-				"mold_name": mould_maintenance,
+				"mould_name": mould_maintenance,
 				"task": task.name,
 				"has_certificate": task.certificate_required,
 				"description": task.description,
@@ -148,7 +148,7 @@ def update_maintenance_log(mould_maintenance,  task, maintenance_team, required_
 
 		mould_maintenance_order.insert()
 	else:
-		maintenance_log = frappe.get_doc("Mold Maintenance Order", mould_maintenance_order.name)
+		maintenance_log = frappe.get_doc("Mould Maintenance Order", mould_maintenance_order.name)
 		maintenance_log.assign_to_name = task.assign_to_name
 		maintenance_log.has_certificate = task.certificate_required
 		maintenance_log.description = task.description
@@ -168,12 +168,12 @@ def get_team_members(doctype, txt, searchfield, start, page_len, filters):
 
 
 @frappe.whitelist()
-def get_maintenance_log(mold_name):
+def get_maintenance_log(mould_name):
 	return frappe.db.sql(
 		"""
-        select maintenance_status, count(mold_name) as count, mold_name
-        from `tabMold Maintenance Order`
-        where mold_name=%s group by maintenance_status""",
-		(mold_name),
+        select maintenance_status, count(mould_name) as count, mould_name
+        from `tabMould Maintenance Order`
+        where mould_name=%s group by maintenance_status""",
+		(mould_name),
 		as_dict=1,
 	)

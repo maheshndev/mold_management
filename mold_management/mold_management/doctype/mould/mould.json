@@ -292,8 +292,13 @@
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
- "links": [],
- "modified": "2025-12-05 18:09:10.967153",
+ "links": [
+  {
+   "link_doctype": "Mould Maintenance",
+   "link_fieldname": "mould_name"
+  }
+ ],
+ "modified": "2025-12-06 19:19:02.207963",
  "modified_by": "Administrator",
  "module": "Mold Management",
  "name": "Mould",

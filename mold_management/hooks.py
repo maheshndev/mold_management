@@ -258,7 +258,10 @@ after_migrate = [
 doctype_js = {
     "Mould":"public/js/fetcehd_id_in_mould_code_field.js",
     "Item": "public/js/if_fixed_asset_hide_customer_provided_item_checkbox.js",
-    "Work Order": "public/js/auto_mold_generation_based_on_work_order.js"
+    "Work Order": "public/js/auto_mold_generation_based_on_work_order.js",
+    "Job Card": "public/js/on_job_card_is_mold_checkbox_checked_then_mandatory_mould_field.js",
+    "Mould Maintenance Order": "public/js/create_material_request_and_purchase_order_from_maintenance_order.js",
+    "Mould Maintenance": "public/js/calculate_amount_in_require_part_table.js"
     
 }
 
@@ -270,8 +273,11 @@ scheduler_events = {
     
 }
 
-# doc_events = {
-#     "Work Order": {
-#         "on_update": "mold_management.api.auto_mould_generated_based_on_work_order_submitted.create_mould_on_status_complete"
-#     }
-# }
+doc_events = {
+    "Job Card": {
+        "on_update": "mold_management.api.mould_shots_updated_on_jo_card_completed_qty.update_mould_usage"
+    },
+    "Mould": {
+        "on_update": "mold_management.api.if_current_usage_count_reach_90_trigger_notification.check_mould_usage"
+    }
+}
