@@ -6,9 +6,10 @@
  "editable_grid": 1,
  "engine": "InnoDB",
  "field_order": [
-  "mould_name",
-  "mould_type",
   "company",
+  "mould_name",
+  "column_break_gsmk",
+  "mould_type",
   "maintenance_team",
   "section_break_6",
   "mould_maintenance_tasks",
@@ -20,7 +21,8 @@
    "fieldname": "maintenance_team",
    "fieldtype": "Select",
    "label": "Maintenance Team",
-   "options": "\nIn-house\nOut-source"
+   "options": "\nIn-house\nOut-source",
+   "reqd": 1
   },
   {
    "fieldname": "company",
@@ -66,10 +68,14 @@
    "label": "Maintenance Tasks",
    "options": "Mould Maintenance Task",
    "reqd": 1
+  },
+  {
+   "fieldname": "column_break_gsmk",
+   "fieldtype": "Column Break"
   }
  ],
  "links": [],
- "modified": "2025-09-01 13:18:33.428431",
+ "modified": "2025-12-09 13:04:57.729225",
  "modified_by": "Administrator",
  "module": "Mold Management",
  "name": "Mould Maintenance",

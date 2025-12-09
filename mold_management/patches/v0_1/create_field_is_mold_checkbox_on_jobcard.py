@@ -11,7 +11,8 @@ def execute():
         "label": "Is Mould",
         "fieldtype": "Check",
         "insert_after": "production_item",
-        "hidden": 1,
+       
+        "read_only": 1,
         "fetch_from": "production_item.is_mould_item"
     }
 

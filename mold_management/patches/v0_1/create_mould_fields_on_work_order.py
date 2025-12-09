@@ -2,15 +2,16 @@ import frappe
 from frappe.custom.doctype.custom_field.custom_field import create_custom_field
 
 def execute():
-    print("Adding custom fields to Quotation Item...")
+    print("Adding custom fields to Work Order...")
 
     fields = [
         {
             "fieldname": "is_mould_item",
             "label": "Is Mould Item",
             "fieldtype": "Check",
-            "insert_after": "item_name",
-            "fetch_from": "item_code.is_mould_item",
+            "insert_after": "project",
+            "hidden":1,
+            "fetch_from": "production_item.is_mould_item",
         },
         {
             "fieldname": "shape",
@@ -18,7 +19,8 @@ def execute():
             "fieldtype": "Link",
             "options": "Shape",
             "insert_after": "is_mould_item",
-            "fetch_from": "item_code.shape",
+            "hidden":1,
+            "fetch_from": "production_item.shape",
         },
         {
             "fieldname": "material_type",
@@ -26,7 +28,8 @@ def execute():
             "fieldtype": "Link",
             "options": "Material Type",
             "insert_after": "shape",
-            "fetch_from": "item_code.material_type",
+            "hidden":1,
+            "fetch_from": "production_item.material_type",
         },
         {
             "fieldname": "side_cores",
@@ -34,35 +37,40 @@ def execute():
             "fieldtype": "Select",
             "options": "\nYes\nNo",
             "insert_after": "material_type",
-            "fetch_from": "item_code.side_cores",
+            "hidden":1,
+            "fetch_from": "production_item.side_cores",
         },
         {
             "fieldname": "side_cores_qty",
             "label": "Side Cores Qty",
             "fieldtype": "Data",
             "insert_after": "side_cores",
-            "fetch_from": "item_code.side_cores_qty",
+            "hidden":1,
+            "fetch_from": "production_item.side_cores_qty",
         },
         {
             "fieldname": "no_of_cavity",
             "label": "No of Cavity",
             "fieldtype": "Data",
             "insert_after": "side_cores_qty",
-            "fetch_from": "item_code.no_of_cavity",
+            "hidden":1,
+            "fetch_from": "production_item.no_of_cavity",
         },
         {
             "fieldname": "total_shots",
             "label": "Total Shots",
             "fieldtype": "Data",
             "insert_after": "no_of_cavity",
-            "fetch_from": "item_code.total_shots",
+            "hidden":1,
+            "fetch_from": "production_item.total_shots",
         },
         {
             "fieldname": "tool_life",
             "label": "Tool Life",
             "fieldtype": "Data",
             "insert_after": "total_shots",
-            "fetch_from": "item_code.tool_life",
+            "hidden":1,
+            "fetch_from": "production_item.tool_life",
         },
         {
             "fieldname": "hot_runner_system",
@@ -70,7 +78,8 @@ def execute():
             "fieldtype": "Select",
             "options": "\nYes\nNo",
             "insert_after": "tool_life",
-            "fetch_from": "item_code.hot_runner_system",
+            "hidden":1,
+            "fetch_from": "production_item.hot_runner_system",
         },
         {
             "fieldname": "cold_runner_system",
@@ -78,14 +87,16 @@ def execute():
             "fieldtype": "Select",
             "options": "\nYes\nNo",
             "insert_after": "hot_runner_system",
-            "fetch_from": "item_code.cold_runner_system",
+            "hidden":1,
+            "fetch_from": "production_item.cold_runner_system",
         },
         {
             "fieldname": "mould_name",
             "label": "Mould Name",
             "fieldtype": "Data",
             "insert_after": "cold_runner_system",
-            "fetch_from": "item_code.mould_name",
+            "hidden":1,
+            "fetch_from": "production_item.mould_name",
         },
         {
             
@@ -94,13 +105,14 @@ def execute():
             "fieldtype": "Link",
             "options": "Mould Type",
             "insert_after": "mould_name",
-            "fetch_from": "item_code.mould_ty"
+            "hidden":1,
+            "fetch_from": "production_item.mould_ty"
         }
     ]
 
     for field in fields:
         try:
-            create_custom_field("Quotation Item", field)
+            create_custom_field("Work Order", field)
             print(f"Created: {field['fieldname']}")
         except Exception as e:
             print(f"Skipping {field['fieldname']} (maybe exists) → {e}")

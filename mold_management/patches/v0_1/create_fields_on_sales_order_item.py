@@ -86,6 +86,15 @@ def execute():
             "fieldtype": "Data",
             "insert_after": "cold_runner_system",
             "fetch_from": "item_code.mould_name"
+        },
+        {
+            
+            "fieldname": "mould_tw",
+            "label": "Mould Type",
+            "fieldtype": "Link",
+            "options": "Mould Type",
+            "insert_after": "mould_name",
+            "fetch_from": "item_code.mould_ty"
         }
     ]
 

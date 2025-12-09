@@ -84,28 +84,63 @@
 
 
 
+# import frappe
+
+# def update_mould_usage(doc, method):
+#     """
+#     This is triggered from hooks.py:
+#     'on_update': 'mold_management.api.mould_shots_updated_on_jo_card_completed_qty.update_mould_usage'
+    
+#     Frappe automatically passes:
+#         doc    = Job Card document
+#         method = on_update
+#     """
+
+#     if doc.is_mould and doc.mould and doc.total_completed_qty:
+
+#         mould_doc = frappe.get_doc("Mould", doc.mould)
+
+#         frappe.log_error("Updating mould usage from Hook")
+
+#         previous_usage = frappe.utils.flt(mould_doc.current_usage_count or 0)
+#         new_usage = previous_usage + frappe.utils.flt(doc.total_completed_qty)
+
+#         mould_doc.current_usage_count = new_usage
+#         mould_doc.save(ignore_permissions=True)
+
+#     return "Mould usage updated"
+
+
+
 import frappe
 
 def update_mould_usage(doc, method):
-    """
-    This is triggered from hooks.py:
-    'on_update': 'mold_management.api.mould_shots_updated_on_jo_card_completed_qty.update_mould_usage'
-    
-    Frappe automatically passes:
-        doc    = Job Card document
-        method = on_update
-    """
 
-    if doc.is_mould and doc.mould and doc.total_completed_qty:
+    # HARD DEBUG LOG — this will PROVE if hook is firing
+    frappe.log_error("JOB CARD SUBMIT TRIGGERED", doc.name)
 
-        mould_doc = frappe.get_doc("Mould", doc.mould)
+    if not doc.mould:
+        frappe.log_error("NO MOULD FOUND", doc.name)
+        return
 
-        frappe.log_error("Updating mould usage from Hook")
+    qty = frappe.utils.flt(doc.total_completed_qty)
 
-        previous_usage = frappe.utils.flt(mould_doc.current_usage_count or 0)
-        new_usage = previous_usage + frappe.utils.flt(doc.total_completed_qty)
+    if qty <= 0:
+        frappe.log_error("QTY IS ZERO", doc.name)
+        return
 
-        mould_doc.current_usage_count = new_usage
-        mould_doc.save(ignore_permissions=True)
+    mould_doc = frappe.get_doc("Mould", doc.mould)
 
-    return "Mould usage updated"
+    previous_usage = frappe.utils.flt(mould_doc.current_usage_count or 0)
+
+    new_usage = previous_usage + qty
+
+    mould_doc.current_usage_count = new_usage
+    mould_doc.save(ignore_permissions=True)
+
+    frappe.db.commit()
+
+    frappe.log_error(
+        "MOULD UPDATED",
+        f"Mould: {doc.mould} | Old: {previous_usage} | Added: {qty} | New: {new_usage}"
+    )
