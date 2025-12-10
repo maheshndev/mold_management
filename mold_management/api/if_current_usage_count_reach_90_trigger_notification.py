@@ -25,13 +25,27 @@ def check_mould_usage(doc, method=None):
                 notification.document_type = "Mould"
                 notification.document_name = doc.name
                 notification.from_user = frappe.session.user
+                # notification.email_content = (
+                #     f"<b>Warning!</b><br>"
+                #     f"Mould <b>{doc.name}</b> has reached <b>{percentage:.2f}%</b> of its shot capacity.<br><br>"
+                #     f"Current Usage Count: <b>{current}</b><br>"
+                #     f"Maximum Usage Count: <b>{maximum}</b><br><br>"
+                #     f"Please take necessary action."
+                    
+                # )
+
                 notification.email_content = (
-                    f"<b>Warning!</b><br>"
+                    f"<b>⚠️ Warning!</b><br><br>"
                     f"Mould <b>{doc.name}</b> has reached <b>{percentage:.2f}%</b> of its shot capacity.<br><br>"
+                    f"<b>📊 Usage Details:</b><br>"
                     f"Current Usage Count: <b>{current}</b><br>"
                     f"Maximum Usage Count: <b>{maximum}</b><br><br>"
-                    f"Please take necessary action."
+                    f"Please take the necessary action to avoid production disruption.<br><br>"
+                    f"Regards,<br>"
+                    f"<b>ERPNext Team</b>"
                 )
+
+
                 notification.insert(ignore_permissions=True)
 
                 # Send Email

@@ -298,9 +298,13 @@
   {
    "link_doctype": "Mould Maintenance",
    "link_fieldname": "mould_name"
+  },
+  {
+   "link_doctype": "Item",
+   "link_fieldname": "item_code"
   }
  ],
- "modified": "2025-12-09 16:14:35.049939",
+ "modified": "2025-12-10 10:39:40.208420",
  "modified_by": "Administrator",
  "module": "Mold Management",
  "name": "Mould",
