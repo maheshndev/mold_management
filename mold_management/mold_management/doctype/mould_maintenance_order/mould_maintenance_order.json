@@ -27,11 +27,11 @@
   "due_date",
   "completion_date",
   "description",
+  "section_break_7",
+  "parts",
   "column_break_9",
   "actions_performed",
-  "amended_from",
-  "section_break_7",
-  "parts"
+  "amended_from"
  ],
  "fields": [
   {
@@ -198,7 +198,7 @@
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2025-09-01 13:22:36.157640",
+ "modified": "2025-12-09 13:00:30.648152",
  "modified_by": "Administrator",
  "module": "Mold Management",
  "name": "Mould Maintenance Order",

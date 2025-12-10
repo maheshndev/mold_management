@@ -35,13 +35,13 @@ frappe.pages['predictive-dash'].on_page_load = async function (wrapper) {
 
     let index = 1;
     try {
-        const mold_parameters = await frappe.db.get_list('Mold Parameter', {
+        const mold_parameters = await frappe.db.get_list('Mould Parameter', {
             fields: ['name', 'suggestive_action'],
             limit: 500
         });
 
         for (const param of mold_parameters) {
-            const param_doc = await frappe.db.get_doc('Mold Parameter', param.name);
+            const param_doc = await frappe.db.get_doc('Mould Parameter', param.name);
 
             for (const row of param_doc.parameters || []) {
                 const mold_no = row.mold_no;
@@ -51,11 +51,11 @@ frappe.pages['predictive-dash'].on_page_load = async function (wrapper) {
                 let standard_value = 0;
 
                 try {
-                    const mold_doc = await frappe.db.get_doc('Mold', mold_no);
+                    const mold_doc = await frappe.db.get_doc('Mould', mold_no);
                     const match = (mold_doc.critical_parameters || []).find(cp => cp.parameter === parameter_name);
                     standard_value = parseFloat((match && match.value) || 0);
                 } catch (err) {
-                    console.warn(`Mold ${mold_no} not found`);
+                    console.warn(`Mould ${mold_no} not found`);
                     continue;
                 }
 
@@ -92,7 +92,7 @@ frappe.pages['predictive-dash'].on_page_load = async function (wrapper) {
         // Schedule button click handler
         content.on('click', '.schedule-btn', function () {
             const moldNo = $(this).data('mold');
-            frappe.new_doc('Mold Maintenance', {
+            frappe.new_doc('Mould Maintenance', {
                 mold_name: moldNo
             });
         });

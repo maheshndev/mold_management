@@ -243,10 +243,30 @@ app_license = "mit"
 # }
 
 after_migrate = [
+     "mold_management.patches.v0_1.add_naming_series_for_mould.execute",
+     "mold_management.patches.v0_1.add_mould_create_checkbox_field_on_work_order.execute",
+     "mold_management.patches.v0_1.create_fields_on_quotation_item_table.execute",
+     "mold_management.patches.v0_1.create_fields_on_sales_order_item.execute",
+     "mold_management.patches.v0_1.create_mould_field_on_job_card.execute",
+     "mold_management.patches.v0_1.create_field_is_mold_checkbox_on_jobcard.execute",
+     "mold_management.patches.v0_1.add_email_sent_90_field_on_mould.execute",
+     "mold_management.patches.v0_1.add_fields_on_work_order_item_table.execute",
+     "mold_management.patches.v0_1.create_moulds_field_on_bom_item_table.execute",
+     "mold_management.patches.v0_1.create_mould_fields_on_work_order.execute"
     
     
 ]
 
+
+doctype_js = {
+    "Mould":"public/js/fetcehd_id_in_mould_code_field.js",
+    "Item": ["public/js/if_fixed_asset_hide_customer_provided_item_checkbox.js","public/js/atleast one of the mould checkbox is checked.js"],
+    "Work Order": "public/js/auto_mold_generation_based_on_work_order.js",
+    "Job Card": ["public/js/mould_filter_applied_on_job_card.js","public/js/on_job_card_is_mold_checkbox_checked_then_mandatory_mould_field.js"],
+    "Mould Maintenance Order": "public/js/create_material_request_and_purchase_order_from_maintenance_order.js",
+    "Mould Maintenance": ["public/js/calculate_amount_in_require_part_table.js","public/js/supplier_mandatory_when_maintenance_team_outsource.js"]
+    
+}
 
 
 scheduler_events = {
@@ -257,7 +277,10 @@ scheduler_events = {
 }
 
 doc_events = {
+   "Job Card": {
+        "on_submit": "mold_management.api.mould_shots_updated_on_jo_card_completed_qty.update_mould_usage"
+    },
     "Mould": {
-        "before_insert": "mold_management.api.mould_code_generate_based_on_item_group_prefix.mould_code_generate_by_item_group_prefix"
+        "on_update": "mold_management.api.if_current_usage_count_reach_90_trigger_notification.check_mould_usage"
     }
 }
