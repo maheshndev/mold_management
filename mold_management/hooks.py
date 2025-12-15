@@ -253,7 +253,8 @@ after_migrate = [
      "mold_management.patches.v0_1.add_fields_on_work_order_item_table.execute",
      "mold_management.patches.v0_1.create_moulds_field_on_bom_item_table.execute",
      "mold_management.patches.v0_1.create_mould_fields_on_work_order.execute",
-     "mold_management.patches.v0_1.create_notification_on_mould_for_next_maintenance_date.execute"
+     "mold_management.patches.v0_1.create_notification_on_mould_for_next_maintenance_date.execute",
+     "mold_management.patches.v0_1.create_tool_room_work+order_field_on_stock_entry.execute"
     
     
 ]
