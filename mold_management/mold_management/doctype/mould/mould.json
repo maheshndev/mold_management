@@ -100,8 +100,7 @@
   {
    "fieldname": "total_shots",
    "fieldtype": "Data",
-   "label": "Total Shot Count",
-   "read_only": 1
+   "label": "Total Shot Count"
   },
   {
    "fieldname": "tab_break_1",
@@ -304,7 +303,7 @@
    "link_fieldname": "item_code"
   }
  ],
- "modified": "2025-12-10 10:39:40.208420",
+ "modified": "2025-12-14 13:42:10.919596",
  "modified_by": "Administrator",
  "module": "Mold Management",
  "name": "Mould",

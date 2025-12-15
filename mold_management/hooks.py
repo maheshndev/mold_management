@@ -252,7 +252,8 @@ after_migrate = [
      "mold_management.patches.v0_1.add_email_sent_90_field_on_mould.execute",
      "mold_management.patches.v0_1.add_fields_on_work_order_item_table.execute",
      "mold_management.patches.v0_1.create_moulds_field_on_bom_item_table.execute",
-     "mold_management.patches.v0_1.create_mould_fields_on_work_order.execute"
+     "mold_management.patches.v0_1.create_mould_fields_on_work_order.execute",
+     "mold_management.patches.v0_1.create_notification_on_mould_for_next_maintenance_date.execute"
     
     
 ]
@@ -261,7 +262,7 @@ after_migrate = [
 doctype_js = {
     "Mould":"public/js/fetcehd_id_in_mould_code_field.js",
     "Item": ["public/js/if_fixed_asset_hide_customer_provided_item_checkbox.js","public/js/atleast one of the mould checkbox is checked.js"],
-    "Work Order": "public/js/auto_mold_generation_based_on_work_order.js",
+    # "Work Order": "public/js/auto_mold_generation_based_on_work_order.js",
     "Job Card": ["public/js/mould_filter_applied_on_job_card.js","public/js/on_job_card_is_mold_checkbox_checked_then_mandatory_mould_field.js"],
     "Mould Maintenance Order": "public/js/create_material_request_and_purchase_order_from_maintenance_order.js",
     "Mould Maintenance": ["public/js/calculate_amount_in_require_part_table.js","public/js/supplier_mandatory_when_maintenance_team_outsource.js"]
@@ -282,5 +283,13 @@ doc_events = {
     },
     "Mould": {
         "on_update": "mold_management.api.if_current_usage_count_reach_90_trigger_notification.check_mould_usage"
+    },
+    "Mould Maintenance": {
+        "on_update": "mold_management.api.update_last_maintenence_date_and_next_maintenance_date.update_mould_dates_from_maintenance"
+    },
+    "Stock Entry": {
+        "on_submit": "mold_management.api.mould_record_generation_on_stock_entry.create_mould_on_stock_entry"
+       
     }
+
 }
