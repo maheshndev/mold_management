@@ -1,0 +1,29 @@
+{
+ "add_total_row": 1,
+ "add_translate_data": 0,
+ "columns": [],
+ "creation": "2025-12-12 14:46:59.850317",
+ "disabled": 0,
+ "docstatus": 0,
+ "doctype": "Report",
+ "filters": [],
+ "idx": 0,
+ "is_standard": "Yes",
+ "letterhead": null,
+ "modified": "2025-12-12 14:48:17.696050",
+ "modified_by": "Administrator",
+ "module": "Mold Management",
+ "name": "Mould History",
+ "owner": "Administrator",
+ "prepared_report": 0,
+ "query": "SELECT\n    m.name AS \"Mould No:Link/Mould:200\",\n    m.mould_type AS \"Mould Type:Data:200\",\n    m.current_usage_count AS \"Current Usage Count:Int:200\",\n    m.maximum_usage_count AS \"Total Shots:Int:200\",\n    m.last_maintenance_date AS \"Last Maintenance Date:Date:190\",\n    m.next_maintenance_due AS \"Next Maintenance Date:Date:190\"\nFROM\n    `tabMould` m\nORDER BY\n    m.name ASC;",
+ "ref_doctype": "Mould",
+ "report_name": "Mould History",
+ "report_type": "Query Report",
+ "roles": [
+  {
+   "role": "System Manager"
+  }
+ ],
+ "timeout": 0
+}
