@@ -11,7 +11,7 @@ def execute():
         "doctype": "Notification",
         "name": notification_name,
         "enabled": 1,
-        "subject": "🔔 Mould Maintenance Alert",
+        "subject": "🚨 Mould Maintenance Alert",
         "document_type": "Mould",
         "event": "Days Before",
         "date_changed": "next_maintenance_due",
@@ -31,7 +31,7 @@ The maintenance date for mould <strong>{{ doc.mould_name }}</strong> is schedule
 </p>
 
 <p>
- Please take the necessary action at the earliest to avoid any operational impact. ❗❗
+❗ Please take the necessary action at the earliest to avoid any operational impact. ❗
 </p>
 
 <p>
