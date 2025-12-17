@@ -96,7 +96,7 @@
   {
    "fieldname": "total_shots",
    "fieldtype": "Data",
-   "label": "Total Shot Count"
+   "label": "Total Shot"
   },
   {
    "fieldname": "tab_break_1",
