@@ -3,7 +3,7 @@ from frappe import _
 
 def get_data():
 	return {
-		"fieldname": "Tool Room work_order",
+		"fieldname": "tool_room_work_order",
 		"non_standard_fieldnames": {"Batch": "reference_name"},
 		"transactions": [
 			{"label": _("Transactions"), "items": ["Stock Entry", "Job Card", "Pick List"]},

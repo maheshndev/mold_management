@@ -420,6 +420,7 @@ frappe.ui.form.on("Tool Room Work Order", {
 				frm.doc.produced_qty -
 				frm.doc.process_loss_qty;
 			if (pending_complete) {
+				
 				var width = (pending_complete / frm.doc.qty) * 100 - added_min;
 				title = __("{0} items in progress", [pending_complete]);
 				bars.push({
@@ -734,7 +735,7 @@ erpnext.work_order = {
 							});
 
 							if (doc.material_transferred_for_manufacturing >= doc.qty) {
-								// all materials transferred for manufacturing, make this primary
+								// all materials  transferred for manufacturing, make this primary
 								finish_btn.addClass("btn-primary");
 							}
 						} else if (frm.doc.__onload && frm.doc.__onload.overproduction_percentage) {

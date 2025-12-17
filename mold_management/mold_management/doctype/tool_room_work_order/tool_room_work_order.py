@@ -365,7 +365,7 @@ class ToolRoomWorkOrder(Document):
 
 		return status
 
-	def update_work_order_qty(self):
+	def update_tool_room_work_order_qty(self):
 		"""Update **Manufactured Qty** and **Material Transferred for Qty** in Work Order
 		based on Stock Entry"""
 
@@ -422,7 +422,7 @@ class ToolRoomWorkOrder(Document):
 	def get_transferred_or_manufactured_qty(self, purpose):
 		table = frappe.qb.DocType("Stock Entry")
 		query = frappe.qb.from_(table).where(
-			(table.work_order == self.name) & (table.docstatus == 1) & (table.purpose == purpose)
+			(table.tool_room_work_order == self.name) & (table.docstatus == 1) & (table.purpose == purpose)
 		)
 
 		if purpose == "Manufacture":
@@ -438,7 +438,7 @@ class ToolRoomWorkOrder(Document):
 			frappe.qb.from_(table)
 			.select(Sum(table.process_loss_qty))
 			.where(
-				(table.work_order == self.name) & (table.purpose == "Manufacture") & (table.docstatus == 1)
+				(table.tool_room_work_order == self.name) & (table.purpose == "Manufacture") & (table.docstatus == 1)
 			)
 		).run()[0][0]
 
@@ -516,7 +516,7 @@ class ToolRoomWorkOrder(Document):
 		if self.has_batch_no:
 			self.create_batch_for_finished_good()
 
-		args = {"item_code": self.production_item, "work_order": self.name}
+		args = {"item_code": self.production_item, "tool_room_work_order": self.name}
 
 		if self.has_serial_no:
 			self.make_serial_nos(args)
@@ -560,7 +560,7 @@ class ToolRoomWorkOrder(Document):
 			)
 
 	def delete_auto_created_batch_and_serial_no(self):
-		for row in frappe.get_all("Serial No", filters={"work_order": self.name}):
+		for row in frappe.get_all("Serial No", filters={"tool_room_work_order": self.name}):
 			frappe.delete_doc("Serial No", row.name)
 
 		for row in frappe.get_all("Batch", filters={"reference_name": self.name}):
@@ -596,7 +596,7 @@ class ToolRoomWorkOrder(Document):
 			"item_name",
 			"description",
 			"status",
-			"work_order",
+			"tool_room_work_order",
 			"batch_no",
 		]
 
@@ -838,7 +838,7 @@ class ToolRoomWorkOrder(Document):
 		frappe.db.set_value(
 			"Sales Order Item",
 			self.sales_order_item,
-			"work_order_qty",
+			"tool_room_work_order_qty",
 			flt(work_order_qty / total_bundle_qty, 2),
 		)
 
@@ -866,7 +866,7 @@ class ToolRoomWorkOrder(Document):
 				if self.docstatus == 1:
 					work_order_qty = flt(plan_reference.qty) / total_bundle_qty
 				frappe.db.set_value(
-					"Sales Order Item", plan_reference.sales_order_item, "work_order_qty", work_order_qty
+					"Sales Order Item", plan_reference.sales_order_item, "tool_room_work_order_qty", work_order_qty
 				)
 
 	def update_completed_qty_in_material_request(self):
@@ -991,7 +991,7 @@ class ToolRoomWorkOrder(Document):
 				"Stock Entry",
 				fields=["timestamp(posting_date, posting_time) as posting_datetime"],
 				filters={
-					"work_order": self.name,
+					"tool_room_work_order": self.name,
 					"purpose": ("in", ["Material Transfer for Manufacture", "Manufacture"]),
 				},
 			)
@@ -1010,7 +1010,7 @@ class ToolRoomWorkOrder(Document):
 			self.lead_time = flt(time_diff_in_hours(self.actual_end_date, self.actual_start_date) * 60)
 
 	def delete_job_card(self):
-		for d in frappe.get_all("Job Card", ["name"], {"work_order": self.name}):
+		for d in frappe.get_all("Job Card", ["name"], {"tool_room_work_order": self.name}):
 			frappe.delete_doc("Job Card", d.name)
 
 	def validate_production_item(self):
@@ -1183,7 +1183,7 @@ class ToolRoomWorkOrder(Document):
 			)
 			.where(
 				(ste.docstatus == 1)
-				& (ste.work_order == self.name)
+				& (ste.tool_room_work_order == self.name)
 				& (ste.purpose == "Material Transfer for Manufacture")
 				& (ste.is_return == 0)
 			)
@@ -1213,7 +1213,7 @@ class ToolRoomWorkOrder(Document):
 			)
 			.where(
 				(ste.docstatus == 1)
-				& (ste.work_order == self.name)
+				& (ste.tool_room_work_order == self.name)
 				& (ste.purpose == "Material Transfer for Manufacture")
 				& (ste.is_return == 1)
 			)
@@ -1241,7 +1241,7 @@ class ToolRoomWorkOrder(Document):
 					`tabStock Entry` entry,
 					`tabStock Entry Detail` detail
 				WHERE
-					entry.work_order = %(name)s
+					entry.tool_room_work_order = %(name)s
 						AND (entry.purpose = "Material Consumption for Manufacture"
 							OR entry.purpose = "Manufacture")
 						AND entry.docstatus = 1
@@ -1572,7 +1572,7 @@ def close_work_order(work_order, status):
 	if work_order.get("operations"):
 		job_cards = frappe.get_list(
 			"Job Card",
-			filters={"work_order": work_order.name, "status": "Work In Progress", "docstatus": 1},
+			filters={"tool_room_work_order": work_order.name, "status": "Work In Progress", "docstatus": 1},
 			pluck="name",
 		)
 
@@ -1616,7 +1616,7 @@ def get_serial_nos_for_job_card(row, wo_doc):
 	for d in frappe.get_all(
 		"Job Card",
 		fields=["serial_no"],
-		filters={"docstatus": ("<", 2), "work_order": wo_doc.name, "operation_id": row.name},
+		filters={"docstatus": ("<", 2), "tool_room_work_order": wo_doc.name, "operation_id": row.name},
 	):
 		used_serial_nos.extend(get_serial_nos(d.serial_no))
 
@@ -1630,7 +1630,7 @@ def get_serial_nos_for_work_order(work_order, production_item):
 		"Serial No",
 		fields=["name"],
 		filters={
-			"work_order": work_order,
+			"tool_room_work_order": work_order,
 			"item_code": production_item,
 		},
 	):
@@ -1661,7 +1661,7 @@ def create_job_card(work_order, row, enable_capacity_planning=False, auto_create
 	doc = frappe.new_doc("Job Card")
 	doc.update(
 		{
-			"work_order": work_order.name,
+			"tool_room_work_order": work_order.name,
 			"workstation_type": row.get("workstation_type"),
 			"operation": row.get("operation"),
 			"workstation": row.get("workstation"),
@@ -1808,7 +1808,7 @@ def make_stock_return_entry(work_order):
 	stock_entry = frappe.new_doc("Stock Entry")
 	stock_entry.from_bom = 1
 	stock_entry.is_return = 1
-	stock_entry.work_order = work_order
+	stock_entry.tool_room_work_order = work_order
 	stock_entry.purpose = "Material Transfer for Manufacture"
 	stock_entry.bom_no = wo_doc.bom_no
 	stock_entry.add_transfered_raw_materials_in_items()
