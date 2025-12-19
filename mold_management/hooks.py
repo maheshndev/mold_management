@@ -31,7 +31,7 @@ after_migrate = [
 
 
 doctype_js = {
-    "Mould":"public/js/fetcehd_id_in_mould_code_field.js",
+    "Mould":["public/js/fetcehd_id_in_mould_code_field.js","public/js/add_manage_button_on_mould.js"],
     "Item": ["public/js/if_fixed_asset_hide_customer_provided_item_checkbox.js","public/js/atleast one of the mould checkbox is checked.js"],
     # "Work Order": "public/js/auto_mold_generation_based_on_work_order.js",
     "Job Card": ["public/js/mould_filter_applied_on_job_card.js","public/js/on_job_card_is_mold_checkbox_checked_then_mandatory_mould_field.js"],

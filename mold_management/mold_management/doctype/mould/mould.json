@@ -34,6 +34,7 @@
   "default_warehouse",
   "drawing",
   "company",
+  "custodian",
   "mould_size_section",
   "lenght_mm",
   "width_mm",
@@ -267,6 +268,12 @@
    "fieldname": "total_lifecycle_shot",
    "fieldtype": "Int",
    "label": "Total Lifecycle Shot"
+  },
+  {
+   "fieldname": "custodian",
+   "fieldtype": "Link",
+   "label": "custodian",
+   "options": "Employee"
   }
  ],
  "grid_page_length": 50,
@@ -279,9 +286,13 @@
   {
    "link_doctype": "Item",
    "link_fieldname": "item_code"
+  },
+  {
+   "link_doctype": "Mould Movement",
+   "link_fieldname": "purpose"
   }
  ],
- "modified": "2025-12-19 09:22:05.811610",
+ "modified": "2025-12-19 15:31:10.965612",
  "modified_by": "Administrator",
  "module": "Mold Management",
  "name": "Mould",
