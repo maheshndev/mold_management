@@ -284,7 +284,9 @@ def create_asset_from_work_order(wo):
 
         # Optional
         "purchase_receipt": None,
-        "is_existing_asset": 1
+        "is_existing_asset": 1,
+        "maintenance_required": 1
+        
     })
 
     asset.insert(ignore_permissions=True)

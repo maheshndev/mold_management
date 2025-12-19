@@ -21,6 +21,7 @@
   "status",
   "mould_type",
   "next_maintenance_due",
+  "total_lifecycle_shot",
   "mould_life",
   "balance_mould_life",
   "current_usage_count",
@@ -96,7 +97,7 @@
   {
    "fieldname": "total_shots",
    "fieldtype": "Data",
-   "label": "Total Shot"
+   "label": "Maintenance Required Per Shot"
   },
   {
    "fieldname": "tab_break_1",
@@ -261,6 +262,11 @@
    "fieldtype": "Link",
    "label": "Company",
    "options": "Company"
+  },
+  {
+   "fieldname": "total_lifecycle_shot",
+   "fieldtype": "Int",
+   "label": "Total Lifecycle Shot"
   }
  ],
  "grid_page_length": 50,
@@ -275,7 +281,7 @@
    "link_fieldname": "item_code"
   }
  ],
- "modified": "2025-12-15 18:01:53.020238",
+ "modified": "2025-12-19 09:22:05.811610",
  "modified_by": "Administrator",
  "module": "Mold Management",
  "name": "Mould",
