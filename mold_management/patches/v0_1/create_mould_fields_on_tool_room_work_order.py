@@ -2,7 +2,7 @@ import frappe
 from frappe.custom.doctype.custom_field.custom_field import create_custom_field
 
 def execute():
-    print("Adding custom fields to Work Order...")
+    print("Adding custom fields to Tool Room Work Order...")
 
     fields = [
         {
@@ -107,20 +107,12 @@ def execute():
             "insert_after": "mould_name",
             "hidden":1,
             "fetch_from": "production_item.mould_ty"
-        },
-        {
-            "fieldname": "total_lifecycle_sho",
-            "label": "Total Lifecycle Shot",
-            "fieldtype": "Data",
-            "insert_after": "mould_ti",
-            "hidden":1,
-            "fetch_from": "production_item.total_lifecycle_shot"
         }
     ]
 
     for field in fields:
         try:
-            create_custom_field("Work Order", field)
+            create_custom_field("Tool Room Work Order", field)
             print(f"Created: {field['fieldname']}")
         except Exception as e:
             print(f"Skipping {field['fieldname']} (maybe exists) → {e}")
