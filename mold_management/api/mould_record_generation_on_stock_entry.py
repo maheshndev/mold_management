@@ -259,7 +259,8 @@ def create_mould(wo, doc):
         "hot_runner_system": wo.get("hot_runner_system"),
         "cold_runner_system": wo.get("cold_runner_system"),
         "total_shots": wo.get("total_shots", 0),
-        "mould_life": wo.get("tool_life", 0)
+        "mould_life": wo.get("tool_life", 0),
+        "total_lifecycle_shot": wo.get("total_lifecycle_sho",0)
     })
 
     mould.insert(ignore_permissions=True)

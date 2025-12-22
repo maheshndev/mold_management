@@ -107,6 +107,14 @@ def execute():
             "insert_after": "mould_name",
             "hidden":1,
             "fetch_from": "production_item.mould_ty"
+        },
+        {
+            "fieldname": "total_lifecycle_sho",
+            "label": "Total Lifecycle Shot",
+            "fieldtype": "Data",
+            "insert_after": "mould_ti",
+            "hidden":1,
+            "fetch_from": "production_item.total_lifecycle_shot"
         }
     ]
 
