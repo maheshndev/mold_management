@@ -1,8 +1,8 @@
-frappe.pages['daily-production-rep'].on_page_load = function (wrapper) {
+frappe.pages["daily-production-rep"].on_page_load = function (wrapper) {
     const page = frappe.ui.make_app_page({
         parent: wrapper,
-        title: 'Daily Production Report',
-        single_column: true
+        title: "Daily Production Report",
+        single_column: true,
     });
 
     let currentIndex = 0;
@@ -66,8 +66,10 @@ frappe.pages['daily-production-rep'].on_page_load = function (wrapper) {
                     <td class="section-title">Machine No</td><td>${doc.machine_no || ""}</td>
                 </tr>
                 <tr>
-                    <td class="section-title">Product Name</td><td colspan="2">${doc.product_name || ""}</td>
-                    <td class="section-title">Operator Name</td><td colspan="2">${doc.operator_name || ""}</td>
+                    <td class="section-title">Product Name</td><td colspan="2">${doc.product_name || ""
+            }</td>
+                    <td class="section-title">Operator Name</td><td colspan="2">${doc.operator_name || ""
+            }</td>
                 </tr>
                 <tr>
                     <td class="section-title">Shot Weight</td><td>${doc.shot_weight || ""}</td>
@@ -90,47 +92,66 @@ frappe.pages['daily-production-rep'].on_page_load = function (wrapper) {
                     <td class="section-title">Shift Target</td><td>${doc.shift_target || ""}</td>
                 </tr>
                 <tr>
-                    <td class="section-title">Total No Cavity</td><td>${doc.total_cavity || ""}</td>
-                    <td class="section-title">Running Cavity</td><td>${doc.running_cavity || ""}</td>
+                    <td class="section-title">Total No Cavity</td><td>${doc.total_cavity || ""
+            }</td>
+                    <td class="section-title">Running Cavity</td><td>${doc.running_cavity || ""
+            }</td>
                     <td class="section-title">Anti Static</td><td>${doc.anti_static || ""}</td>
                 </tr>
             </table>
 
-            <!-- Production Data -->
+            
+           <!-- Production Data -->
             <table>
                 <tr>
                     <th>Time</th>
                     <th>OK Shots</th>
-                    <th>Rej Shots</th>
+                    <th>Reject Shots</th>
                     <th>Total Shots</th>
-                    <th>Rej Code</th>
+                    <th>Reject Code</th>
                     <th>Remarks</th>
                 </tr>
-                ${(doc.production_data || []).map(row => `
-                    <tr>
-                        <td>1 ${row.time_slot || ""}</td>
-                        <td>2 ${row.ok_shots || ""}</td>
-                        <td>3 ${row.rej_shots || ""}</td>
-                        <td>4 ${row.total_shots || ""}</td>
-                        <td>5 ${row.rej_code || ""}</td>
-                        <td>6 ${row.remarks || ""}</td>
-                    </tr>
-                `).join("")}
-                
+
+                ${doc.production_data && doc.production_data.length
+                            ? doc.production_data
+                                .map(
+                                    (row) => `
+                            <tr>
+                                <td>${row.time_slot || ""}</td>
+                                <td>${row.ok_shots ?? 0}</td>
+                                <td>${row.rej_shots ?? 0}</td>
+                                <td>${row.total_shots ?? 0}</td>
+                                <td>${row.rej_code || ""}</td>
+                                <td>${row.remarks || ""}</td>
+                            </tr>
+                        `
+                                )
+                                .join("")
+                            : `
+                            <tr>
+                                <td colspan="6" style="text-align:center; color:#888;">
+                                    No Production Shots Data
+                                </td>
+                            </tr>
+                        `
+                        }
             </table>
+
 
             <!-- Summary -->
             <table>
                 <tr>
                     <td class="section-title">Last Counter</td><td>${doc.last_counter || ""}</td>
-                    <td class="section-title">OK Shots</td><td>${doc.ok_shots || ""}</td>
-                    <td class="section-title">Rej Shots</td><td>${doc.rej_shots || ""}</td>
+                    <td class="section-title">OK Shots</td><td>${doc.total_ok_shots || ""}</td>
+                    <td class="section-title">Rej Shots</td><td>${doc.total_rej_shots || ""}</td>
                     <td class="section-title">Total Shots</td><td>${doc.total_shots || ""}</td>
                 </tr>
                 <tr>
-                    <td class="section-title">RM Consumption</td><td>${doc.rm_consumption || ""}</td>
+                    <td class="section-title">RM Consumption</td><td>${doc.rm_consumption || ""
+            }</td>
                     <td class="section-title">Lumps</td><td>${doc.lumps || ""}</td>
-                    <td class="section-title">Supervisor Sign</td><td colspan="3">${doc.supervisor_sign || ""}</td>
+                    <td class="section-title">Supervisor Sign</td><td colspan="3">${doc.supervisor_sign || ""
+            }</td>
                 </tr>
             </table>
         `;
@@ -148,15 +169,15 @@ frappe.pages['daily-production-rep'].on_page_load = function (wrapper) {
         method: "frappe.client.get_list",
         args: {
             doctype: "Daily Production Log",
-            fields: ["*"],   // fetch all fields
-            limit_page_length: 50
+            fields: ["*"], // fetch all fields
+            limit_page_length: 50,
         },
         callback: function (r) {
             if (r.message) {
                 records = r.message;
                 renderPage(currentIndex);
             }
-        }
+        },
     });
 
     // Pagination controls

@@ -333,7 +333,7 @@
    "fieldname": "mold",
    "fieldtype": "Link",
    "label": "Mold",
-   "options": "Mold"
+   "options": "Mould"
   },
   {
    "fetch_from": "quality_inspection.reference_name",
@@ -347,7 +347,7 @@
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2025-08-26 18:11:57.896670",
+ "modified": "2025-12-30 22:59:40.391356",
  "modified_by": "Administrator",
  "module": "Mold Management",
  "name": "Daily Production Log",

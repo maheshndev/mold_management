@@ -2,6 +2,7 @@
  "actions": [],
  "allow_import": 1,
  "allow_rename": 1,
+ "autoname": "format:MP-{#####}",
  "creation": "2025-06-09 22:12:11.763677",
  "doctype": "DocType",
  "engine": "InnoDB",
@@ -32,10 +33,11 @@
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2025-09-01 12:54:34.232902",
+ "modified": "2026-01-02 15:29:09.181532",
  "modified_by": "Administrator",
  "module": "Mold Management",
  "name": "Mould Parameter",
+ "naming_rule": "Expression",
  "owner": "Administrator",
  "permissions": [
   {
