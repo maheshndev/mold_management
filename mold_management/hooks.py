@@ -25,7 +25,13 @@ after_migrate = [
      "mold_management.patches.v0_1.create_tool_room_work_order_on_serial_no.execute",
      "mold_management.patches.v0_1.create_tool_room_work_order_on_material_request.execute",
      "mold_management.patches.v0_1.create_is_customer_and_maintain_stock_fixed_asset_on_work_order.execute",
-     "mold_management.patches.v0_1.add_work_order_routing_field_on_work_order.execute"
+     "mold_management.patches.v0_1.add_work_order_routing_field_on_work_order.execute",
+
+     # fields and section on item doctype
+     "mold_management.patches.v0_1.add_packing_details_tab_on_item.execute",
+     "mold_management.patches.v0_1.add_part_specification_tab_on_item.execute",
+     "mold_management.patches.v0_1.add_pre_feasibility_item_field_on_lead.execute",
+     "mold_management.patches.v0_1.add_rework_and_checking_details.execute"
     
     
 ]
