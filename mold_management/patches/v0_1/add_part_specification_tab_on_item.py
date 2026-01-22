@@ -132,4 +132,5 @@ def execute():
                 **field
             }).insert(ignore_permissions=True)
 
-    frappe.db.commit()
+    
+    frappe.clear_cache()
