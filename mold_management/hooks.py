@@ -30,7 +30,6 @@ after_migrate = [
      # fields and section on item doctype
      "mold_management.patches.v0_1.add_packing_details_tab_on_item.execute",
      "mold_management.patches.v0_1.add_part_specification_tab_on_item.execute",
-     "mold_management.patches.v0_1.add_pre_feasibility_item_field_on_lead.execute",
      "mold_management.patches.v0_1.add_rework_and_checking_details.execute"
     
     
