@@ -9,6 +9,7 @@ def execute():
             "fieldname": "rework_and_checking_details_tab",
             "label": "Rework & Checking Details",
             "fieldtype": "Tab Break",
+            "insert_after": "total_lifecycle_shot"
         }).insert(ignore_permissions=True)
 
     # Step 2: Create Section Break inside Mould Details tab

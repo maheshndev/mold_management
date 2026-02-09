@@ -9,7 +9,7 @@ def execute():
             "fieldname": "mould_details_tab",
             "label": "Mould Details",
             "fieldtype": "Tab Break",
-            "insert_after": "total_projected_qty"
+            "insert_after": "manufacturing"
         }).insert(ignore_permissions=True)
 
     # Step 2: Create Section Break inside Mould Details tab

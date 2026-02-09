@@ -8,7 +8,7 @@ def execute():
             "label": "Shape",
             "fieldtype": "Link",
             "options": "Shape",
-            "insert_after": "mould_selection_table"
+            "insert_after": "mould_ty"
         },
         {
             "fieldname": "mould_ty",

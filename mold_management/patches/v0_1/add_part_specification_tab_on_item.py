@@ -9,6 +9,7 @@ def execute():
             "fieldname": "part_specification_tab",
             "label": "Part Specification & Operations",
             "fieldtype": "Tab Break",
+            "insert_after": "engraving_in_1hrs"
         }).insert(ignore_permissions=True)
 
     # Step 2: Create Section Break inside Mould Details tab
