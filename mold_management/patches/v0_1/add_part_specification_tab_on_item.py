@@ -108,14 +108,15 @@ def execute():
             "fieldtype": "Select",
             "options": "\nYes\nNo",
             "insert_after": "bending"
-        },
-        {
-            "fieldname": "mould",
-            "label": "Mould",
-            "fieldtype": "Link",
-            "options": "Mould",
-            "insert_after": "clipping"
         }
+        # ,
+        # {
+        #     "fieldname": "mould",
+        #     "label": "Mould",
+        #     "fieldtype": "Link",
+        #     "options": "Mould",
+        #     "insert_after": "clipping"
+        # }
         
 
         
