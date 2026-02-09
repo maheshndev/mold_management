@@ -9,7 +9,7 @@ def execute():
             "fieldname": "packing_details_tab",
             "label": "Packing Details",
             "fieldtype": "Tab Break",
-            "insert_after": "gluing"
+           
         }).insert(ignore_permissions=True)
 
     # Step 2: Create Section Break inside Mould Details tab
