@@ -114,7 +114,7 @@ def execute():
             "label": "Mould",
             "fieldtype": "Link",
             "options": "Mould",
-            "insert_after": "bending"
+            "insert_after": "clipping"
         }
         
 
