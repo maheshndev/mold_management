@@ -29,9 +29,9 @@ after_migrate = [
 
      # fields and section on item doctype
      "mold_management.patches.v0_1.add_mould_detail_tab_on_item_master.execute",
-     "mold_management.patches.v0_1.add_selection_of_tool_on_item.execute",
-     "mold_management.patches.v0_1.add_moulds_field_on_item.execute",
-     "mold_management.patches.v0_1.add_mould_name_field_on_item.execute",
+    #  "mold_management.patches.v0_1.add_selection_of_tool_on_item.execute",
+    #  "mold_management.patches.v0_1.add_moulds_field_on_item.execute",
+    #  "mold_management.patches.v0_1.add_mould_name_field_on_item.execute",
      "mold_management.patches.v0_1.add_packing_details_tab_on_item.execute",
      "mold_management.patches.v0_1.add_part_specification_tab_on_item.execute",
      "mold_management.patches.v0_1.add_rework_and_checking_details.execute",
