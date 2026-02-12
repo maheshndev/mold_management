@@ -8,18 +8,18 @@ from frappe import qb
 from frappe.query_builder.functions import Sum
 from frappe.utils import add_days, add_months, flt, get_first_day, nowdate, nowtime, today
 
-from erpnext.assets.doctype.asset.asset import (
-	get_asset_account,
-	get_asset_value_after_depreciation,
+from mold_management.mold_management.doctype.mould.mould import (
+	get_mould_account,
+	get_mould_value_after_depreciation,
 	make_sales_invoice,
 )
-from erpnext.assets.doctype.asset.test_asset import (
-	create_asset,
-	create_asset_data,
+from mold_management.mold_management.doctype.mould.test_mould import (
+	create_mould,
+	create_mould_data,
 	set_depreciation_settings_in_company,
 )
-from erpnext.assets.doctype.asset_depreciation_schedule.asset_depreciation_schedule import (
-	get_asset_depr_schedule_doc,
+from mold_management.mold_management.doctype.mould_depreciation_schedule.mould_depreciation_schedule import (
+	get_mould_depr_schedule_doc,
 )
 from erpnext.stock.doctype.item.test_item import create_item
 from erpnext.stock.doctype.serial_and_batch_bundle.test_serial_and_batch_bundle import (
@@ -28,17 +28,17 @@ from erpnext.stock.doctype.serial_and_batch_bundle.test_serial_and_batch_bundle 
 )
 
 
-class MouldAssetRepair(unittest.TestCase):
+class MouldRepair(unittest.TestCase):
 	@classmethod
 	def setUpClass(cls):
 		set_depreciation_settings_in_company()
-		create_asset_data()
+		create_mould_data()
 		create_item("_Test Stock Item")
 		frappe.db.sql("delete from `tabTax Rule`")
 
 		purchase_date = add_months(get_first_day(date), -2)
 
-		asset = create_asset(
+		mould = create_mould(
 			calculate_depreciation=1,
 			available_for_use_date=purchase_date,
 			purchase_date=purchase_date,
@@ -48,72 +48,72 @@ class MouldAssetRepair(unittest.TestCase):
 			submit=1,
 		)
 
-		si = make_sales_invoice(asset=asset.name, item_code="Macbook Pro", company="_Test Company")
+		si = make_sales_invoice(mould=mould.name, item_code="Macbook Pro", company="_Test Company")
 		si.customer = "_Test Customer"
 		si.due_date = date
 		si.get("items")[0].rate = 25000
 		si.insert()
 		si.submit()
 
-		asset.reload()
-		self.assertEqual(frappe.db.get_value("Mould", asset.name, "status"), "Sold")
-		asset_repair = frappe.new_doc("Mould Repair")
-		asset_repair.update({"company": "_Test Company", "asset": asset.name, "asset_name": asset.asset_name})
-		self.assertRaises(frappe.ValidationError, asset_repair.save)
+		mould.reload()
+		self.assertEqual(frappe.db.get_value("Mould", mould.name, "status"), "Sold")
+		mould_repair = frappe.new_doc("Mould Repair")
+		mould_repair.update({"company": "_Test Company", "mould": mould.name, "mould_name": mould.mould_name})
+		self.assertRaises(frappe.ValidationError, mould_repair.save)
 
 	def test_update_status(self):
-		asset = create_asset(submit=1)
-		initial_status = asset.status
-		asset_repair = create_asset_repair(asset=asset)
+		mould = create_mould(submit=1)
+		initial_status = mould.status
+		mould_repair = create_mould_repair(mould=mould)
 
-		if asset_repair.repair_status == "Pending":
-			asset.reload()
-			self.assertEqual(asset.status, "Out of Order")
+		if mould_repair.repair_status == "Pending":
+			mould.reload()
+			self.assertEqual(mould.status, "Out of Order")
 
-		asset_repair.repair_status = "Completed"
-		asset_repair.save()
-		asset_status = frappe.db.get_value("Mould", asset_repair.asset, "status")
-		self.assertEqual(asset_status, initial_status)
+		mould_repair.repair_status = "Completed"
+		mould_repair.save()
+		mould_status = frappe.db.get_value("Mould", mould_repair.mould, "status")
+		self.assertEqual(mould_status, initial_status)
 
 	def test_stock_item_total_value(self):
-		asset_repair = create_asset_repair(stock_consumption=1)
+		mould_repair = create_mould_repair(stock_consumption=1)
 
-		for item in asset_repair.stock_items:
+		for item in mould_repair.stock_items:
 			total_value = flt(item.valuation_rate) * flt(item.consumed_quantity)
 			self.assertEqual(item.total_value, total_value)
 
 	def test_total_repair_cost(self):
-		asset_repair = create_asset_repair(stock_consumption=1)
+		mould_repair = create_mould_repair(stock_consumption=1)
 
-		total_repair_cost = asset_repair.repair_cost
-		self.assertEqual(total_repair_cost, asset_repair.repair_cost)
-		for item in asset_repair.stock_items:
+		total_repair_cost = mould_repair.repair_cost
+		self.assertEqual(total_repair_cost, mould_repair.repair_cost)
+		for item in mould_repair.stock_items:
 			total_repair_cost += item.total_value
 
-		self.assertEqual(total_repair_cost, asset_repair.total_repair_cost)
+		self.assertEqual(total_repair_cost, mould_repair.total_repair_cost)
 
 	def test_repair_status_after_submit(self):
-		asset_repair = create_asset_repair(submit=1)
-		self.assertNotEqual(asset_repair.repair_status, "Pending")
+		mould_repair = create_mould_repair(submit=1)
+		self.assertNotEqual(mould_repair.repair_status, "Pending")
 
 	def test_stock_items(self):
-		asset_repair = create_asset_repair(stock_consumption=1)
-		self.assertTrue(asset_repair.stock_consumption)
-		self.assertTrue(asset_repair.stock_items)
+		mould_repair = create_mould_repair(stock_consumption=1)
+		self.assertTrue(mould_repair.stock_consumption)
+		self.assertTrue(mould_repair.stock_items)
 
 	def test_warehouse(self):
-		asset_repair = create_asset_repair(stock_consumption=1)
-		self.assertTrue(asset_repair.stock_consumption)
-		self.assertTrue(asset_repair.stock_items[0].warehouse)
+		mould_repair = create_mould_repair(stock_consumption=1)
+		self.assertTrue(mould_repair.stock_consumption)
+		self.assertTrue(mould_repair.stock_items[0].warehouse)
 
 	def test_decrease_stock_quantity(self):
-		asset_repair = create_asset_repair(stock_consumption=1, submit=1)
+		mould_repair = create_mould_repair(stock_consumption=1, submit=1)
 		stock_entry = frappe.get_last_doc("Stock Entry")
 
 		self.assertEqual(stock_entry.stock_entry_type, "Material Issue")
-		self.assertEqual(stock_entry.items[0].s_warehouse, asset_repair.stock_items[0].warehouse)
-		self.assertEqual(stock_entry.items[0].item_code, asset_repair.stock_items[0].item_code)
-		self.assertEqual(stock_entry.items[0].qty, asset_repair.stock_items[0].consumed_quantity)
+		self.assertEqual(stock_entry.items[0].s_warehouse, mould_repair.stock_items[0].warehouse)
+		self.assertEqual(stock_entry.items[0].item_code, mould_repair.stock_items[0].item_code)
+		self.assertEqual(stock_entry.items[0].qty, mould_repair.stock_items[0].consumed_quantity)
 
 	def test_serialized_item_consumption(self):
 		from erpnext.stock.doctype.stock_entry.test_stock_entry import make_serialized_item
@@ -124,7 +124,7 @@ class MouldAssetRepair(unittest.TestCase):
 		serial_no = serial_nos[0]
 
 		# should not raise any error
-		create_asset_repair(
+		create_mould_repair(
 			stock_consumption=1,
 			item_code=stock_entry.get("items")[0].item_code,
 			warehouse="_Test Warehouse - _TC",
@@ -133,53 +133,53 @@ class MouldAssetRepair(unittest.TestCase):
 		)
 
 		# should raise error
-		asset_repair = create_asset_repair(
+		mould_repair = create_mould_repair(
 			stock_consumption=1,
 			warehouse="_Test Warehouse - _TC",
 			item_code=stock_entry.get("items")[0].item_code,
 		)
 
-		asset_repair.repair_status = "Completed"
-		self.assertRaises(frappe.ValidationError, asset_repair.submit)
+		mould_repair.repair_status = "Completed"
+		self.assertRaises(frappe.ValidationError, mould_repair.submit)
 
-	def test_no_increase_in_asset_value_when_not_capitalized(self):
-		asset = create_asset(calculate_depreciation=1, submit=1)
-		initial_asset_value = get_asset_value_after_depreciation(asset.name)
-		create_asset_repair(asset=asset, stock_consumption=1, submit=1)
-		asset.reload()
+	def test_no_increase_in_mould_value_when_not_capitalized(self):
+		mould = create_mould(calculate_depreciation=1, submit=1)
+		initial_mould_value = get_mould_value_after_depreciation(mould.name)
+		create_mould_repair(mould=mould, stock_consumption=1, submit=1)
+		mould.reload()
 
-		increase_in_asset_value = get_asset_value_after_depreciation(asset.name) - initial_asset_value
-		self.assertEqual(increase_in_asset_value, 0)
+		increase_in_mould_value = get_mould_value_after_depreciation(mould.name) - initial_mould_value
+		self.assertEqual(increase_in_mould_value, 0)
 
-	def test_increase_in_asset_value_due_to_repair_cost_capitalisation(self):
-		asset = create_asset(calculate_depreciation=1, submit=1)
-		initial_asset_value = get_asset_value_after_depreciation(asset.name)
-		asset_repair = create_asset_repair(asset=asset, capitalize_repair_cost=1, submit=1)
-		asset.reload()
+	def test_increase_in_mould_value_due_to_repair_cost_capitalisation(self):
+		mould = create_mould(calculate_depreciation=1, submit=1)
+		initial_mould_value = get_mould_value_after_depreciation(mould.name)
+		mould_repair = create_mould_repair(mould=mould, capitalize_repair_cost=1, submit=1)
+		mould.reload()
 
-		increase_in_asset_value = get_asset_value_after_depreciation(asset.name) - initial_asset_value
-		self.assertEqual(asset_repair.repair_cost, increase_in_asset_value)
+		increase_in_mould_value = get_mould_value_after_depreciation(mould.name) - initial_mould_value
+		self.assertEqual(mould_repair.repair_cost, increase_in_mould_value)
 
 	def test_purchase_invoice(self):
-		asset_repair = create_asset_repair(capitalize_repair_cost=1, submit=1)
-		self.assertTrue(asset_repair.purchase_invoice)
+		mould_repair = create_mould_repair(capitalize_repair_cost=1, submit=1)
+		self.assertTrue(mould_repair.purchase_invoice)
 
 	def test_gl_entries_with_perpetual_inventory(self):
 		set_depreciation_settings_in_company(company="_Test Company with perpetual inventory")
 
-		asset_category = frappe.get_doc("Asset Category", "Computers")
-		asset_category.append(
+		mould_category = frappe.get_doc("Mould Category", "Computers")
+		mould_category.append(
 			"accounts",
 			{
 				"company_name": "_Test Company with perpetual inventory",
-				"fixed_asset_account": "_Test Fixed Asset - TCP1",
+				"fixed_mould_account": "_Test Fixed Mould - TCP1",
 				"accumulated_depreciation_account": "_Test Accumulated Depreciations - TCP1",
 				"depreciation_expense_account": "_Test Depreciations - TCP1",
 			},
 		)
-		asset_category.save()
+		mould_category.save()
 
-		asset_repair = create_asset_repair(
+		mould_repair = create_mould_repair(
 			capitalize_repair_cost=1,
 			stock_consumption=1,
 			warehouse="Stores - TCP1",
@@ -200,25 +200,25 @@ class MouldAssetRepair(unittest.TestCase):
 			group by
 				account
 		""",
-			asset_repair.name,
+			mould_repair.name,
 			as_dict=1,
 		)
 
 		self.assertTrue(gl_entries)
 
-		fixed_asset_account = get_asset_account(
-			"fixed_asset_account", asset=asset_repair.asset, company=asset_repair.company
+		fixed_mould_account = get_mould_account(
+			"fixed_mould_account", mould=mould_repair.mould, company=mould_repair.company
 		)
 		pi_expense_account = (
-			frappe.get_doc("Purchase Invoice", asset_repair.purchase_invoice).items[0].expense_account
+			frappe.get_doc("Purchase Invoice", mould_repair.purchase_invoice).items[0].expense_account
 		)
 		stock_entry_expense_account = (
-			frappe.get_doc("Stock Entry", {"asset_repair": asset_repair.name}).get("items")[0].expense_account
+			frappe.get_doc("Stock Entry", {"mould_repair": mould_repair.name}).get("items")[0].expense_account
 		)
 
 		expected_values = {
-			fixed_asset_account: [asset_repair.total_repair_cost, 0],
-			pi_expense_account: [0, asset_repair.repair_cost],
+			fixed_mould_account: [mould_repair.total_repair_cost, 0],
+			pi_expense_account: [0, mould_repair.repair_cost],
 			stock_entry_expense_account: [0, 100],
 		}
 
@@ -228,7 +228,7 @@ class MouldAssetRepair(unittest.TestCase):
 
 	def test_gl_entries_with_periodical_inventory(self):
 		frappe.db.set_value("Company", "_Test Company", "default_expense_account", "Cost of Goods Sold - _TC")
-		asset_repair = create_asset_repair(
+		mould_repair = create_mould_repair(
 			capitalize_repair_cost=1,
 			stock_consumption=1,
 			submit=1,
@@ -242,113 +242,113 @@ class MouldAssetRepair(unittest.TestCase):
 				sum(credit) as credit
 			from `tabGL Entry`
 			where
-				voucher_type='Asset Repair'
+				voucher_type='Mould Repair'
 				and voucher_no=%s
 			group by
 				account
 		""",
-			asset_repair.name,
+			mould_repair.name,
 			as_dict=1,
 		)
 
 		self.assertTrue(gl_entries)
 
-		fixed_asset_account = get_asset_account(
-			"fixed_asset_account", asset=asset_repair.asset, company=asset_repair.company
+		fixed_mould_account = get_mould_account(
+			"fixed_mould_account", mould=mould_repair.mould, company=mould_repair.company
 		)
 		default_expense_account = frappe.get_cached_value(
-			"Company", asset_repair.company, "default_expense_account"
+			"Company", mould_repair.company, "default_expense_account"
 		)
 
-		expected_values = {fixed_asset_account: [1100, 0], default_expense_account: [0, 1100]}
+		expected_values = {fixed_mould_account: [1100, 0], default_expense_account: [0, 1100]}
 
 		for d in gl_entries:
 			self.assertEqual(expected_values[d.account][0], d.debit)
 			self.assertEqual(expected_values[d.account][1], d.credit)
 
-	def test_increase_in_asset_life(self):
-		asset = create_asset(calculate_depreciation=1, submit=1)
+	def test_increase_in_mould_life(self):
+		mould = create_mould(calculate_depreciation=1, submit=1)
 
-		first_asset_depr_schedule = get_asset_depr_schedule_doc(asset.name, "Active")
-		self.assertEqual(first_asset_depr_schedule.status, "Active")
+		first_mould_depr_schedule = get_mould_depr_schedule_doc(mould.name, "Active")
+		self.assertEqual(first_mould_depr_schedule.status, "Active")
 
-		initial_num_of_depreciations = num_of_depreciations(asset)
-		create_asset_repair(asset=asset, capitalize_repair_cost=1, submit=1)
+		initial_num_of_depreciations = num_of_depreciations(mould)
+		create_mould_repair(mould=mould, capitalize_repair_cost=1, submit=1)
 
-		asset.reload()
-		first_asset_depr_schedule.load_from_db()
+		mould.reload()
+		first_mould_depr_schedule.load_from_db()
 
-		second_asset_depr_schedule = get_asset_depr_schedule_doc(asset.name, "Active")
-		self.assertEqual(second_asset_depr_schedule.status, "Active")
-		self.assertEqual(first_asset_depr_schedule.status, "Cancelled")
+		second_mould_depr_schedule = get_mould_depr_schedule_doc(mould.name, "Active")
+		self.assertEqual(second_mould_depr_schedule.status, "Active")
+		self.assertEqual(first_mould_depr_schedule.status, "Cancelled")
 
-		self.assertEqual((initial_num_of_depreciations + 1), num_of_depreciations(asset))
+		self.assertEqual((initial_num_of_depreciations + 1), num_of_depreciations(mould))
 		self.assertEqual(
-			second_asset_depr_schedule.get("depreciation_schedule")[-1].accumulated_depreciation_amount,
-			asset.finance_books[0].value_after_depreciation,
+			second_mould_depr_schedule.get("depreciation_schedule")[-1].accumulated_depreciation_amount,
+			mould.finance_books[0].value_after_depreciation,
 		)
 
-	def test_asset_repiar_link_in_stock_entry(self):
-		asset = create_asset(calculate_depreciation=1, submit=1)
-		asset_repair = create_asset_repair(asset=asset, stock_consumption=1, submit=1)
+	def test_mould_repiar_link_in_stock_entry(self):
+		mould = create_mould(calculate_depreciation=1, submit=1)
+		mould_repair = create_mould_repair(mould=mould, stock_consumption=1, submit=1)
 		stock_entry = frappe.get_last_doc("Stock Entry")
-		self.assertEqual(stock_entry.asset_repair, asset_repair.name)
+		self.assertEqual(stock_entry.mould_repair, mould_repair.name)
 
-	def test_gl_entries_with_capitalized_asset_repair(self):
-		asset = create_asset(is_existing_asset=1, calculate_depreciation=1, submit=1)
-		asset_repair = create_asset_repair(
-			asset=asset, capitalize_repair_cost=1, item="_Test Non Stock Item", submit=1
+	def test_gl_entries_with_capitalized_mould_repair(self):
+		mould = create_mould(is_existing_mould=1, calculate_depreciation=1, submit=1)
+		mould_repair = create_mould_repair(
+			mould=mould, capitalize_repair_cost=1, item="_Test Non Stock Item", submit=1
 		)
-		asset.reload()
+		mould.reload()
 
 		GLEntry = qb.DocType("GL Entry")
 		res = (
 			qb.from_(GLEntry)
 			.select(Sum(GLEntry.debit_in_account_currency).as_("total_debit"))
 			.where(
-				(GLEntry.voucher_type == "Asset Repair")
-				& (GLEntry.voucher_no == asset_repair.name)
-				& (GLEntry.against_voucher_type == "Asset")
-				& (GLEntry.against_voucher == asset.name)
-				& (GLEntry.company == asset.company)
+				(GLEntry.voucher_type == "Mould Repair")
+				& (GLEntry.voucher_no == mould_repair.name)
+				& (GLEntry.against_voucher_type == "Mould")
+				& (GLEntry.against_voucher == mould.name)
+				& (GLEntry.company == mould.company)
 				& (GLEntry.is_cancelled == 0)
 			)
 		).run(as_dict=True)
 		booked_value = res[0].total_debit if res else 0
 
-		self.assertEqual(asset.additional_asset_cost, asset_repair.repair_cost)
-		self.assertEqual(booked_value, asset_repair.repair_cost)
+		self.assertEqual(mould.additional_mould_cost, mould_repair.repair_cost)
+		self.assertEqual(booked_value, mould_repair.repair_cost)
 
 
-def num_of_depreciations(asset):
-	return asset.finance_books[0].total_number_of_depreciations
+def num_of_depreciations(mould):
+	return mould.finance_books[0].total_number_of_depreciations
 
 
-def create_asset_repair(**args):
+def create_mould_repair(**args):
 	from erpnext.accounts.doctype.purchase_invoice.test_purchase_invoice import make_purchase_invoice
 	from erpnext.stock.doctype.warehouse.test_warehouse import create_warehouse
 
 	args = frappe._dict(args)
 
-	if args.asset:
-		asset = args.asset
+	if args.mould:
+		mould = args.mould
 	else:
-		asset = create_asset(is_existing_asset=1, submit=1, company=args.company)
-	asset_repair = frappe.new_doc("Asset Repair")
-	asset_repair.update(
+		mould = create_mould(is_existing_mould=1, submit=1, company=args.company)
+	mould_repair = frappe.new_doc("Mould Repair")
+	mould_repair.update(
 		{
-			"asset": asset.name,
-			"asset_name": asset.asset_name,
+			"mould": mould.name,
+			"mould_name": mould.mould_name,
 			"failure_date": nowdate(),
 			"description": "Test Description",
 			"repair_cost": 0,
-			"company": asset.company,
+			"company": mould.company,
 		}
 	)
 
 	if args.stock_consumption:
-		asset_repair.stock_consumption = 1
-		warehouse = args.warehouse or create_warehouse("Test Warehouse", company=asset.company)
+		mould_repair.stock_consumption = 1
+		warehouse = args.warehouse or create_warehouse("Test Warehouse", company=mould.company)
 
 		bundle = None
 		if args.serial_no:
@@ -359,8 +359,8 @@ def create_asset_repair(**args):
 						"warehouse": warehouse,
 						"company": frappe.get_cached_value("Warehouse", warehouse, "company"),
 						"qty": (flt(args.stock_qty) or 1) * -1,
-						"voucher_type": "Asset Repair",
-						"type_of_transaction": "Asset Repair",
+						"voucher_type": "Mould Repair",
+						"type_of_transaction": "Mould Repair",
 						"serial_nos": args.serial_no,
 						"posting_date": today(),
 						"posting_time": nowtime(),
@@ -369,7 +369,7 @@ def create_asset_repair(**args):
 				)
 			).name
 
-		asset_repair.append(
+		mould_repair.append(
 			"stock_items",
 			{
 				"item_code": args.item_code or "_Test Stock Item",
@@ -380,41 +380,41 @@ def create_asset_repair(**args):
 			},
 		)
 
-	asset_repair.insert(ignore_if_duplicate=True)
+	mould_repair.insert(ignore_if_duplicate=True)
 
 	if args.submit:
-		asset_repair.repair_status = "Completed"
-		asset_repair.completion_date = add_days(args.failure_date, 1)
-		asset_repair.cost_center = frappe.db.get_value("Company", asset.company, "cost_center")
+		mould_repair.repair_status = "Completed"
+		mould_repair.completion_date = add_days(args.failure_date, 1)
+		mould_repair.cost_center = frappe.db.get_value("Company", mould.company, "cost_center")
 
 		if args.stock_consumption:
 			stock_entry = frappe.get_doc(
-				{"doctype": "Stock Entry", "stock_entry_type": "Material Receipt", "company": asset.company}
+				{"doctype": "Stock Entry", "stock_entry_type": "Material Receipt", "company": mould.company}
 			)
 			stock_entry.append(
 				"items",
 				{
-					"t_warehouse": asset_repair.stock_items[0].warehouse,
-					"item_code": asset_repair.stock_items[0].item_code,
-					"qty": asset_repair.stock_items[0].consumed_quantity,
+					"t_warehouse": mould_repair.stock_items[0].warehouse,
+					"item_code": mould_repair.stock_items[0].item_code,
+					"qty": mould_repair.stock_items[0].consumed_quantity,
 					"basic_rate": args.rate if args.get("rate") is not None else 100,
-					"cost_center": asset_repair.cost_center,
+					"cost_center": mould_repair.cost_center,
 				},
 			)
 			stock_entry.submit()
 
 		if args.capitalize_repair_cost:
-			asset_repair.capitalize_repair_cost = 1
-			asset_repair.repair_cost = 1000
-			if asset.calculate_depreciation:
-				asset_repair.increase_in_asset_life = 12
+			mould_repair.capitalize_repair_cost = 1
+			mould_repair.repair_cost = 1000
+			if mould.calculate_depreciation:
+				mould_repair.increase_in_mould_life = 12
 			pi = make_purchase_invoice(
-				company=asset.company,
-				expense_account=frappe.db.get_value("Company", asset.company, "default_expense_account"),
-				cost_center=asset_repair.cost_center,
-				warehouse=args.warehouse or create_warehouse("Test Warehouse", company=asset.company),
+				company=mould.company,
+				expense_account=frappe.db.get_value("Company", mould.company, "default_expense_account"),
+				cost_center=mould_repair.cost_center,
+				warehouse=args.warehouse or create_warehouse("Test Warehouse", company=mould.company),
 			)
-			asset_repair.purchase_invoice = pi.name
+			mould_repair.purchase_invoice = pi.name
 
-		asset_repair.submit()
-	return asset_repair
+		mould_repair.submit()
+	return mould_repair

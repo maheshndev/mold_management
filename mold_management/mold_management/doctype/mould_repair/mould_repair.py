@@ -10,11 +10,11 @@ from erpnext.accounts.doctype.accounting_dimension.accounting_dimension import (
 	get_accounting_dimensions,
 )
 from erpnext.accounts.general_ledger import make_gl_entries
-from erpnext.assets.doctype.asset.asset import get_asset_account
-from erpnext.assets.doctype.asset_activity.asset_activity import add_asset_activity
-from erpnext.assets.doctype.asset_depreciation_schedule.asset_depreciation_schedule import (
+from mold_management.mold_management.doctype.mould.mould import get_mould_account
+from mold_management.mold_management.doctype.mould_activity.mould_activity import add_mould_activity
+from mold_management.mold_management.doctype.mould_depreciation_schedule.mould_depreciation_schedule import (
 	get_depr_schedule,
-	make_new_active_asset_depr_schedules_and_cancel_current_ones,
+	make_new_active_mould_depr_schedules_and_cancel_current_ones,
 )
 from erpnext.controllers.accounts_controller import AccountsController
 
@@ -28,14 +28,14 @@ class MouldRepair(AccountsController):
 	if TYPE_CHECKING:
 		from frappe.types import DF
 
-		from erpnext.assets.doctype.asset_repair_consumed_item.asset_repair_consumed_item import (
-			AssetRepairConsumedItem,
+		from mold_management.mold_management.doctype.mould_repair_consumed_item.mould_repair_consumed_item import (
+			MouldRepairConsumedItem,
 		)
 
 		actions_performed: DF.LongText | None
 		amended_from: DF.Link | None
-		asset: DF.Link
-		asset_name: DF.ReadOnly | None
+		mould: DF.Link
+		mould_name: DF.ReadOnly | None
 		capitalize_repair_cost: DF.Check
 		company: DF.Link | None
 		completion_date: DF.Datetime | None
@@ -43,7 +43,7 @@ class MouldRepair(AccountsController):
 		description: DF.LongText | None
 		downtime: DF.Data | None
 		failure_date: DF.Datetime
-		increase_in_asset_life: DF.Int
+		increase_in_mould_life: DF.Int
 		naming_series: DF.Literal["ACC-ASR-.YYYY.-"]
 		project: DF.Link | None
 		purchase_invoice: DF.Link | None
@@ -55,8 +55,8 @@ class MouldRepair(AccountsController):
 	# end: auto-generated types
 
 	def validate(self):
-		self.asset_doc = frappe.get_doc("Mould", self.asset)
-		self.validate_asset()
+		self.mould_doc = frappe.get_doc("Mould", self.mould)
+		self.validate_mould()
 		self.validate_dates()
 		self.update_status()
 
@@ -75,11 +75,11 @@ class MouldRepair(AccountsController):
 					)
 				)
 
-	def validate_asset(self):
-		if self.asset_doc.status in ("Sold", "Fully Depreciated", "Scrapped"):
+	def validate_mould(self):
+		if self.mould_doc.status in ("Sold", "Fully Depreciated", "Scrapped"):
 			frappe.throw(
 				_("Mould {0} is in {1} status and cannot be repaired.").format(
-					get_link_to_form("Mould", self.asset), self.asset_doc.status
+					get_link_to_form("Mould", self.mould), self.mould_doc.status
 				)
 			)
 
@@ -90,16 +90,16 @@ class MouldRepair(AccountsController):
 			)
 
 	def update_status(self):
-		if self.repair_status == "Pending" and self.asset_doc.status != "Out of Order":
-			frappe.db.set_value("Mould", self.asset, "status", "Out of Order")
-			add_asset_activity(
-				self.asset,
-				_("Mould out of order due to Asset Repair {0}").format(
+		if self.repair_status == "Pending" and self.mould_doc.status != "Out of Order":
+			frappe.db.set_value("Mould", self.mould, "status", "Out of Order")
+			add_mould_activity(
+				self.mould,
+				_("Mould out of order due to Mould Repair {0}").format(
 					get_link_to_form("Mould Repair", self.name)
 				),
 			)
 		else:
-			self.asset_doc.set_docstatus()
+			self.mould_doc.set_docstatus()
 
 	def set_stock_items_cost(self):
 		for item in self.get("stock_items"):
@@ -114,41 +114,41 @@ class MouldRepair(AccountsController):
 	def before_submit(self):
 		self.check_repair_status()
 
-		self.asset_doc.flags.increase_in_asset_value_due_to_repair = False
+		self.mould_doc.flags.increase_in_mould_value_due_to_repair = False
 
 		if self.get("stock_consumption") or self.get("capitalize_repair_cost"):
-			self.asset_doc.flags.increase_in_asset_value_due_to_repair = True
+			self.mould_doc.flags.increase_in_mould_value_due_to_repair = True
 
-			self.increase_asset_value()
+			self.increase_mould_value()
 
 			total_repair_cost = self.get_total_value_of_stock_consumed()
 			if self.capitalize_repair_cost:
 				total_repair_cost += self.repair_cost
-			self.asset_doc.total_asset_cost += total_repair_cost
-			self.asset_doc.additional_asset_cost += total_repair_cost
+			self.mould_doc.total_mould_cost += total_repair_cost
+			self.mould_doc.additional_mould_cost += total_repair_cost
 
 			if self.get("stock_consumption"):
 				self.check_for_stock_items_and_warehouse()
 				self.decrease_stock_quantity()
 			if self.get("capitalize_repair_cost"):
 				self.make_gl_entries()
-				if self.asset_doc.calculate_depreciation and self.increase_in_asset_life:
+				if self.mould_doc.calculate_depreciation and self.increase_in_mould_life:
 					self.modify_depreciation_schedule()
 
 				notes = _(
 					"This schedule was created when Mould {0} was repaired through Mould Repair {1}."
 				).format(
-					get_link_to_form(self.asset_doc.doctype, self.asset_doc.name),
+					get_link_to_form(self.mould_doc.doctype, self.mould_doc.name),
 					get_link_to_form(self.doctype, self.name),
 				)
-				self.asset_doc.flags.ignore_validate_update_after_submit = True
-				make_new_active_asset_depr_schedules_and_cancel_current_ones(
-					self.asset_doc, notes, ignore_booked_entry=True
+				self.mould_doc.flags.ignore_validate_update_after_submit = True
+				make_new_active_mould_depr_schedules_and_cancel_current_ones(
+					self.mould_doc, notes, ignore_booked_entry=True
 				)
-				self.asset_doc.save()
+				self.mould_doc.save()
 
-				add_asset_activity(
-					self.asset,
+				add_mould_activity(
+					self.mould,
 					_("Mould updated after completion of Mould Repair {0}").format(
 						get_link_to_form("Mould Repair", self.name)
 					),
@@ -162,41 +162,41 @@ class MouldRepair(AccountsController):
 				doc.cancel()
 
 	def before_cancel(self):
-		self.asset_doc = frappe.get_doc("Mould", self.asset)
+		self.mould_doc = frappe.get_doc("Mould", self.mould)
 
-		self.asset_doc.flags.increase_in_asset_value_due_to_repair = False
+		self.mould_doc.flags.increase_in_mould_value_due_to_repair = False
 
 		if self.get("stock_consumption") or self.get("capitalize_repair_cost"):
-			self.asset_doc.flags.increase_in_asset_value_due_to_repair = True
+			self.mould_doc.flags.increase_in_mould_value_due_to_repair = True
 
-			self.decrease_asset_value()
+			self.decrease_mould_value()
 
 			total_repair_cost = self.get_total_value_of_stock_consumed()
 			if self.capitalize_repair_cost:
 				total_repair_cost += self.repair_cost
-			self.asset_doc.total_asset_cost -= total_repair_cost
-			self.asset_doc.additional_asset_cost -= total_repair_cost
+			self.mould_doc.total_mould_cost -= total_repair_cost
+			self.mould_doc.additional_mould_cost -= total_repair_cost
 
 			if self.get("capitalize_repair_cost"):
 				self.ignore_linked_doctypes = ("GL Entry", "Stock Ledger Entry")
 				self.make_gl_entries(cancel=True)
-				if self.asset_doc.calculate_depreciation and self.increase_in_asset_life:
+				if self.mould_doc.calculate_depreciation and self.increase_in_mould_life:
 					self.revert_depreciation_schedule_on_cancellation()
 
 				notes = _(
 					"This schedule was created when Mould {0}'s Mould Repair {1} was cancelled."
 				).format(
-					get_link_to_form(self.asset_doc.doctype, self.asset_doc.name),
+					get_link_to_form(self.mould_doc.doctype, self.mould_doc.name),
 					get_link_to_form(self.doctype, self.name),
 				)
-				self.asset_doc.flags.ignore_validate_update_after_submit = True
-				make_new_active_asset_depr_schedules_and_cancel_current_ones(
-					self.asset_doc, notes, ignore_booked_entry=True
+				self.mould_doc.flags.ignore_validate_update_after_submit = True
+				make_new_active_mould_depr_schedules_and_cancel_current_ones(
+					self.mould_doc, notes, ignore_booked_entry=True
 				)
-				self.asset_doc.save()
+				self.mould_doc.save()
 
-				add_asset_activity(
-					self.asset,
+				add_mould_activity(
+					self.mould,
 					_("Mould updated after cancellation of Mould Repair {0}").format(
 						get_link_to_form("Mould Repair", self.name)
 					),
@@ -205,7 +205,7 @@ class MouldRepair(AccountsController):
 		self.cancel_sabb()
 
 	def after_delete(self):
-		frappe.get_doc("Mould", self.asset).set_docstatus()
+		frappe.get_doc("Mould", self.mould).set_docstatus()
 
 	def check_repair_status(self):
 		if self.repair_status == "Submit":
@@ -215,21 +215,21 @@ class MouldRepair(AccountsController):
 		if not self.get("stock_items"):
 			frappe.throw(_("Please enter Stock Items consumed during the Repair."), title=_("Missing Items"))
 
-	def increase_asset_value(self):
+	def increase_mould_value(self):
 		total_value_of_stock_consumed = self.get_total_value_of_stock_consumed()
 
-		if self.asset_doc.calculate_depreciation:
-			for row in self.asset_doc.finance_books:
+		if self.mould_doc.calculate_depreciation:
+			for row in self.mould_doc.finance_books:
 				row.value_after_depreciation += total_value_of_stock_consumed
 
 				if self.capitalize_repair_cost:
 					row.value_after_depreciation += self.repair_cost
 
-	def decrease_asset_value(self):
+	def decrease_mould_value(self):
 		total_value_of_stock_consumed = self.get_total_value_of_stock_consumed()
 
-		if self.asset_doc.calculate_depreciation:
-			for row in self.asset_doc.finance_books:
+		if self.mould_doc.calculate_depreciation:
+			for row in self.mould_doc.finance_books:
 				row.value_after_depreciation -= total_value_of_stock_consumed
 
 				if self.capitalize_repair_cost:
@@ -247,7 +247,7 @@ class MouldRepair(AccountsController):
 		stock_entry = frappe.get_doc(
 			{"doctype": "Stock Entry", "stock_entry_type": "Material Issue", "company": self.company}
 		)
-		stock_entry.asset_repair = self.name
+		stock_entry.mould_repair = self.name
 
 		accounting_dimensions = {
 			"cost_center": self.cost_center,
@@ -298,13 +298,13 @@ class MouldRepair(AccountsController):
 	def get_gl_entries(self):
 		gl_entries = []
 
-		fixed_asset_account = get_asset_account("fixed_asset_account", asset=self.asset, company=self.company)
-		self.get_gl_entries_for_repair_cost(gl_entries, fixed_asset_account)
-		self.get_gl_entries_for_consumed_items(gl_entries, fixed_asset_account)
+		fixed_mould_account = get_mould_account("fixed_mould_account", mould=self.mould, company=self.company)
+		self.get_gl_entries_for_repair_cost(gl_entries, fixed_mould_account)
+		self.get_gl_entries_for_consumed_items(gl_entries, fixed_mould_account)
 
 		return gl_entries
 
-	def get_gl_entries_for_repair_cost(self, gl_entries, fixed_asset_account):
+	def get_gl_entries_for_repair_cost(self, gl_entries, fixed_mould_account):
 		if flt(self.repair_cost) <= 0:
 			return
 
@@ -315,7 +315,7 @@ class MouldRepair(AccountsController):
 		gl_entries.append(
 			self.get_gl_dict(
 				{
-					"account": fixed_asset_account,
+					"account": fixed_mould_account,
 					"debit": self.repair_cost,
 					"debit_in_account_currency": self.repair_cost,
 					"against": pi_expense_account,
@@ -323,8 +323,8 @@ class MouldRepair(AccountsController):
 					"voucher_no": self.name,
 					"cost_center": self.cost_center,
 					"posting_date": self.completion_date,
-					"against_voucher_type": "Asset",
-					"against_voucher": self.asset,
+					"against_voucher_type": "Mould",
+					"against_voucher": self.mould,
 					"company": self.company,
 				},
 				item=self,
@@ -337,7 +337,7 @@ class MouldRepair(AccountsController):
 					"account": pi_expense_account,
 					"credit": self.repair_cost,
 					"credit_in_account_currency": self.repair_cost,
-					"against": fixed_asset_account,
+					"against": fixed_mould_account,
 					"voucher_type": self.doctype,
 					"voucher_no": self.name,
 					"cost_center": self.cost_center,
@@ -348,12 +348,12 @@ class MouldRepair(AccountsController):
 			)
 		)
 
-	def get_gl_entries_for_consumed_items(self, gl_entries, fixed_asset_account):
+	def get_gl_entries_for_consumed_items(self, gl_entries, fixed_mould_account):
 		if not (self.get("stock_consumption") and self.get("stock_items")):
 			return
 
 		# creating GL Entries for each row in Stock Items based on the Stock Entry created for it
-		stock_entry = frappe.get_doc("Stock Entry", {"asset_repair": self.name})
+		stock_entry = frappe.get_doc("Stock Entry", {"mould_repair": self.name})
 
 		default_expense_account = None
 		if not erpnext.is_perpetual_inventory_enabled(self.company):
@@ -371,7 +371,7 @@ class MouldRepair(AccountsController):
 							"account": item.expense_account or default_expense_account,
 							"credit": item.amount,
 							"credit_in_account_currency": item.amount,
-							"against": fixed_asset_account,
+							"against": fixed_mould_account,
 							"voucher_type": self.doctype,
 							"voucher_no": self.name,
 							"cost_center": self.cost_center,
@@ -385,7 +385,7 @@ class MouldRepair(AccountsController):
 				gl_entries.append(
 					self.get_gl_dict(
 						{
-							"account": fixed_asset_account,
+							"account": fixed_mould_account,
 							"debit": item.amount,
 							"debit_in_account_currency": item.amount,
 							"against": item.expense_account or default_expense_account,
@@ -402,28 +402,28 @@ class MouldRepair(AccountsController):
 				)
 
 	def modify_depreciation_schedule(self):
-		for row in self.asset_doc.finance_books:
-			row.total_number_of_depreciations += self.increase_in_asset_life / row.frequency_of_depreciation
+		for row in self.mould_doc.finance_books:
+			row.total_number_of_depreciations += self.increase_in_mould_life / row.frequency_of_depreciation
 
-			self.asset_doc.flags.increase_in_asset_life = False
-			extra_months = self.increase_in_asset_life % row.frequency_of_depreciation
+			self.mould_doc.flags.increase_in_mould_life = False
+			extra_months = self.increase_in_mould_life % row.frequency_of_depreciation
 			if extra_months != 0:
-				self.calculate_last_schedule_date(self.asset_doc, row, extra_months)
+				self.calculate_last_schedule_date(self.mould_doc, row, extra_months)
 
-	# to help modify depreciation schedule when increase_in_asset_life is not a multiple of frequency_of_depreciation
-	def calculate_last_schedule_date(self, asset, row, extra_months):
-		asset.flags.increase_in_asset_life = True
+	# to help modify depreciation schedule when increase_in_mould_life is not a multiple of frequency_of_depreciation
+	def calculate_last_schedule_date(self, mould, row, extra_months):
+		mould.flags.increase_in_mould_life = True
 		number_of_pending_depreciations = cint(row.total_number_of_depreciations) - cint(
-			asset.opening_number_of_booked_depreciations
+			mould.opening_number_of_booked_depreciations
 		)
 
-		depr_schedule = get_depr_schedule(asset.name, "Active", row.finance_book)
+		depr_schedule = get_depr_schedule(mould.name, "Active", row.finance_book)
 
 		# the Schedule Date in the final row of the old Depreciation Schedule
 		last_schedule_date = depr_schedule[len(depr_schedule) - 1].schedule_date
 
 		# the Schedule Date in the final row of the new Depreciation Schedule
-		asset.to_date = add_months(last_schedule_date, extra_months)
+		mould.to_date = add_months(last_schedule_date, extra_months)
 
 		# the latest possible date at which the depreciation can occur, without increasing the Total Number of Depreciations
 		# if depreciations happen yearly and the Depreciation Posting Date is 01-01-2020, this could be 01-01-2021, 01-01-2022...
@@ -432,31 +432,31 @@ class MouldRepair(AccountsController):
 			number_of_pending_depreciations * cint(row.frequency_of_depreciation),
 		)
 
-		if asset.to_date > schedule_date:
+		if mould.to_date > schedule_date:
 			row.total_number_of_depreciations += 1
 
 	def revert_depreciation_schedule_on_cancellation(self):
-		for row in self.asset_doc.finance_books:
-			row.total_number_of_depreciations -= self.increase_in_asset_life / row.frequency_of_depreciation
+		for row in self.mould_doc.finance_books:
+			row.total_number_of_depreciations -= self.increase_in_mould_life / row.frequency_of_depreciation
 
-			self.asset_doc.flags.increase_in_asset_life = False
-			extra_months = self.increase_in_asset_life % row.frequency_of_depreciation
+			self.mould_doc.flags.increase_in_mould_life = False
+			extra_months = self.increase_in_mould_life % row.frequency_of_depreciation
 			if extra_months != 0:
-				self.calculate_last_schedule_date_before_modification(self.asset_doc, row, extra_months)
+				self.calculate_last_schedule_date_before_modification(self.mould_doc, row, extra_months)
 
-	def calculate_last_schedule_date_before_modification(self, asset, row, extra_months):
-		asset.flags.increase_in_asset_life = True
+	def calculate_last_schedule_date_before_modification(self, mould, row, extra_months):
+		mould.flags.increase_in_mould_life = True
 		number_of_pending_depreciations = cint(row.total_number_of_depreciations) - cint(
-			asset.opening_number_of_booked_depreciations
+			mould.opening_number_of_booked_depreciations
 		)
 
-		depr_schedule = get_depr_schedule(asset.name, "Active", row.finance_book)
+		depr_schedule = get_depr_schedule(mould.name, "Active", row.finance_book)
 
 		# the Schedule Date in the final row of the modified Depreciation Schedule
 		last_schedule_date = depr_schedule[len(depr_schedule) - 1].schedule_date
 
 		# the Schedule Date in the final row of the original Depreciation Schedule
-		asset.to_date = add_months(last_schedule_date, -extra_months)
+		mould.to_date = add_months(last_schedule_date, -extra_months)
 
 		# the latest possible date at which the depreciation can occur, without decreasing the Total Number of Depreciations
 		# if depreciations happen yearly and the Depreciation Posting Date is 01-01-2020, this could be 01-01-2021, 01-01-2022...
@@ -465,7 +465,7 @@ class MouldRepair(AccountsController):
 			(number_of_pending_depreciations - 1) * cint(row.frequency_of_depreciation),
 		)
 
-		if asset.to_date < schedule_date:
+		if mould.to_date < schedule_date:
 			row.total_number_of_depreciations -= 1
 
 
