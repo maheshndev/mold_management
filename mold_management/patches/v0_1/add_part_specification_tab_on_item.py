@@ -31,7 +31,7 @@ def execute():
             "fieldname": "other_operations",
             "label": "Operation Section",
             "fieldtype": "Section Break",
-            "insert_after": "part_specification_tab"
+            "insert_after": "part_specification_section"
         }).insert(ignore_permissions=True)
 
     # Step 3: Create custom fields under the section
