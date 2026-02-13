@@ -1,8 +1,9 @@
-// Copyright (c) 2025, Assimilate Technologies and contributors
-// For license information, please see license.txt
-
-// frappe.ui.form.on("Daily Production Log", {
-// 	refresh(frm) {
-
-// 	},
-// });
+frappe.ui.form.on("Daily Production Log", {
+	refresh(frm) {
+		if (!frm.is_new()) {
+			frm.add_custom_button(__("View Report"), () => {
+				frappe.set_route("daily-production-rep", frm.doc.name);
+			});
+		}
+	},
+});

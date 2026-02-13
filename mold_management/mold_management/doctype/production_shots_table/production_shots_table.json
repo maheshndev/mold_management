@@ -17,7 +17,8 @@
     "fields": [
         {
             "fieldname": "time_slot",
-            "fieldtype": "Data",
+            "fieldtype": "Link",
+            "options": "Production Time Slots",
             "in_list_view": 1,
             "label": "Time Slot"
         },
@@ -41,7 +42,8 @@
         },
         {
             "fieldname": "rej_code",
-            "fieldtype": "Data",
+            "fieldtype": "Link",
+            "options": "Quality Inspection Parameter",
             "in_list_view": 1,
             "label": "Rejection Code"
         },

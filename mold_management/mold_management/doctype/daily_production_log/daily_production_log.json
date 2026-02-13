@@ -90,9 +90,8 @@
         {
             "fetch_from": "item_code.item_name",
             "fieldname": "product_name",
-            "fieldtype": "Link",
-            "label": "Product Name",
-            "options": "Item"
+            "fieldtype": "Data",
+            "label": "Product Name"
         },
         {
             "fetch_from": "operator.employee_name",
@@ -122,7 +121,7 @@
             "label": "Masterbatch Grade"
         },
         {
-            "fetch_from": "product_name.batch_number_series",
+            "fetch_from": "masterbatch.batch_number_series",
             "fieldname": "masterbatch_batch_no",
             "fieldtype": "Link",
             "label": "Masterbatch Batch No",

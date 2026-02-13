@@ -156,3 +156,35 @@ def update_totals(dpl):
 @frappe.whitelist()
 def get_job_cards_for_work_order(work_order):
     return frappe.get_all("Job Card", filters={"work_order": work_order, "docstatus": ["<", 2]}, fields=["name", "operation", "workstation"])
+
+@frappe.whitelist()
+def get_last_time_slot(job_card):
+    # Find the most recent Daily Production Log for this Job Card
+    last_log = frappe.db.get_value("Daily Production Log", 
+        {"job_card": job_card, "docstatus": ["<", 2]}, 
+        "name", 
+        order_by="report_date desc, creation desc"
+    )
+    
+    if last_log:
+        # Get the last time slot from the production_data child table
+        last_slot = frappe.db.get_value("Production Shots Table", 
+            {"parent": last_log}, 
+            "time_slot", 
+            order_by="idx desc"
+        )
+        return last_slot
+    
+@frappe.whitelist()
+def get_production_logs(limit=50, name=None):
+    filters = {}
+    if name:
+        filters["name"] = name
+        
+    logs = frappe.get_all("Daily Production Log", filters=filters, fields=["*"], order_by="creation desc", limit=limit)
+    for log in logs:
+        log["production_data"] = frappe.get_all("Production Shots Table", 
+            filters={"parent": log.name}, 
+            fields=["*"], 
+            order_by="idx")
+    return logs

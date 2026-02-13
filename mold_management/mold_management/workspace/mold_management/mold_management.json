@@ -1,6 +1,7 @@
 {
+ "app": "mold_management",
  "charts": [],
- "content": "[{\"id\":\"NVV-IvR9SL\",\"type\":\"header\",\"data\":{\"text\":\"<span class=\\\"h4\\\">Mold Management</span>\",\"col\":12}},{\"id\":\"hIBEm5YQIB\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Mould Availability Dashboard\",\"col\":3}},{\"id\":\"-CDTAzTYmw\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Predictive Dashboard\",\"col\":3}},{\"id\":\"XeJ2MRlpKd\",\"type\":\"spacer\",\"data\":{\"col\":12}}]",
+ "content": "[{\"id\":\"NVV-IvR9SL\",\"type\":\"header\",\"data\":{\"text\":\"<span class=\\\"h4\\\">Mold Management</span>\",\"col\":12}},{\"id\":\"hIBEm5YQIB\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Mould Availability Dashboard\",\"col\":3}},{\"id\":\"-CDTAzTYmw\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Predictive Dashboard\",\"col\":3}},{\"id\":\"XeJ2MRlpKd\",\"type\":\"spacer\",\"data\":{\"col\":12}},{\"id\":\"iSL4C3LNsx\",\"type\":\"card\",\"data\":{\"card_name\":\"Masters\",\"col\":4}},{\"id\":\"d_SUekQ51m\",\"type\":\"card\",\"data\":{\"card_name\":\"Reports\",\"col\":4}},{\"id\":\"YIBJ97-3gy\",\"type\":\"card\",\"data\":{\"card_name\":\"Other\",\"col\":4}}]",
  "creation": "2025-06-08 17:51:04.348546",
  "custom_blocks": [],
  "docstatus": 0,
@@ -102,9 +103,116 @@
    "link_type": "DocType",
    "onboard": 0,
    "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Masters",
+   "link_count": 6,
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Card Break"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Mould",
+   "link_count": 0,
+   "link_to": "Mould",
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Mould Type",
+   "link_count": 0,
+   "link_to": "Mould Type",
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Critical Paramerter",
+   "link_count": 0,
+   "link_to": "Critical Paramerter",
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Items",
+   "link_count": 0,
+   "link_to": "Items",
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Mould Parameter",
+   "link_count": 0,
+   "link_to": "Mould Parameter",
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Parameter",
+   "link_count": 0,
+   "link_to": "Parameter",
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Reports",
+   "link_count": 1,
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Card Break"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Daily Production Report",
+   "link_count": 0,
+   "link_to": "daily-production-rep",
+   "link_type": "Page",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Other",
+   "link_count": 1,
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Card Break"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Daily Production Log",
+   "link_count": 0,
+   "link_to": "Daily Production Log",
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Link"
   }
  ],
- "modified": "2025-12-31 12:30:59.499900",
+ "modified": "2026-02-13 14:12:41.345516",
  "modified_by": "Administrator",
  "module": "Mold Management",
  "name": "Mold Management",
@@ -138,5 +246,6 @@
    "type": "Page"
   }
  ],
- "title": "Mold Management"
+ "title": "Mold Management",
+ "type": "Workspace"
 }

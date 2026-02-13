@@ -131,5 +131,23 @@ function open_production_log_dialog(job_card) {
 			});
 		},
 	});
+
+	// Fetch and display last time slot
+	frappe.call({
+		method: "mold_management.api.production_log_api.get_last_time_slot",
+		args: {
+			job_card: job_card,
+		},
+		callback: function (r) {
+			if (r.message) {
+				d.set_df_property(
+					"time_slot",
+					"description",
+					__("Last Time Slot: <b>{0}</b> (e.g., 08-09)", [r.message]),
+				);
+			}
+		},
+	});
+
 	d.show();
 }
