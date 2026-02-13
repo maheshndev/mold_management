@@ -10,12 +10,12 @@ from erpnext.accounts.doctype.accounting_dimension.accounting_dimension import (
 	get_accounting_dimensions,
 )
 from erpnext.accounts.general_ledger import make_gl_entries
-from erpnext.assets.doctype.asset.asset import get_asset_account
-from erpnext.assets.doctype.asset_activity.asset_activity import add_asset_activity
-from erpnext.assets.doctype.asset_depreciation_schedule.asset_depreciation_schedule import (
-	get_depr_schedule,
-	make_new_active_asset_depr_schedules_and_cancel_current_ones,
-)
+# from erpnext.assets.doctype.asset.asset import get_asset_account
+# from erpnext.assets.doctype.asset_activity.asset_activity import add_asset_activity
+# from mold_management.mold_management.doctype.mould_depreciation_schedule.mould_depreciation_schedule import (
+# 	get_depr_schedule,
+# 	make_new_active_asset_depr_schedules_and_cancel_current_ones,
+# )
 from erpnext.controllers.accounts_controller import AccountsController
 
 
