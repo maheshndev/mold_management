@@ -78,9 +78,10 @@ function open_production_log_dialog(job_card) {
 			{
 				label: __("Time Slot"),
 				fieldname: "time_slot",
-				fieldtype: "Data",
+				fieldtype: "Link",
+				options: "Production Time Slots",
 				reqd: 1,
-				description: __("e.g., 08-09"),
+				description: __("Select time slot"),
 			},
 			{
 				label: __("OK Shots"),
@@ -89,15 +90,16 @@ function open_production_log_dialog(job_card) {
 				default: 0,
 			},
 			{
-				label: __("Rej Shots"),
+				label: __("Rejection Shots"),
 				fieldname: "rej_shots",
 				fieldtype: "Int",
 				default: 0,
 			},
 			{
-				label: __("Rej Code"),
+				label: __("Rejection Code"),
 				fieldname: "rej_code",
-				fieldtype: "Data",
+				fieldtype: "Link",
+				options: "Quality Inspection Parameter",
 			},
 			{
 				label: __("Remarks"),

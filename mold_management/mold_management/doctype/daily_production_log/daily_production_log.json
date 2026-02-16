@@ -164,7 +164,6 @@
             "label": "Page No"
         },
         {
-            "fetch_from": "quality_inspection.custom_shift",
             "fieldname": "shift",
             "fieldtype": "Link",
             "label": "Shift Details",

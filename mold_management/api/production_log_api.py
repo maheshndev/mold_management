@@ -23,6 +23,15 @@ def add_production_log_entry(job_card, time_slot, ok_shots, rej_shots, operator=
     
     if log_name:
         dpl = frappe.get_doc("Daily Production Log", log_name)
+        # Ensure Quality Inspection is linked if missing
+        if not dpl.quality_inspection:
+            qi = frappe.db.get_value("Quality Inspection", {"reference_name": job_card, "docstatus": ["<", 2]}, "name")
+            if not qi and jc.work_order:
+                qi = frappe.db.get_value("Quality Inspection", {"reference_name": jc.work_order, "docstatus": ["<", 2]}, "name")
+            if qi:
+                dpl.quality_inspection = qi
+                dpl.shift = jc.get("custom_shift")
+                # Note: dpl.save() is called at the end of the function regardless
     else:
         # Create new Daily Production Log
         dpl = frappe.new_doc("Daily Production Log")
@@ -48,7 +57,7 @@ def add_production_log_entry(job_card, time_slot, ok_shots, rej_shots, operator=
         qi = frappe.db.get_value("Quality Inspection", {"reference_name": job_card, "docstatus": ["<", 2]}, "name")
         if qi:
             dpl.quality_inspection = qi
-            dpl.shift = frappe.db.get_value("Quality Inspection", qi, "custom_shift")
+            dpl.shift = jc.get("custom_shift")
         
         # Fetch Item details
         item = frappe.get_doc("Item", jc.production_item)
@@ -82,10 +91,26 @@ def add_production_log_entry(job_card, time_slot, ok_shots, rej_shots, operator=
         # Try to fetch raw materials from Job Card items
         if jc.items:
             for rm in jc.items:
-                if "MASTERBATCH" in rm.item_name.upper():
-                    if not dpl.masterbatch: dpl.masterbatch = rm.item_code
+                item_name = rm.item_name or frappe.db.get_value("Item", rm.item_code, "item_name")
+                if item_name and "MASTERBATCH" in item_name.upper():
+                    if not dpl.masterbatch: 
+                        dpl.masterbatch = rm.item_code
+                        dpl.masterbatch_grade = frappe.db.get_value("Item", rm.item_code, "item_name")
                 else:
-                    if not dpl.raw_material: dpl.raw_material = rm.item_code
+                    if not dpl.raw_material: 
+                        dpl.raw_material = rm.item_code
+                        dpl.raw_material_grade = frappe.db.get_value("Item", rm.item_code, "item_name")
+        
+        # If still no Masterbatch, check linked Items in BOM if needed (skipped for now as per user request to use Job Card RM)
+        
+        # Enhanced Quality Inspection Fetching
+        qi = frappe.db.get_value("Quality Inspection", {"reference_name": job_card, "docstatus": ["<", 2]}, "name")
+        if not qi and jc.work_order:
+             qi = frappe.db.get_value("Quality Inspection", {"reference_name": jc.work_order, "docstatus": ["<", 2]}, "name")
+             
+        if qi:
+            dpl.quality_inspection = qi
+            dpl.shift = jc.get("custom_shift")
         
         # Fetch Batch from Job Card main if available
         dpl.raw_material_batch_no = jc.get("batch_no")
