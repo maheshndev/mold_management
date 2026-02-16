@@ -36,3 +36,7 @@ mold_management.patches.v0_1.add_rework_and_checking_details
 #mold_management.patches.v0_1.add_mould_name_field_on_item
 #mold_management.patches.v0_1.add_selection_of_tool_on_item
 #mold_management.patches.v0_1.add_moulds_field_on_item
+
+mold_management.patches.v_0.add_other_than_mould_or_moulding_item
+mold_management.patches.v_0.add_is_moulding_item_checkbox_on_item
+mold_management.patches.v_0.add_is_mold_item_field_on_item
