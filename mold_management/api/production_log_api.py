@@ -1,6 +1,7 @@
 import frappe
 from frappe import _
-from frappe.utils import nowdate, flt
+from frappe.utils import nowdate, flt, now_datetime
+from datetime import datetime, time
 
 @frappe.whitelist()
 def add_production_log_entry(job_card, time_slot, ok_shots, rej_shots, operator=None, rej_code=None, remarks=None):
@@ -14,11 +15,10 @@ def add_production_log_entry(job_card, time_slot, ok_shots, rej_shots, operator=
     dpl_meta = frappe.get_meta("Daily Production Log")
     mould_field = "mould" if dpl_meta.has_field("mould") else "mold"
     
-    # Try to find an existing Daily Production Log for this Job Card and Date
+    # Try to find an existing Daily Production Log for this Job Card
     log_name = frappe.db.get_value("Daily Production Log", {
         "job_card": job_card,
-        "report_date": today,
-        "docstatus": ["<", 2]
+        "docstatus": 0
     }, "name")
     
     if log_name:
@@ -36,6 +36,7 @@ def add_production_log_entry(job_card, time_slot, ok_shots, rej_shots, operator=
         # Create new Daily Production Log
         dpl = frappe.new_doc("Daily Production Log")
         dpl.job_card = job_card
+        dpl.work_order = jc.work_order
         dpl.doc_no = job_card
         dpl.company = jc.company
         dpl.item_code = jc.production_item
@@ -153,11 +154,33 @@ def add_production_log_entry(job_card, time_slot, ok_shots, rej_shots, operator=
         "remarks": remarks
     })
     
-    # Update cumulative totals in parent
+    # Set shift if missing
+    if not dpl.shift:
+        dpl.shift = get_current_shift()
+
+    # Update totals
     update_totals(dpl)
     dpl.save()
     
     return dpl.name
+
+def get_current_shift():
+    now = now_datetime().time()
+    shifts = frappe.get_all("Shift Type", fields=["name", "start_time", "end_time"])
+    
+    for s in shifts:
+        if s.start_time and s.end_time:
+            # Handle standard shifts and overnight shifts
+            start = (datetime.min + s.start_time).time()
+            end = (datetime.min + s.end_time).time()
+            
+            if start <= end:
+                if start <= now <= end:
+                    return s.name
+            else: # Overnight shift
+                if now >= start or now <= end:
+                    return s.name
+    return None
 
 def update_totals(dpl):
     total_ok = 0
@@ -168,6 +191,7 @@ def update_totals(dpl):
     
     dpl.total_ok_shots = total_ok
     dpl.total_rej_shots = total_rej
+    dpl.total_shots = total_ok + total_rej
     
     # Update last_counter
     dpl.last_counter = flt(dpl.first_counter or 0) + total_ok + total_rej
