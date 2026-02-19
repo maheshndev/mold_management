@@ -200,7 +200,7 @@ def add_production_log_entry(job_card, time_slot, ok_shots, rej_shots, operator=
             if template:
                 params = frappe.get_all("Item Quality Inspection Parameter",
                     filters={"parent": template},
-                    fields=["specification", "numeric", "parameter_group", "parameter_type"],
+                    fields=["specification", "numeric", "parameter_group"],
                     order_by="idx"
                 )
                 
@@ -209,7 +209,7 @@ def add_production_log_entry(job_card, time_slot, ok_shots, rej_shots, operator=
                     r = readings_map.get(spec) or {}
                     
                     val = r.get("reading_value")
-                    is_p_numeric = p.numeric or p.parameter_type == "Numeric"
+                    is_p_numeric = p.numeric
                     
                     reading_row = {
                         "specification": spec,
