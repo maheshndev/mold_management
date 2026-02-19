@@ -1,6 +1,6 @@
 import frappe
 from frappe import _
-from frappe.utils import nowdate, flt, now_datetime
+from frappe.utils import nowdate, flt, now_datetime, cstr
 from datetime import datetime, time
 
 @frappe.whitelist()
@@ -219,7 +219,7 @@ def add_production_log_entry(job_card, time_slot, ok_shots, rej_shots, operator=
 
                     # Determine if value is numeric
                     is_val_numeric = False
-                    if val is not None and str(val).strip() != "":
+                    if val is not None and val != "":
                         try:
                             float(val)
                             is_val_numeric = True
@@ -229,12 +229,12 @@ def add_production_log_entry(job_card, time_slot, ok_shots, rej_shots, operator=
                     # Mapping logic as requested:
                     if is_p_numeric and is_val_numeric:
                         # Numeric template + Numeric value -> Reading 1
-                        reading_row["reading_1"] = flt(val)
+                        reading_row["reading_1"] = cstr(flt(val))
                         reading_row["reading_value"] = "" # Explicitly empty string
                     else:
                         # Otherwise -> Reading Value as string
-                        reading_row["reading_value"] = str(val) if val is not None else ""
-                        reading_row["reading_1"] = 0.0
+                        reading_row["reading_value"] = cstr(val) if val is not None else ""
+                        reading_row["reading_1"] = ""
 
                     qi.append("readings", reading_row)
             else:
@@ -245,7 +245,7 @@ def add_production_log_entry(job_card, time_slot, ok_shots, rej_shots, operator=
                     qi.append("readings", {
                         "specification": str(spec),
                         "status": str(r.get("status") or "Accepted"),
-                        "reading_value": str(r.get("reading_value") or "")
+                        "reading_value": cstr(r.get("reading_value") or "")
                     })
 
             try:
