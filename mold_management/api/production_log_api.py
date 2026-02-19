@@ -4,7 +4,9 @@ from frappe.utils import nowdate, flt, now_datetime
 from datetime import datetime, time
 
 @frappe.whitelist()
-def add_production_log_entry(job_card, time_slot, ok_shots, rej_shots, operator=None, rej_code=None, remarks=None):
+def add_production_log_entry(job_card, time_slot, ok_shots, rej_shots, operator=None, rej_code=None, remarks=None,
+                             create_qi=False, qi_template=None, qi_readings=None):
+
     if not job_card:
         frappe.throw(_("Job Card is required"))
     
@@ -154,6 +156,8 @@ def add_production_log_entry(job_card, time_slot, ok_shots, rej_shots, operator=
         "remarks": remarks
     })
     
+    row = dpl.production_data[-1]
+    
     # Set shift if missing
     if not dpl.shift:
         dpl.shift = get_current_shift()
@@ -161,7 +165,106 @@ def add_production_log_entry(job_card, time_slot, ok_shots, rej_shots, operator=
     # Update totals
     update_totals(dpl)
     dpl.save()
-    
+
+    if create_qi and qi_readings:
+        try:
+            # Re-fetch Job Card for fresh template info
+            jc = frappe.get_doc("Job Card", job_card)
+            item_code = jc.production_item
+            template = qi_template or frappe.db.get_value("Item", item_code, "quality_inspection_template")
+            
+            qi = frappe.new_doc("Quality Inspection")
+            qi.report_date = today
+            qi.inspected_by = frappe.session.user
+            qi.status = "Accepted"
+            qi.inspection_type = "In Process"
+            qi.company = dpl.company
+            qi.sample_size = 1
+            qi.item_code = item_code
+            qi.reference_type = "Job Card"
+            qi.reference_name = job_card
+            qi.batch_no = str(jc.batch_no) if jc.batch_no else None
+            qi.work_order = str(jc.work_order) if jc.work_order else None
+            
+            if template:
+                qi.quality_inspection_template = template
+
+            # Map provided readings for easy lookup
+            if isinstance(qi_readings, str):
+                qi_readings = frappe.parse_json(qi_readings)
+            
+            # Key by specification for matching with template
+            readings_map = {str(r.get("specification")): r for r in qi_readings if r.get("specification")}
+
+            # Fetch parameters from Template to ensure sequence and correct types
+            if template:
+                params = frappe.get_all("Item Quality Inspection Parameter",
+                    filters={"parent": template},
+                    fields=["specification", "numeric", "parameter_group", "parameter_type"],
+                    order_by="idx"
+                )
+                
+                for p in params:
+                    spec = str(p.specification)
+                    r = readings_map.get(spec) or {}
+                    
+                    val = r.get("reading_value")
+                    is_p_numeric = p.numeric or p.parameter_type == "Numeric"
+                    
+                    reading_row = {
+                        "specification": spec,
+                        "status": str(r.get("status") or "Accepted"),
+                        "is_numeric": 1 if is_p_numeric else 0
+                    }
+
+                    # Determine if value is numeric
+                    is_val_numeric = False
+                    if val is not None and str(val).strip() != "":
+                        try:
+                            float(val)
+                            is_val_numeric = True
+                        except (ValueError, TypeError):
+                            is_val_numeric = False
+
+                    # Mapping logic as requested:
+                    if is_p_numeric and is_val_numeric:
+                        # Numeric template + Numeric value -> Reading 1
+                        reading_row["reading_1"] = flt(val)
+                        reading_row["reading_value"] = "" # Explicitly empty string
+                    else:
+                        # Otherwise -> Reading Value as string
+                        reading_row["reading_value"] = str(val) if val is not None else ""
+                        reading_row["reading_1"] = 0.0
+
+                    qi.append("readings", reading_row)
+            else:
+                # Fallback to provided readings if no template (unlikely)
+                for r in qi_readings:
+                    spec = r.get("specification")
+                    if not spec: continue
+                    qi.append("readings", {
+                        "specification": str(spec),
+                        "status": str(r.get("status") or "Accepted"),
+                        "reading_value": str(r.get("reading_value") or "")
+                    })
+
+            try:
+                qi.insert()
+                qi.submit()
+            except Exception as e:
+                frappe.log_error(frappe.get_traceback(), "QI Insertion Error Traceback")
+                raise e
+
+            # Link QI to the specific row in Production Shots Table
+            row.quality_inspection = qi.name
+            dpl.save()
+            
+            frappe.msgprint(_("Quality Inspection {0} created and linked.").format(qi.name))
+
+        except Exception as e:
+            frappe.log_error(frappe.get_traceback(), "Production Log QI Error")
+            frappe.msgprint(_("Warning: Production Log added, but failed to create Quality Inspection. Check Error Log: {0}").format(str(e)))
+
     return dpl.name
 
 def get_current_shift():
@@ -224,6 +327,8 @@ def get_last_time_slot(job_card):
         )
         return last_slot
     
+    return None
+    
 @frappe.whitelist()
 def get_production_logs(limit=50, name=None):
     filters = {}
@@ -237,3 +342,34 @@ def get_production_logs(limit=50, name=None):
             fields=["*"], 
             order_by="idx")
     return logs
+
+@frappe.whitelist()
+def get_qi_template_parameters(job_card=None, template=None):
+    if not template and job_card:
+        item_code = frappe.db.get_value("Job Card", job_card, "production_item")
+        if item_code:
+            template = frappe.db.get_value("Item", item_code, "quality_inspection_template")
+    
+    if not template:
+        return []
+
+    return frappe.get_all("Item Quality Inspection Parameter",
+        filters={"parent": template},
+        fields=["*"],
+        order_by="idx") # Maintain sequence as per template
+
+@frappe.whitelist()
+def get_item_qi_details(job_card):
+    item_code = frappe.db.get_value("Job Card", job_card, "production_item")
+    if not item_code:
+        return {}
+    
+    template = frappe.db.get_value("Item", item_code, "quality_inspection_template")
+    if not template:
+        return {}
+        
+    parameters = get_qi_template_parameters(template=template)
+    return {
+        "template": template,
+        "parameters": parameters
+    }
