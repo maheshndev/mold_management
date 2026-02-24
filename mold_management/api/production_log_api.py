@@ -13,6 +13,25 @@ def add_production_log_entry(job_card, time_slot, ok_shots, rej_shots, operator=
     jc = frappe.get_doc("Job Card", job_card)
     today = nowdate()
     
+    # Validation: Check against Job Card Qty To Manufacture
+    # Standard Job Card quantity field is for_quantity; qty is used in some custom versions
+    target_qty = flt(jc.get("for_quantity") or jc.get("qty") or jc.get("qty_to_manufacture") or 0)
+    
+    if target_qty > 0:
+        # Sum all shots from all Daily Production Logs for this Job Card that are not cancelled
+        # If adding to an existing draft log, its total_shots in DB is still the old total
+        existing_total = frappe.db.get_value("Daily Production Log", 
+            {"job_card": job_card, "docstatus": ["<", 2]}, 
+            "sum(total_shots)") or 0
+        
+        new_shots = flt(ok_shots) + flt(rej_shots)
+        total_forecast = flt(existing_total) + new_shots
+
+        if total_forecast > target_qty:
+            frappe.throw(_("Cannot add production log. Total shots ({0}) would exceed Job Card Qty To Manufacture ({1})").format(
+                flt(total_forecast), flt(target_qty)
+            ))
+    
     # Resilience: Check for mold vs mould field names
     dpl_meta = frappe.get_meta("Daily Production Log")
     mould_field = "mould" if dpl_meta.has_field("mould") else "mold"
@@ -189,6 +208,17 @@ def add_production_log_entry(job_card, time_slot, ok_shots, rej_shots, operator=
             if template:
                 qi.quality_inspection_template = template
 
+            # Set machine and mold if fields exist in QI
+            qi_meta = frappe.get_meta("Quality Inspection")
+            if qi_meta.has_field("machine_no"):
+                qi.machine_no = dpl.machine_no
+            if qi_meta.has_field(mould_field):
+                qi.set(mould_field, dpl.get(mould_field))
+            elif mould_field == "mould" and qi_meta.has_field("mold"):
+                qi.mold = dpl.mould
+            elif mould_field == "mold" and qi_meta.has_field("mould"):
+                qi.mould = dpl.mold
+
             # Map provided readings for easy lookup
             if isinstance(qi_readings, str):
                 qi_readings = frappe.parse_json(qi_readings)
@@ -200,21 +230,25 @@ def add_production_log_entry(job_card, time_slot, ok_shots, rej_shots, operator=
             if template:
                 params = frappe.get_all("Item Quality Inspection Parameter",
                     filters={"parent": template},
-                    fields=["specification", "numeric", "parameter_group"],
+                    fields=["specification", "numeric", "parameter_group", "min_value", "max_value"],
                     order_by="idx"
                 )
                 
                 for p in params:
                     spec = str(p.specification)
                     r = readings_map.get(spec) or {}
-                    
                     val = r.get("reading_value")
                     is_p_numeric = p.numeric
+                    min_val = flt(p.min_value) if is_p_numeric and p.min_value is not None else None
+                    max_val = flt(p.max_value) if is_p_numeric and p.max_value is not None else None
                     
                     reading_row = {
                         "specification": spec,
-                        "status": str(r.get("status") or "Accepted"),
-                        "is_numeric": 1 if is_p_numeric else 0
+                        "status": "Accepted", # Default, will be recalculated
+                        "is_numeric": 1 if is_p_numeric else 0,
+                        "min_value": p.min_value,
+                        "max_value": p.max_value,
+                        "parameter_group": p.parameter_group
                     }
 
                     # Determine if value is numeric
@@ -228,13 +262,26 @@ def add_production_log_entry(job_card, time_slot, ok_shots, rej_shots, operator=
 
                     # Mapping logic as requested:
                     if is_p_numeric and is_val_numeric:
+                        f_val = flt(val)
+                        # Automate status check
+                        if (min_val is not None and f_val < min_val) or (max_val is not None and f_val > max_val):
+                            reading_row["status"] = "Rejected"
+                        else:
+                            reading_row["status"] = "Accepted"
+
                         # Numeric template + Numeric value -> Reading 1
-                        reading_row["reading_1"] = cstr(flt(val))
+                        reading_row["reading_1"] = cstr(f_val)
                         reading_row["reading_value"] = "" # Explicitly empty string
                     else:
-                        # Otherwise -> Reading Value as string
+                        # Otherwise -> Reading Value as string, keep status as entered (or default Accepted)
                         reading_row["reading_value"] = cstr(val) if val is not None else ""
                         reading_row["reading_1"] = ""
+                        # If user manually sent a status, use it
+                        if r.get("status"):
+                            reading_row["status"] = r.get("status")
+
+                    if reading_row["status"] == "Rejected":
+                        qi.status = "Rejected"
 
                     qi.append("readings", reading_row)
             else:
@@ -242,13 +289,17 @@ def add_production_log_entry(job_card, time_slot, ok_shots, rej_shots, operator=
                 for r in qi_readings:
                     spec = r.get("specification")
                     if not spec: continue
-                    qi.append("readings", {
+                    reading_row = {
                         "specification": str(spec),
                         "status": str(r.get("status") or "Accepted"),
                         "reading_value": cstr(r.get("reading_value") or "")
-                    })
+                    }
+                    if reading_row["status"] == "Rejected":
+                        qi.status = "Rejected"
+                    qi.append("readings", reading_row)
 
             try:
+                # Re-check status: if any row is rejected, document status should be Rejected
                 qi.insert()
                 qi.submit()
             except Exception as e:
@@ -259,7 +310,7 @@ def add_production_log_entry(job_card, time_slot, ok_shots, rej_shots, operator=
             row.quality_inspection = qi.name
             dpl.save()
             
-            frappe.msgprint(_("Quality Inspection {0} created and linked.").format(qi.name))
+            frappe.msgprint(_("Quality Inspection {0} created and linked. Status: {1}").format(qi.name, qi.status))
 
         except Exception as e:
             frappe.log_error(frappe.get_traceback(), "Production Log QI Error")

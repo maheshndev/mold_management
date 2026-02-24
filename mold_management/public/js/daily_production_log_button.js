@@ -182,7 +182,7 @@ function open_production_log_dialog(job_card) {
 						label: __("Reading Value"),
 						fieldname: "reading_value",
 						fieldtype: "Data",
-						columns: 3,
+						columns: 6,
 						in_list_view: 1,
 					},
 				],
@@ -306,6 +306,8 @@ function open_production_log_dialog(job_card) {
 				status: "Accepted",
 				is_numeric: numeric,
 				reading_value: "",
+				min_value: p.min_value || "",
+				max_value: p.max_value || "",
 				name: frappe.utils.get_random(10), // Temporary name
 			};
 
