@@ -70,8 +70,16 @@ scheduler_events = {
 }
 
 doc_events = {
-   "Job Card": {
-        "on_submit": "mold_management.api.mould_shots_updated_on_jo_card_completed_qty.update_mould_usage"
+    "Job Card": {
+        "on_submit": [
+            "mold_management.api.mould_shots_updated_on_jo_card_completed_qty.update_mould_usage",
+            "mold_management.api.dpl_sync.sync_dpl_on_job_card_submit"
+        ],
+        "on_cancel": "mold_management.api.dpl_sync.sync_dpl_on_job_card_cancel"
+    },
+    "Work Order": {
+        "on_submit": "mold_management.api.dpl_sync.sync_dpl_on_work_order_submit",
+        "on_cancel": "mold_management.api.dpl_sync.sync_dpl_on_work_order_cancel"
     },
     "Mould": {
         "on_update": "mold_management.api.if_current_usage_count_reach_90_trigger_notification.check_mould_usage"
