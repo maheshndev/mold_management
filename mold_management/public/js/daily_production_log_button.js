@@ -1,10 +1,7 @@
 frappe.ui.form.on("Job Card", {
 	refresh: function (frm) {
 		const active_statuses = ["Open", "Work In Progress"];
-		if (
-			frm.doc.docstatus === 1 &&
-			(active_statuses.includes(frm.doc.status) || !frm.doc.status)
-		) {
+		if (frm.doc.docstatus === 1 && active_statuses.includes(frm.doc.status)) {
 			frm.add_custom_button(
 				__("Add Production Log"),
 				function () {
@@ -18,7 +15,7 @@ frappe.ui.form.on("Job Card", {
 
 frappe.ui.form.on("Work Order", {
 	refresh: function (frm) {
-		const active_statuses = ["Not Started", "In Process"];
+		const active_statuses = ["Not Started", "In Process", "Work In Progress"];
 		if (frm.doc.docstatus === 1 && active_statuses.includes(frm.doc.status)) {
 			frm.add_custom_button(
 				__("Add Production Log"),

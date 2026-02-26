@@ -11,6 +11,19 @@ def add_production_log_entry(job_card, time_slot, ok_shots, rej_shots, operator=
         frappe.throw(_("Job Card is required"))
     
     jc = frappe.get_doc("Job Card", job_card)
+    
+    # Validation: Check Job Card status
+    if jc.status in ["Completed", "Cancelled"]:
+        frappe.throw(_("Cannot add production log for a {0} Job Card.").format(jc.status))
+        
+    # Validation: Check Work Order status
+    if jc.work_order:
+        wo_status, wo_docstatus = frappe.db.get_value("Work Order", jc.work_order, ["status", "docstatus"])
+        if wo_docstatus == 0:
+            frappe.throw(_("Cannot add production log for a Draft Work Order."))
+        if wo_status in ["Completed", "Stopped"]:
+            frappe.throw(_("Cannot add production log for a {0} Work Order.").format(wo_status))
+
     today = nowdate()
     
     # Validation: Check against Job Card Qty To Manufacture
@@ -360,7 +373,14 @@ def update_totals(dpl):
 
 @frappe.whitelist()
 def get_job_cards_for_work_order(work_order):
-    return frappe.get_all("Job Card", filters={"work_order": work_order, "docstatus": ["<", 2]}, fields=["name", "operation", "workstation"])
+    return frappe.get_all("Job Card", 
+        filters={
+            "work_order": work_order, 
+            "docstatus": 1,
+            "status": ["in", ["Open", "Work In Progress"]]
+        }, 
+        fields=["name", "operation", "workstation"]
+    )
 
 @frappe.whitelist()
 def get_last_time_slot(job_card):
