@@ -1,7 +1,7 @@
 frappe.ui.form.on("Job Card", {
 	refresh: function (frm) {
 		const active_statuses = ["Open", "Work In Progress"];
-		if (frm.doc.docstatus === 1 && active_statuses.includes(frm.doc.status)) {
+		if (frm.doc.docstatus < 2 && active_statuses.includes(frm.doc.status)) {
 			frm.add_custom_button(
 				__("Add Production Log"),
 				function () {

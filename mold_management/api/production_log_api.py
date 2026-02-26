@@ -376,7 +376,7 @@ def get_job_cards_for_work_order(work_order):
     return frappe.get_all("Job Card", 
         filters={
             "work_order": work_order, 
-            "docstatus": 1,
+            "docstatus": ["<", 2],
             "status": ["in", ["Open", "Work In Progress"]]
         }, 
         fields=["name", "operation", "workstation"]
