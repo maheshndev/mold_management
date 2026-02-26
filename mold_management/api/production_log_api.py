@@ -20,9 +20,11 @@ def add_production_log_entry(job_card, time_slot, ok_shots, rej_shots, operator=
     if target_qty > 0:
         # Sum all shots from all Daily Production Logs for this Job Card that are not cancelled
         # If adding to an existing draft log, its total_shots in DB is still the old total
-        existing_total = frappe.db.get_value("Daily Production Log", 
-            {"job_card": job_card, "docstatus": ["<", 2]}, 
-            "sum(total_shots)") or 0
+        existing_total = frappe.db.sql("""
+            SELECT SUM(total_shots) 
+            FROM `tabDaily Production Log` 
+            WHERE job_card = %s AND docstatus < 2
+        """, job_card)[0][0] or 0
         
         new_shots = flt(ok_shots) + flt(rej_shots)
         total_forecast = flt(existing_total) + new_shots

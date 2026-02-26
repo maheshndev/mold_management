@@ -1,6 +1,10 @@
 frappe.ui.form.on("Job Card", {
 	refresh: function (frm) {
-		if (!frm.is_new() && frm.doc.docstatus < 2) {
+		const active_statuses = ["Open", "Work In Progress"];
+		if (
+			frm.doc.docstatus === 1 &&
+			(active_statuses.includes(frm.doc.status) || !frm.doc.status)
+		) {
 			frm.add_custom_button(
 				__("Add Production Log"),
 				function () {
@@ -14,7 +18,8 @@ frappe.ui.form.on("Job Card", {
 
 frappe.ui.form.on("Work Order", {
 	refresh: function (frm) {
-		if (!frm.is_new() && frm.doc.docstatus < 2) {
+		const active_statuses = ["Not Started", "In Process"];
+		if (frm.doc.docstatus === 1 && active_statuses.includes(frm.doc.status)) {
 			frm.add_custom_button(
 				__("Add Production Log"),
 				function () {
@@ -158,7 +163,7 @@ function open_production_log_dialog(job_card) {
 						fieldtype: "Link",
 						options: "Quality Inspection Parameter",
 						in_list_view: 1,
-						columns: 4,
+						columns: 3,
 						read_only: 1,
 					},
 					{
@@ -171,18 +176,34 @@ function open_production_log_dialog(job_card) {
 						default: "Accepted",
 					},
 					{
-						label: __("Numeric"),
+						label: __("Num"),
 						fieldname: "is_numeric",
 						fieldtype: "Check",
 						in_list_view: 1,
-						columns: 2,
+						columns: 1,
 						read_only: 1,
 					},
 					{
-						label: __("Reading Value"),
+						label: __("Min"),
+						fieldname: "min_value",
+						fieldtype: "Data",
+						in_list_view: 1,
+						columns: 1,
+						read_only: 1,
+					},
+					{
+						label: __("Max"),
+						fieldname: "max_value",
+						fieldtype: "Data",
+						in_list_view: 1,
+						columns: 1,
+						read_only: 1,
+					},
+					{
+						label: __("Reading"),
 						fieldname: "reading_value",
 						fieldtype: "Data",
-						columns: 6,
+						columns: 4,
 						in_list_view: 1,
 					},
 				],
