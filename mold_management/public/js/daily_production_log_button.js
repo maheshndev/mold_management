@@ -115,6 +115,13 @@ function open_production_log_dialog(job_card) {
 			},
 			{
 				fieldtype: "Section Break",
+			},
+			{
+				fieldname: "qty_info",
+				fieldtype: "HTML",
+			},
+			{
+				fieldtype: "Section Break",
 				columns: 2,
 			},
 			{
@@ -174,24 +181,8 @@ function open_production_log_dialog(job_card) {
 					},
 					{
 						label: __("Num"),
-						fieldname: "is_numeric",
+						fieldname: "numeric",
 						fieldtype: "Check",
-						in_list_view: 1,
-						columns: 1,
-						read_only: 1,
-					},
-					{
-						label: __("Min"),
-						fieldname: "min_value",
-						fieldtype: "Data",
-						in_list_view: 1,
-						columns: 1,
-						read_only: 1,
-					},
-					{
-						label: __("Max"),
-						fieldname: "max_value",
-						fieldtype: "Data",
 						in_list_view: 1,
 						columns: 1,
 						read_only: 1,
@@ -200,8 +191,23 @@ function open_production_log_dialog(job_card) {
 						label: __("Reading"),
 						fieldname: "reading_value",
 						fieldtype: "Data",
-						columns: 4,
+						columns: 3,
 						in_list_view: 1,
+					},
+					{
+						label: __("Sampling Plan"),
+						fieldname: "sampling_plan",
+						fieldtype: "Link",
+						options: "Sampling Plan",
+						in_list_view: 1,
+						columns: 2,
+					},
+					{
+						label: __("Sampling Qty"),
+						fieldname: "sampling_qty",
+						fieldtype: "Float",
+						in_list_view: 1,
+						columns: 1,
 					},
 				],
 			},
@@ -316,16 +322,25 @@ function open_production_log_dialog(job_card) {
 		// Manually push each row to the grid data
 		parameters.forEach((p) => {
 			let spec = p.specification || p.parameter_name || p.parameter || p.name;
-			let numeric = p.numeric || p.is_numeric || p.parameter_type === "Numeric" ? 1 : 0;
+
+			// Fix: Ensure numeric is correctly evaluated even if it's a string from the API
+			let numeric =
+				p.numeric === 1 ||
+				p.numeric === "1" ||
+				p.is_numeric === 1 ||
+				p.is_numeric === "1" ||
+				p.parameter_type === "Numeric"
+					? 1
+					: 0;
 
 			// Create a generic row object
 			let row = {
 				specification: spec,
 				status: "Accepted",
-				is_numeric: numeric,
+				numeric: numeric,
 				reading_value: "",
-				min_value: p.min_value || "",
-				max_value: p.max_value || "",
+				sampling_plan: "",
+				sampling_qty: 0,
 				name: frappe.utils.get_random(10), // Temporary name
 			};
 
@@ -352,26 +367,66 @@ function open_production_log_dialog(job_card) {
 		console.log("Grid replacement complete for " + parameters.length + " parameters");
 	}
 
-	// Fetch and display last time slot
+	// Fetch defaults (Operator and Next Time Slot)
 	frappe.call({
-		method: "mold_management.api.production_log_api.get_last_time_slot",
+		method: "mold_management.api.production_log_api.get_production_log_defaults",
 		args: {
 			job_card: job_card,
 		},
 		callback: function (r) {
 			if (r.message) {
-				let description = __("Last Time Slot: <b>{0}</b>", [r.message]);
-				d.set_df_property("time_slot", "description", description);
+				if (r.message.operator) {
+					d.set_value("operator", r.message.operator);
+				}
+				if (r.message.next_time_slot) {
+					d.set_value("time_slot", r.message.next_time_slot);
+				}
 
-				// Fallback for some versions of Frappe
-				if (d.fields_dict.time_slot && d.fields_dict.time_slot.set_description) {
-					d.fields_dict.time_slot.set_description(description);
+				// Restore "Last Time Slot" description
+				if (r.message.last_time_slot) {
+					let description = __("Last Time Slot: <b>{0}</b>", [r.message.last_time_slot]);
+					d.set_df_property("time_slot", "description", description);
+					if (d.fields_dict.time_slot && d.fields_dict.time_slot.set_description) {
+						d.fields_dict.time_slot.set_description(description);
+					}
 				}
 			}
 		},
 	});
 
 	d.show();
+
+	// Fetch quantity stats and update info
+	frappe.call({
+		method: "mold_management.api.production_log_api.get_job_card_qty_stats",
+		args: { job_card: job_card },
+		callback: function (r) {
+			if (r.message) {
+				const stats = r.message;
+				const update_qty_info = () => {
+					const ok = flt(d.get_value("ok_shots"));
+					const rej = flt(d.get_value("rej_shots"));
+					const current_remaining = stats.remaining_qty - (ok + rej);
+
+					let color = current_remaining < 0 ? "#ff5858" : "#808080"; // Red if negative, grey for Label
+					let balance_color = current_remaining < 0 ? "#ff5858" : "#28a745"; // Success green for balance
+
+					d.get_field("qty_info").$wrapper.html(`
+						<div style="font-size: 13px; color: #808080; text-align: center; margin-top: -10px; padding: 5px;">
+							${__("Job Card Total")}: <b style="color: #444;">${stats.target_qty}</b> | 
+							${__("Balance to Produce")}: <b style="color: ${balance_color}; font-size: 14px;">${current_remaining}</b>
+						</div>
+					`);
+				};
+
+				update_qty_info();
+
+				// Update dynamically on shots change
+				d.fields_dict.ok_shots.df.onchange = update_qty_info;
+				d.fields_dict.rej_shots.df.onchange = update_qty_info;
+			}
+		},
+	});
 
 	// Force dialog width expansion aggressively
 	$(d.wrapper).addClass("modal-xl"); // Standard Bootstrap XL class

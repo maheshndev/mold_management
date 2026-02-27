@@ -4,6 +4,26 @@ from frappe.utils import nowdate, flt, now_datetime, cstr
 from datetime import datetime, time
 
 @frappe.whitelist()
+def get_job_card_qty_stats(job_card):
+    if not job_card:
+        return {}
+    
+    jc = frappe.get_doc("Job Card", job_card)
+    target_qty = flt(jc.get("for_quantity") or jc.get("qty") or jc.get("qty_to_manufacture") or 0)
+    
+    produced_qty = frappe.db.sql("""
+        SELECT SUM(total_shots) 
+        FROM `tabDaily Production Log` 
+        WHERE job_card = %s AND docstatus < 2
+    """, job_card)[0][0] or 0
+    
+    return {
+        "target_qty": flt(target_qty),
+        "produced_qty": flt(produced_qty),
+        "remaining_qty": flt(target_qty) - flt(produced_qty)
+    }
+
+@frappe.whitelist()
 def add_production_log_entry(job_card, time_slot, ok_shots, rej_shots, operator=None, rej_code=None, remarks=None,
                              create_qi=False, qi_template=None, qi_readings=None):
 
@@ -18,7 +38,7 @@ def add_production_log_entry(job_card, time_slot, ok_shots, rej_shots, operator=
         
     # Validation: Check Work Order status
     if jc.work_order:
-        wo_status, wo_docstatus = frappe.db.get_value("Work Order", jc.work_order, ["status", "docstatus"])
+        wo_status, wo_docstatus, shift = frappe.db.get_value("Work Order", jc.work_order, ["status", "docstatus", "shift"])
         if wo_docstatus == 0:
             frappe.throw(_("Cannot add production log for a Draft Work Order."))
         if wo_status in ["Completed", "Stopped"]:
@@ -66,7 +86,7 @@ def add_production_log_entry(job_card, time_slot, ok_shots, rej_shots, operator=
                 qi = frappe.db.get_value("Quality Inspection", {"reference_name": jc.work_order, "docstatus": ["<", 2]}, "name")
             if qi:
                 dpl.quality_inspection = qi
-                dpl.shift = jc.get("custom_shift")
+                dpl.shift = shift
                 # Note: dpl.save() is called at the end of the function regardless
     else:
         # Create new Daily Production Log
@@ -93,7 +113,6 @@ def add_production_log_entry(job_card, time_slot, ok_shots, rej_shots, operator=
         # Fetch Quality Inspection if exists for this Job Card
         qi = frappe.db.get_value("Quality Inspection", {"reference_name": job_card, "docstatus": ["<", 2]}, "name")
         if qi:
-            dpl.quality_inspection = qi
             dpl.shift = jc.get("custom_shift")
         
         # Fetch Item details
@@ -245,7 +264,7 @@ def add_production_log_entry(job_card, time_slot, ok_shots, rej_shots, operator=
             if template:
                 params = frappe.get_all("Item Quality Inspection Parameter",
                     filters={"parent": template},
-                    fields=["specification", "numeric", "parameter_group", "min_value", "max_value"],
+                    fields=["specification", "numeric", "parameter_group", "min_value", "max_value", "value"],
                     order_by="idx"
                 )
                 
@@ -260,10 +279,13 @@ def add_production_log_entry(job_card, time_slot, ok_shots, rej_shots, operator=
                     reading_row = {
                         "specification": spec,
                         "status": "Accepted", # Default, will be recalculated
-                        "is_numeric": 1 if is_p_numeric else 0,
+                        "numeric": 1 if is_p_numeric else 0,
                         "min_value": p.min_value,
                         "max_value": p.max_value,
-                        "parameter_group": p.parameter_group
+                        "value": p.value,
+                        "parameter_group": p.parameter_group,
+                        "sampling_plan": r.get("sampling_plan"),
+                        "sampling_qty": flt(r.get("sampling_qty"))
                     }
 
                     # Determine if value is numeric
@@ -275,23 +297,23 @@ def add_production_log_entry(job_card, time_slot, ok_shots, rej_shots, operator=
                         except (ValueError, TypeError):
                             is_val_numeric = False
 
-                    # Mapping logic as requested:
-                    if is_p_numeric and is_val_numeric:
-                        f_val = flt(val)
-                        # Automate status check
-                        if (min_val is not None and f_val < min_val) or (max_val is not None and f_val > max_val):
-                            reading_row["status"] = "Rejected"
-                        else:
-                            reading_row["status"] = "Accepted"
-
-                        # Numeric template + Numeric value -> Reading 1
-                        reading_row["reading_1"] = cstr(f_val)
-                        reading_row["reading_value"] = "" # Explicitly empty string
+                    if is_p_numeric:
+                        # Numeric template -> store in reading_1, keep reading_value empty
+                        reading_row["reading_1"] = cstr(val) if val is not None else ""
+                        reading_row["reading_value"] = ""
+                        
+                        if is_val_numeric:
+                            f_val = flt(val)
+                            # Automate status check
+                            if (min_val is not None and f_val < min_val) or (max_val is not None and f_val > max_val):
+                                reading_row["status"] = "Rejected"
+                            else:
+                                reading_row["status"] = "Accepted"
                     else:
-                        # Otherwise -> Reading Value as string, keep status as entered (or default Accepted)
+                        # Non-numeric template -> store in reading_value, keep reading_1 empty
                         reading_row["reading_value"] = cstr(val) if val is not None else ""
                         reading_row["reading_1"] = ""
-                        # If user manually sent a status, use it
+                        # For non-numeric or mismatch, keep user status if provided
                         if r.get("status"):
                             reading_row["status"] = r.get("status")
 
@@ -304,11 +326,23 @@ def add_production_log_entry(job_card, time_slot, ok_shots, rej_shots, operator=
                 for r in qi_readings:
                     spec = r.get("specification")
                     if not spec: continue
+                    is_p_numeric = 1 if r.get("numeric") or r.get("is_numeric") else 0
+                    val = r.get("reading_value")
+                    
                     reading_row = {
                         "specification": str(spec),
                         "status": str(r.get("status") or "Accepted"),
-                        "reading_value": cstr(r.get("reading_value") or "")
+                        "numeric": is_p_numeric,
+                        "sampling_plan": r.get("sampling_plan"),
+                        "sampling_qty": flt(r.get("sampling_qty"))
                     }
+                    
+                    if is_p_numeric:
+                        reading_row["reading_1"] = cstr(val) if val is not None else ""
+                        reading_row["reading_value"] = ""
+                    else:
+                        reading_row["reading_value"] = cstr(val) if val is not None else ""
+                        reading_row["reading_1"] = ""
                     if reading_row["status"] == "Rejected":
                         qi.status = "Rejected"
                     qi.append("readings", reading_row)
@@ -401,7 +435,58 @@ def get_last_time_slot(job_card):
         return last_slot
     
     return None
+
+@frappe.whitelist()
+def get_production_log_defaults(job_card):
+    if not job_card:
+        return {}
     
+    jc = frappe.get_doc("Job Card", job_card)
+    
+    # Get operator from Job Card
+    # Try direct field first
+    operator = jc.get("operator")
+    
+    # Try standard Job Card Time Logs
+    if not operator:
+        time_logs = jc.get("time_logs")
+        if time_logs and len(time_logs) > 0:
+            operator = time_logs[0].employee
+            
+    # Try custom "employee" child table or link field
+    if not operator:
+        employee_val = jc.get("employee")
+        if isinstance(employee_val, list) and len(employee_val) > 0:
+            operator = employee_val[0].employee
+        else:
+            operator = employee_val
+    
+    # Get next time slot
+    last_slot = get_last_time_slot(job_card)
+    next_slot = None
+    
+    slots = frappe.get_all("Production Time Slots", fields=["name"], order_by="idx")
+    if slots:
+        if last_slot:
+            # Find index of last slot
+            try:
+                current_idx = next(i for i, s in enumerate(slots) if s.name == last_slot)
+                if current_idx < len(slots) - 1:
+                    next_slot = slots[current_idx + 1].name
+                else:
+                    next_slot = slots[0].name # Wrap around
+            except StopIteration:
+                next_slot = slots[0].name
+        else:
+            # No logs yet, pick first
+            next_slot = slots[0].name
+
+    return {
+        "operator": cstr(operator) if operator else None,
+        "next_time_slot": next_slot,
+        "last_time_slot": last_slot
+    }
+
 @frappe.whitelist()
 def get_production_logs(limit=50, name=None):
     filters = {}
