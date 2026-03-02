@@ -40,7 +40,8 @@ after_migrate = [
      "mold_management.patches.v0_1.add_is_moulding_item_checkbox_on_item.execute",
      "mold_management.patches.v0_1.add_other_than_mould_or_moulding_item.execute",
      "mold_management.patches.v0_1.add_mould_in_workorder.execute",
-     "mold_management.patches.v0_1.add_shift_field_to_work_order.execute"
+     "mold_management.patches.v0_1.add_shift_field_to_work_order.execute",
+     "mold_management.patches.v0_1.add_sampling_fields_to_qi_template.execute"
 
     
 ]
