@@ -1,7 +1,20 @@
 import frappe
 from frappe import _
-from frappe.utils import nowdate, flt, now_datetime, cstr
+from frappe.utils import nowdate, flt, now_datetime, cstr, time_diff
 from datetime import datetime, time
+import math
+
+def get_shift_hours(shift_name):
+	if not shift_name:
+		return 12.0
+	
+	shift_type = frappe.db.get_value("Shift Type", shift_name, ["start_time", "end_time"], as_dict=1)
+	if shift_type and shift_type.start_time and shift_type.end_time:
+		diff = time_diff(shift_type.end_time, shift_type.start_time)
+		hours = diff.total_seconds() / 3600
+		if hours < 0: hours += 24 # Handle overnight shift
+		return hours or 12.0
+	return 12.0
 
 @frappe.whitelist()
 def get_job_card_qty_stats(job_card):
@@ -98,13 +111,19 @@ def add_production_log_entry(job_card, time_slot, ok_shots, rej_shots, operator=
         dpl.item_code = jc.production_item
         dpl.report_date = today
         dpl.machine_no = jc.workstation
-        dpl.operator = operator or jc.get("operator") or jc.get("employee")
+        dpl.operator = operator or jc.get("operator")
+        if not dpl.operator and jc.get("employee"):
+            emp = jc.get("employee")
+            if isinstance(emp, list) and len(emp) > 0:
+                dpl.operator = emp[0].get("employee")
+            elif hasattr(emp, "__iter__") and not isinstance(emp, (str, dict)):
+                emp_list = list(emp)
+                if emp_list:
+                    dpl.operator = emp_list[0].get("employee")
+            else:
+                dpl.operator = emp
         
-        # Handle employee field which could be Table MultiSelect or Link
-        if not dpl.operator and hasattr(jc, "employee"):
-             dpl.operator = jc.employee[0].employee if isinstance(jc.employee, list) and len(jc.employee) > 0 else jc.employee
-        
-        if dpl.operator:
+        if dpl.operator and isinstance(dpl.operator, str):
             dpl.operator_name = frappe.db.get_value("Employee", dpl.operator, "employee_name")
             
         mould_val = jc.get("mould") or jc.get("mold")
@@ -126,8 +145,14 @@ def add_production_log_entry(job_card, time_slot, ok_shots, rej_shots, operator=
         dpl.page_no = item.get("page_no")
         dpl.anti_static = item.get("anti_static")
         
-        if dpl.shift_target:
-            dpl.hourly_target = flt(dpl.shift_target) / 12  # Assuming 12hr shift
+        # Calculate Targets
+        shift_hours = get_shift_hours(dpl.shift)
+        if dpl.cycle_time and dpl.running_cavity:
+            dpl.shift_hours = shift_hours
+            dpl.shift_target = math.floor((shift_hours * 3600 / flt(dpl.cycle_time)) * flt(dpl.running_cavity))
+            dpl.hourly_target = math.floor(dpl.shift_target / shift_hours)
+        else:
+            dpl.shift_hours = 12.0
         
         # Fetch Mould details
         if mould_val:
@@ -136,40 +161,34 @@ def add_production_log_entry(job_card, time_slot, ok_shots, rej_shots, operator=
             dpl.running_cavity = mould_doc.get("cavity_count") 
             if not dpl.shot_weight: dpl.shot_weight = mould_doc.get("shot_weight")
             if not dpl.runner_weight: dpl.runner_weight = mould_doc.get("runner_weight")
-            dpl.total_shots = mould_doc.get("total_shots")
             
         # Raw Material and Masterbatch fallback mapping
         dpl.raw_material = item.get("raw_material")
-        dpl.raw_material_grade = item.get("raw_material_grade")
         dpl.masterbatch = item.get("masterbatch")
-        dpl.masterbatch_grade = item.get("masterbatch_grade")
         
-        # Try to fetch raw materials from Job Card items
+        # Try to fetch raw materials from Job Card items if missing or to get batches
         if jc.items:
-            for rm in jc.items:
-                item_name = rm.item_name or frappe.db.get_value("Item", rm.item_code, "item_name")
-                if item_name and "MASTERBATCH" in item_name.upper():
-                    if not dpl.masterbatch: 
-                        dpl.masterbatch = rm.item_code
-                        dpl.masterbatch_grade = frappe.db.get_value("Item", rm.item_code, "item_name")
+            for rm_row in jc.items:
+                i_name = (rm_row.item_name or frappe.db.get_value("Item", rm_row.item_code, "item_name") or "").upper()
+                if "MASTERBATCH" in i_name:
+                    if not dpl.masterbatch:
+                        dpl.masterbatch = rm_row.item_code
+                    if rm_row.item_code == dpl.masterbatch:
+                        dpl.masterbatch_batch_no = rm_row.batch_no
                 else:
-                    if not dpl.raw_material: 
-                        dpl.raw_material = rm.item_code
-                        dpl.raw_material_grade = frappe.db.get_value("Item", rm.item_code, "item_name")
-        
-        # If still no Masterbatch, check linked Items in BOM if needed (skipped for now as per user request to use Job Card RM)
-        
-        # Enhanced Quality Inspection Fetching
-        qi = frappe.db.get_value("Quality Inspection", {"reference_name": job_card, "docstatus": ["<", 2]}, "name")
-        if not qi and jc.work_order:
-             qi = frappe.db.get_value("Quality Inspection", {"reference_name": jc.work_order, "docstatus": ["<", 2]}, "name")
-             
-        if qi:
-            dpl.quality_inspection = qi
-            dpl.shift = jc.get("custom_shift")
+                    if not dpl.raw_material:
+                        dpl.raw_material = rm_row.item_code
+                    if rm_row.item_code == dpl.raw_material:
+                        dpl.raw_material_batch_no = rm_row.batch_no
+
+        if dpl.raw_material:
+            dpl.raw_material_grade = frappe.db.get_value("Item", dpl.raw_material, "item_name")
+        if dpl.masterbatch:
+            dpl.masterbatch_grade = frappe.db.get_value("Item", dpl.masterbatch, "item_name")
         
         # Fetch Batch from Job Card main if available
         dpl.raw_material_batch_no = jc.get("batch_no")
+        dpl.shift = shift or jc.get("custom_shift")
         
         # Fetch First Counter from Last Log
         # Use try-except because even if meta has 'mould', the DB column might be missing until migration
@@ -264,7 +283,7 @@ def add_production_log_entry(job_card, time_slot, ok_shots, rej_shots, operator=
             if template:
                 params = frappe.get_all("Item Quality Inspection Parameter",
                     filters={"parent": template},
-                    fields=["specification", "numeric", "parameter_group", "min_value", "max_value", "value"],
+                    fields=["specification", "numeric", "parameter_group", "min_value", "max_value", "value", "sampling_plan", "sampling_qty"],
                     order_by="idx"
                 )
                 
@@ -284,8 +303,8 @@ def add_production_log_entry(job_card, time_slot, ok_shots, rej_shots, operator=
                         "max_value": p.max_value,
                         "value": p.value,
                         "parameter_group": p.parameter_group,
-                        "sampling_plan": r.get("sampling_plan"),
-                        "sampling_qty": flt(r.get("sampling_qty"))
+                        "sampling_plan": r.get("sampling_plan") or p.sampling_plan,
+                        "sampling_qty": flt(r.get("sampling_qty")) or flt(p.sampling_qty)
                     }
 
                     # Determine if value is numeric
@@ -441,25 +460,9 @@ def get_production_log_defaults(job_card):
     if not job_card:
         return {}
     
-    jc = frappe.get_doc("Job Card", job_card)
-    
-    # Get operator from Job Card
-    # Try direct field first
-    operator = jc.get("operator")
-    
-    # Try standard Job Card Time Logs
-    if not operator:
-        time_logs = jc.get("time_logs")
-        if time_logs and len(time_logs) > 0:
-            operator = time_logs[0].employee
-            
-    # Try custom "employee" child table or link field
-    if not operator:
-        employee_val = jc.get("employee")
-        if isinstance(employee_val, list) and len(employee_val) > 0:
-            operator = employee_val[0].employee
-        else:
-            operator = employee_val
+    # Get standard details (targets, RM, MB, batches, etc.)
+    from mold_management.mold_management.doctype.daily_production_log.daily_production_log import get_job_card_details
+    details = get_job_card_details(job_card)
     
     # Get next time slot
     last_slot = get_last_time_slot(job_card)
@@ -468,7 +471,6 @@ def get_production_log_defaults(job_card):
     slots = frappe.get_all("Production Time Slots", fields=["name"], order_by="idx")
     if slots:
         if last_slot:
-            # Find index of last slot
             try:
                 current_idx = next(i for i, s in enumerate(slots) if s.name == last_slot)
                 if current_idx < len(slots) - 1:
@@ -478,14 +480,14 @@ def get_production_log_defaults(job_card):
             except StopIteration:
                 next_slot = slots[0].name
         else:
-            # No logs yet, pick first
             next_slot = slots[0].name
 
-    return {
-        "operator": cstr(operator) if operator else None,
+    defaults = {
         "next_time_slot": next_slot,
         "last_time_slot": last_slot
     }
+    defaults.update(details)
+    return defaults
 
 @frappe.whitelist()
 def get_production_logs(limit=50, name=None):

@@ -35,7 +35,7 @@ def execute():
 
     try:
         for field in fields:
-            create_custom_field("Item Quality Inspection Parameter", field)
+            create_custom_field("Quality Inspection Reading", field)
         frappe.clear_cache()
     except Exception as e:
         if "Duplicate column name" not in str(e):

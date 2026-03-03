@@ -128,7 +128,7 @@ function open_production_log_dialog(job_card) {
 				label: __("Rejection Code"),
 				fieldname: "rej_code",
 				fieldtype: "Link",
-				options: "Quality Inspection Parameter",
+				options: "Rejection Code",
 			},
 			{
 				fieldtype: "Column Break",
@@ -180,7 +180,7 @@ function open_production_log_dialog(job_card) {
 						default: "Accepted",
 					},
 					{
-						label: __("Num"),
+						label: __("Numeric"),
 						fieldname: "numeric",
 						fieldtype: "Check",
 						in_list_view: 1,
@@ -188,7 +188,7 @@ function open_production_log_dialog(job_card) {
 						read_only: 1,
 					},
 					{
-						label: __("Reading"),
+						label: __("Reading Value"),
 						fieldname: "reading_value",
 						fieldtype: "Data",
 						columns: 3,
@@ -339,8 +339,8 @@ function open_production_log_dialog(job_card) {
 				status: "Accepted",
 				numeric: numeric,
 				reading_value: "",
-				sampling_plan: "",
-				sampling_qty: 0,
+				sampling_plan: p.sampling_plan || "",
+				sampling_qty: flt(p.sampling_qty) || 0,
 				name: frappe.utils.get_random(10), // Temporary name
 			};
 

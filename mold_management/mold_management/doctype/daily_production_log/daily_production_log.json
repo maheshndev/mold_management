@@ -76,12 +76,13 @@
             "search_index": 1
         },
         {
+            "fetch_from": "mould.current_usage_count",
             "fieldname": "first_counter",
             "fieldtype": "Data",
             "label": "First Counter"
         },
         {
-            "fetch_from": "quality_inspection.company",
+            "fetch_from": "work_order.company",
             "fieldname": "company",
             "fieldtype": "Link",
             "label": "Company",
@@ -121,7 +122,6 @@
             "label": "Masterbatch Grade"
         },
         {
-            "fetch_from": "masterbatch.batch_number_series",
             "fieldname": "masterbatch_batch_no",
             "fieldtype": "Link",
             "label": "Masterbatch Batch No",
@@ -139,6 +139,7 @@
             "label": "Total No Cavity"
         },
         {
+            "fetch_from": "mould.cavity_count",
             "fieldname": "running_cavity",
             "fieldtype": "Int",
             "label": "Running Cavity"
@@ -151,7 +152,8 @@
         {
             "fieldname": "doc_no",
             "fieldtype": "Data",
-            "label": "Doc No"
+            "label": "Doc No",
+            "fetch_from": "daily_production_log.job_card"
         },
         {
             "fieldname": "rev_no",
@@ -164,13 +166,14 @@
             "label": "Page No"
         },
         {
+            "fetch_from": "work_order.shift",
             "fieldname": "shift",
             "fieldtype": "Link",
             "label": "Shift Details",
             "options": "Shift Type"
         },
         {
-            "fetch_from": "quality_inspection.report_date",
+            "fetch_from": "job_card.posting_date",
             "fieldname": "report_date",
             "fieldtype": "Date",
             "label": "Date"
@@ -183,11 +186,11 @@
             "options": "Workstation"
         },
         {
-            "fetch_from": "quality_inspection.item_code",
             "fieldname": "item_code",
             "fieldtype": "Link",
             "label": "Item Code No",
-            "options": "Item"
+            "options": "Item",
+            "fetch_from": "job_card.production_item"
         },
         {
             "fieldname": "raw_material",
@@ -196,6 +199,7 @@
             "options": "Item"
         },
         {
+            "fetch_from": "raw_material.item_name",
             "fieldname": "raw_material_grade",
             "fieldtype": "Data",
             "label": "Raw Material Grade"
@@ -311,6 +315,11 @@
             "fieldtype": "Column Break"
         },
         {
+            "fieldname": "shift_hours",
+            "fieldtype": "Float",
+            "label": "Shift Hours"
+        },
+        {
             "fieldname": "hourly_target",
             "fieldtype": "Data",
             "label": "Hourly Target"
@@ -322,12 +331,6 @@
             "options": "Employee"
         },
         {
-            "fieldname": "quality_inspection",
-            "fieldtype": "Link",
-            "label": "Quality Inspection",
-            "options": "Quality Inspection"
-        },
-        {
             "fetch_from": "work_order.mould",
             "fieldname": "mould",
             "fieldtype": "Link",
@@ -335,7 +338,6 @@
             "options": "Mould"
         },
         {
-            "fetch_from": "quality_inspection.reference_name",
             "fieldname": "job_card",
             "fieldtype": "Link",
             "label": "Job Card",
@@ -353,7 +355,7 @@
     "index_web_pages_for_search": 1,
     "is_submittable": 1,
     "links": [],
-    "modified": "2026-02-18 11:27:00.370642",
+    "modified": "2026-03-02 13:02:53.619335",
     "modified_by": "Administrator",
     "module": "Mold Management",
     "name": "Daily Production Log",

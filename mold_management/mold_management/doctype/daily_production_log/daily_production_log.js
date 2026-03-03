@@ -6,6 +6,77 @@ frappe.ui.form.on("Daily Production Log", {
 			});
 		}
 	},
+
+	job_card: function (frm) {
+		if (frm.doc.job_card) {
+			frappe.call({
+				method: "mold_management.mold_management.doctype.daily_production_log.daily_production_log.get_job_card_details",
+				args: {
+					job_card: frm.doc.job_card,
+					machine_no: frm.doc.machine_no,
+					mould: frm.doc.mould,
+				},
+				callback: function (r) {
+					if (r.message) {
+						let details = r.message;
+						// Only set if field exists and current value is empty or we want to overwrite
+						Object.keys(details).forEach((field) => {
+							if (frm.fields_dict[field]) {
+								frm.set_value(field, details[field]);
+							}
+						});
+						calculate_parent_totals(frm);
+					}
+				},
+			});
+		}
+	},
+
+	item_code: function (frm) {
+		if (frm.doc.item_code) {
+			frappe.db.get_doc("Item", frm.doc.item_code).then((item) => {
+				frm.set_value("product_name", item.item_name);
+				frm.set_value("shot_weight", item.shot_wt);
+				frm.set_value("runner_weight", item.runner_wt);
+				frm.set_value("rev_no", item.rev_no);
+				frm.set_value("page_no", item.page_no);
+				frm.set_value("shift_target", item.shift_prod);
+				frm.set_value("cycle_time", item.cycle_time);
+				frm.set_value("anti_static", item.anti_static);
+				frm.set_value("raw_material", item.raw_material);
+				frm.set_value("masterbatch", item.masterbatch);
+				calculate_parent_totals(frm);
+			});
+		}
+	},
+
+	raw_material: function (frm) {
+		if (frm.doc.raw_material) {
+			frappe.db.get_value("Item", frm.doc.raw_material, "item_name", (r) => {
+				frm.set_value("raw_material_grade", r.item_name);
+			});
+		}
+	},
+
+	masterbatch: function (frm) {
+		if (frm.doc.masterbatch) {
+			frappe.db.get_value("Item", frm.doc.masterbatch, "item_name", (r) => {
+				frm.set_value("masterbatch_grade", r.item_name);
+			});
+		}
+	},
+
+	mould: function (frm) {
+		if (frm.doc.mould) {
+			// If mould is selected
+			frappe.db.get_doc("Mould", frm.doc.mould).then((m_doc) => {
+				if (!frm.doc.shot_weight) frm.set_value("shot_weight", m_doc.shot_weight);
+				if (!frm.doc.runner_weight) frm.set_value("runner_weight", m_doc.runner_weight);
+				calculate_parent_totals(frm);
+			});
+		}
+	},
+
 	first_counter: function (frm) {
 		calculate_parent_totals(frm);
 	},
@@ -13,6 +84,29 @@ frappe.ui.form.on("Daily Production Log", {
 		calculate_parent_totals(frm);
 	},
 	runner_weight: function (frm) {
+		calculate_parent_totals(frm);
+	},
+	shift: function (frm) {
+		if (frm.doc.shift) {
+			frappe.call({
+				method: "mold_management.mold_management.doctype.daily_production_log.daily_production_log.get_shift_hours_api",
+				args: { shift_name: frm.doc.shift },
+				callback: function (r) {
+					if (r.message !== undefined) {
+						frm.set_value("shift_hours", flt(r.message));
+						calculate_parent_totals(frm);
+					}
+				},
+			});
+		} else {
+			frm.set_value("shift_hours", 12.0);
+			calculate_parent_totals(frm);
+		}
+	},
+	cycle_time: function (frm) {
+		calculate_parent_totals(frm);
+	},
+	running_cavity: function (frm) {
 		calculate_parent_totals(frm);
 	},
 });
@@ -36,7 +130,7 @@ function calculate_row_total(frm, cdt, cdn) {
 	frappe.model.set_value(cdt, cdn, "total_shots", flt(row.ok_shots) + flt(row.rej_shots));
 }
 
-function calculate_parent_totals(frm) {
+async function calculate_parent_totals(frm) {
 	let total_ok = 0;
 	let total_rej = 0;
 
@@ -47,15 +141,29 @@ function calculate_parent_totals(frm) {
 
 	frm.set_value("total_ok_shots", total_ok);
 	frm.set_value("total_rej_shots", total_rej);
-	frm.set_value("total_shots", total_ok + total_rej);
+	const total_shots = total_ok + total_rej;
+	frm.set_value("total_shots", total_shots);
 
 	// Update last_counter
-	frm.set_value("last_counter", flt(frm.doc.first_counter) + total_ok + total_rej);
+	frm.set_value("last_counter", flt(frm.doc.first_counter) + total_shots);
+
+	// Dynamic Target Calculation (Whole Numbers)
+	if (frm.doc.cycle_time && frm.doc.running_cavity) {
+		const shift_hours = flt(frm.doc.shift_hours || 12.0);
+		const cycle_time = flt(frm.doc.cycle_time);
+		const cavities = flt(frm.doc.running_cavity);
+
+		if (cycle_time > 0) {
+			const shift_target = Math.floor((shift_hours * 3600) / cycle_time) * cavities;
+			frm.set_value("shift_target", Math.floor(shift_target));
+			frm.set_value("hourly_target", Math.floor(shift_target / shift_hours));
+		}
+	}
 
 	// RM Consumption calculation (grams to kg)
 	if (frm.doc.shot_weight || frm.doc.runner_weight) {
 		let s_wt = flt(frm.doc.shot_weight);
 		let r_wt = flt(frm.doc.runner_weight);
-		frm.set_value("rm_consumption", ((s_wt + r_wt) * (total_ok + total_rej)) / 1000);
+		frm.set_value("rm_consumption", ((s_wt + r_wt) * total_shots) / 1000);
 	}
 }
