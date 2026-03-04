@@ -10,6 +10,18 @@ frappe.ui.form.on("Job Card", {
 				__("Actions"),
 			);
 		}
+
+		if (frm.doc.docstatus === 1) {
+			frm.add_custom_button(
+				__("Quality Inspection Report"),
+				function () {
+					frappe.set_route("in-process-inspectio", {
+						reference_name: frm.doc.name,
+					});
+				},
+				__("Actions"),
+			);
+		}
 	},
 });
 
@@ -58,6 +70,18 @@ frappe.ui.form.on("Work Order", {
 								);
 							}
 						},
+					});
+				},
+				__("Actions"),
+			);
+		}
+
+		if (frm.doc.docstatus === 1) {
+			frm.add_custom_button(
+				__("Quality Inspection Report"),
+				function () {
+					frappe.set_route("in-process-inspectio", {
+						reference_name: frm.doc.name,
 					});
 				},
 				__("Actions"),
