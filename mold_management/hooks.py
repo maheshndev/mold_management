@@ -42,7 +42,9 @@ after_migrate = [
      "mold_management.patches.v0_1.add_mould_in_workorder.execute",
      "mold_management.patches.v0_1.add_shift_field_to_work_order.execute",
      "mold_management.patches.v0_1.add_sampling_fields_to_qi_template.execute",
-     "mold_management.patches.v0_1.add_fields_to_qir_quality_inspection.execute"
+     "mold_management.patches.v0_1.add_fields_to_qir_quality_inspection.execute",
+     "mold_management.patches.v0_1.add_field_on_qi_time_slot.execute",
+     "mold_management.patches.v0_1.add_in_process_inspection_template_to_item.execute"
 
     
 ]

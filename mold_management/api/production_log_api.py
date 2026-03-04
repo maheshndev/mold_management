@@ -243,10 +243,13 @@ def add_production_log_entry(job_card, time_slot, ok_shots, rej_shots, operator=
             # Re-fetch Job Card for fresh template info
             jc = frappe.get_doc("Job Card", job_card)
             item_code = jc.production_item
-            template = qi_template or frappe.db.get_value("Item", item_code, "quality_inspection_template")
+            template = qi_template or frappe.db.get_value("Item", item_code, ["in_process_inspection_template", "quality_inspection_template"], as_dict=True)
+            if isinstance(template, dict):
+                template = template.in_process_inspection_template or template.quality_inspection_template
             
             qi = frappe.new_doc("Quality Inspection")
             qi.report_date = today
+            qi.time_slot = time_slot
             qi.inspected_by = frappe.session.user
             qi.status = "Accepted"
             qi.inspection_type = "In Process"
@@ -283,7 +286,7 @@ def add_production_log_entry(job_card, time_slot, ok_shots, rej_shots, operator=
             if template:
                 params = frappe.get_all("Item Quality Inspection Parameter",
                     filters={"parent": template},
-                    fields=["specification", "numeric", "parameter_group", "min_value", "max_value", "value", "sampling_plan", "sampling_qty"],
+                    fields=["specification", "numeric", "parameter_group", "min_value", "max_value", "value", "sample_type", "sample_qty"],
                     order_by="idx"
                 )
                 
@@ -303,8 +306,8 @@ def add_production_log_entry(job_card, time_slot, ok_shots, rej_shots, operator=
                         "max_value": p.max_value,
                         "value": p.value,
                         "parameter_group": p.parameter_group,
-                        "sampling_plan": r.get("sampling_plan") or p.sampling_plan,
-                        "sampling_qty": flt(r.get("sampling_qty")) or flt(p.sampling_qty)
+                        "sample_type": r.get("sample_type") or p.sample_type,
+                        "sample_qty": flt(r.get("sample_qty")) or flt(p.sample_qty)
                     }
 
                     # Determine if value is numeric
@@ -352,8 +355,8 @@ def add_production_log_entry(job_card, time_slot, ok_shots, rej_shots, operator=
                         "specification": str(spec),
                         "status": str(r.get("status") or "Accepted"),
                         "numeric": is_p_numeric,
-                        "sampling_plan": r.get("sampling_plan"),
-                        "sampling_qty": flt(r.get("sampling_qty"))
+                        "sample_type": r.get("sample_type"),
+                        "sample_qty": flt(r.get("sample_qty"))
                     }
                     
                     if is_p_numeric:
@@ -508,7 +511,9 @@ def get_qi_template_parameters(job_card=None, template=None):
     if not template and job_card:
         item_code = frappe.db.get_value("Job Card", job_card, "production_item")
         if item_code:
-            template = frappe.db.get_value("Item", item_code, "quality_inspection_template")
+            res = frappe.db.get_value("Item", item_code, ["in_process_inspection_template", "quality_inspection_template"], as_dict=True)
+            if res:
+                template = res.in_process_inspection_template or res.quality_inspection_template
     
     if not template:
         return []
@@ -524,7 +529,11 @@ def get_item_qi_details(job_card):
     if not item_code:
         return {}
     
-    template = frappe.db.get_value("Item", item_code, "quality_inspection_template")
+    res = frappe.db.get_value("Item", item_code, ["in_process_inspection_template", "quality_inspection_template"], as_dict=True)
+    template = None
+    if res:
+        template = res.in_process_inspection_template or res.quality_inspection_template
+    
     if not template:
         return {}
         

@@ -5,24 +5,25 @@ def execute():
     # Fields for Item Quality Inspection Parameter (Child table of Quality Inspection Template)
     fields = [
         {
-            "fieldname": "sampling_plan",
+            "fieldname": "sample_type",
             "label": "Sample Type",
             "fieldtype": "Link",
-            "options": "Sampling Plan",
-            "insert_after": "specification"
+            "options": "Sample Type",
+            "insert_after": "specification",
+
         },
         {
-            "fieldname": "sampling_qty",
+            "fieldname": "sample_qty",
             "label": "Sample Qty",
             "fieldtype": "Float",
-            "insert_after": "sampling_plan"
+            "insert_after": "sample_type"
         },
         {
             "fieldname": "criteria_type",
             "label": "Criteria Type",
             "fieldtype": "Select",
             "options": "Equals\nAverage\nMin-Max\nMax\nMin\nNot Equal",
-            "insert_after": "sampling_qty"
+            "insert_after": "sample_qty"
         },
         {
             "fieldname": "avg",

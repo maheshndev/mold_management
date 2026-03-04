@@ -195,16 +195,16 @@ function open_production_log_dialog(job_card) {
 						in_list_view: 1,
 					},
 					{
-						label: __("Sampling Plan"),
-						fieldname: "sampling_plan",
+						label: __("Sample Type"),
+						fieldname: "sample_type",
 						fieldtype: "Link",
 						options: "Sampling Plan",
 						in_list_view: 1,
 						columns: 2,
 					},
 					{
-						label: __("Sampling Qty"),
-						fieldname: "sampling_qty",
+						label: __("Sample Qty"),
+						fieldname: "sample_qty",
 						fieldtype: "Float",
 						in_list_view: 1,
 						columns: 1,
@@ -339,8 +339,8 @@ function open_production_log_dialog(job_card) {
 				status: "Accepted",
 				numeric: numeric,
 				reading_value: "",
-				sampling_plan: p.sampling_plan || "",
-				sampling_qty: flt(p.sampling_qty) || 0,
+				sample_type: p.sample_type || "",
+				sample_qty: flt(p.sample_qty) || 0,
 				name: frappe.utils.get_random(10), // Temporary name
 			};
 
