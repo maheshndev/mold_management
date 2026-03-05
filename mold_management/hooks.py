@@ -64,6 +64,7 @@ doctype_js = {
         "public/js/add_filter_for_mould_field_in_workorder.js"
     ],
     "Stock Entry": ["public/js/on_stock_entry_fetched_work_order_item.js", "public/js/stock_entry_non_tock_items_allow.js"],
+    "Quality Inspection": "public/js/quality_inspection.js",
 }
 
 

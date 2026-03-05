@@ -148,8 +148,8 @@ frappe.pages["in-process-inspectio"].on_page_load = function (wrapper) {
 		// Fetch Quality Inspections linked to this Job Card
 		const inspections = await frappe.db.get_list("Quality Inspection", {
 			filters: { reference_name: jc.name, docstatus: 1, inspection_type: "In Process" },
-			fields: ["name", "report_date", "custom_time", "inspected_by", "time_slot"],
-			order_by: "custom_time asc",
+			fields: ["name", "report_date", "inspected_by", "time_slot"],
+			order_by: "time_slot asc",
 		});
 
 		for (const qi of inspections) {
@@ -162,8 +162,7 @@ frappe.pages["in-process-inspectio"].on_page_load = function (wrapper) {
 		// Organizing columns: Inspections
 		const columns = inspections.map((qi) => ({
 			name: qi.name,
-			time: qi.custom_time ? qi.custom_time.split(".")[0] : "", // HH:MM:SS
-			type: qi.time_slot || "INP",
+			time: qi.time_slot || "",
 		}));
 
 		// Header HTML pieces
