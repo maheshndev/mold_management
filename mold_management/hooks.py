@@ -104,15 +104,10 @@ doc_events = {
     },
     "Mould Maintenance Order": {
         "on_update": "mold_management.api.reset_current_shot_zero.reset_mould_usage_on_submit"
+    },
+    "Quality Inspection": {
+        "validate": "mold_management.mold_management.api.quality_inspection.validate_quality_inspection"
     }
-    
-    # "Stock Entry": {
-    #     "on_submit": [
-    #         "mold_management.api.mould_record_generation_on_stock_entry.create_mould_on_stock_entry",
-    #         # "mold_management.api.create_asset_on_stock_entry_submit.create_pr_and_asset_from_stock_entry"
-    #     ]
-    # }
-
 }
 
 override_doctype_class = {
