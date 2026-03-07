@@ -222,7 +222,7 @@ function open_production_log_dialog(job_card) {
 						label: __("Sample Type"),
 						fieldname: "sample_type",
 						fieldtype: "Link",
-						options: "Sampling Plan",
+						options: "Sample Type",
 						in_list_view: 1,
 						columns: 2,
 					},

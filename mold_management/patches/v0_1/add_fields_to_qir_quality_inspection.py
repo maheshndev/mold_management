@@ -8,7 +8,7 @@ def execute():
             "fieldname": "sample_type",
             "label": "Sample Type",
             "fieldtype": "Link",
-            "options": "Sampling Plan",
+            "options": "Sample Type",
             "insert_after": "specification",
             "in_list_view": 1,
             "columns": 2,
