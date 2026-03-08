@@ -1,5 +1,4 @@
 import frappe
-frappe. Throwfrappe. Throwfrappe. Throwfrappe. Throwitem. Getitem. Getitem. Getitem. Getmath. Floormath. Floor
 from frappe import _
 from frappe.utils import nowdate, flt, now_datetime, cstr, time_diff
 from datetime import datetime, time
