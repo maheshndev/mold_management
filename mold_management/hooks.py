@@ -26,6 +26,7 @@ after_migrate = [
      "mold_management.patches.v0_1.create_tool_room_work_order_on_material_request.execute",
      "mold_management.patches.v0_1.create_is_customer_and_maintain_stock_fixed_asset_on_work_order.execute",
      "mold_management.patches.v0_1.add_work_order_routing_field_on_work_order.execute",
+     "mold_management.patches.v0_1.add_mould_to_work_order_operation.execute",
 
      # fields and section on item doctype
      "mold_management.patches.v0_1.add_mould_detail_tab_on_item_master.execute",
@@ -85,6 +86,7 @@ doc_events = {
         "on_cancel": "mold_management.api.dpl_sync.sync_dpl_on_job_card_cancel"
     },
     "Work Order": {
+        "before_insert": "mold_management.api.production_plan.map_production_plan_operations",
         "on_submit": "mold_management.api.dpl_sync.sync_dpl_on_work_order_submit",
         "on_cancel": "mold_management.api.dpl_sync.sync_dpl_on_work_order_cancel"
     },
