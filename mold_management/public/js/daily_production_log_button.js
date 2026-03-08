@@ -9,6 +9,70 @@ frappe.ui.form.on("Job Card", {
 				},
 				__("Actions"),
 			);
+
+			// Override "Complete Job" to bypass the quantity prompt ONLY IF production logs with quantity exist
+			setTimeout(() => {
+				frappe.db
+					.get_list("Daily Production Log", {
+						filters: { job_card: frm.doc.name, docstatus: ["<", 2] },
+						limit: 1,
+					})
+					.then((res) => {
+						const has_logs = res && res.length > 0;
+						const has_qty = flt(frm.doc.total_completed_qty) > 0;
+
+						if (has_logs && has_qty && frm.doc.status === "Work In Progress") {
+							frm.remove_custom_button(__("Complete Job"));
+							frm.add_custom_button(
+								__("Complete Job"),
+								function () {
+									// Calculate what should be passed to complete_job
+									// We want the total in time_logs to match frm.doc.total_completed_qty
+									const target_total = flt(frm.doc.total_completed_qty || 0);
+									const planned_qty = flt(
+										frm.doc.for_quantity || frm.doc.qty || 0,
+									);
+
+									// If we are already over target, we might need to cap it for validation
+									let complete_qty = target_total;
+
+									// Check if we already have time logs.
+									// If so, we only need to add the difference.
+									let existing_time_log_qty = 0;
+									if (frm.doc.time_logs) {
+										frm.doc.time_logs.forEach((log) => {
+											if (log.completed_qty)
+												existing_time_log_qty += flt(log.completed_qty);
+										});
+									}
+
+									const delta = target_total - existing_time_log_qty;
+									complete_qty = delta > 0 ? delta : 0;
+
+									// Final check to avoid overproduction error if target is strict
+									if (
+										planned_qty > 0 &&
+										existing_time_log_qty + complete_qty > planned_qty
+									) {
+										complete_qty = Math.max(
+											0,
+											planned_qty - existing_time_log_qty,
+										);
+									}
+
+									console.log(
+										"Completing Job Card with qty:",
+										complete_qty,
+										"Target Total:",
+										target_total,
+									);
+									frm.events.complete_job(frm, "Complete", complete_qty);
+								},
+								null,
+							).addClass("btn-primary");
+						}
+					});
+			}, 50);
 		}
 
 		if (frm.doc.docstatus === 1) {
@@ -260,6 +324,14 @@ function open_production_log_dialog(job_card) {
 							indicator: "green",
 						});
 						d.hide();
+						// Refresh Job Card form if it's currently open
+						if (
+							cur_frm &&
+							cur_frm.doctype === "Job Card" &&
+							cur_frm.docname === job_card
+						) {
+							cur_frm.reload_doc();
+						}
 					}
 				},
 			});
@@ -436,11 +508,11 @@ function open_production_log_dialog(job_card) {
 					let balance_color = current_remaining < 0 ? "#ff5858" : "#28a745"; // Success green for balance
 
 					d.get_field("qty_info").$wrapper.html(`
-						<div style="font-size: 13px; color: #808080; text-align: center; margin-top: -10px; padding: 5px;">
-							${__("Job Card Total")}: <b style="color: #444;">${stats.target_qty}</b> | 
-							${__("Balance to Produce")}: <b style="color: ${balance_color}; font-size: 14px;">${current_remaining}</b>
-						</div>
-					`);
+                        <div style="font-size: 13px; color: #808080; text-align: center; margin-top: -10px; padding: 5px;">
+                            ${__("Job Card Total")}: <b style="color: #444;">${stats.target_qty}</b> |
+                            ${__("Balance to Produce")}: <b style="color: ${balance_color}; font-size: 14px;">${current_remaining}</b>
+                        </div>
+                    `);
 				};
 
 				update_qty_info();

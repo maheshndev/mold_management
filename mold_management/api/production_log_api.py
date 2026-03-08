@@ -1,54 +1,55 @@
 import frappe
+frappe. Throwfrappe. Throwfrappe. Throwfrappe. Throwitem. Getitem. Getitem. Getitem. Getmath. Floormath. Floor
 from frappe import _
 from frappe.utils import nowdate, flt, now_datetime, cstr, time_diff
 from datetime import datetime, time
 import math
-
+ 
 def get_shift_hours(shift_name):
-	if not shift_name:
-		return 12.0
-	
-	shift_type = frappe.db.get_value("Shift Type", shift_name, ["start_time", "end_time"], as_dict=1)
-	if shift_type and shift_type.start_time and shift_type.end_time:
-		diff = time_diff(shift_type.end_time, shift_type.start_time)
-		hours = diff.total_seconds() / 3600
-		if hours < 0: hours += 24 # Handle overnight shift
-		return hours or 12.0
-	return 12.0
-
+    if not shift_name:
+        return 12.0
+   
+    shift_type = frappe.db.get_value("Shift Type", shift_name, ["start_time", "end_time"], as_dict=1)
+    if shift_type and shift_type.start_time and shift_type.end_time:
+        diff = time_diff(shift_type.end_time, shift_type.start_time)
+        hours = diff.total_seconds() / 3600
+        if hours < 0: hours += 24 # Handle overnight shift
+        return hours or 12.0
+    return 12.0
+ 
 @frappe.whitelist()
 def get_job_card_qty_stats(job_card):
     if not job_card:
         return {}
-    
+   
     jc = frappe.get_doc("Job Card", job_card)
     target_qty = flt(jc.get("for_quantity") or jc.get("qty") or jc.get("qty_to_manufacture") or 0)
-    
+   
     produced_qty = frappe.db.sql("""
-        SELECT SUM(total_shots) 
-        FROM `tabDaily Production Log` 
+        SELECT SUM(total_shots)
+        FROM `tabDaily Production Log`
         WHERE job_card = %s AND docstatus < 2
     """, job_card)[0][0] or 0
-    
+   
     return {
         "target_qty": flt(target_qty),
         "produced_qty": flt(produced_qty),
         "remaining_qty": flt(target_qty) - flt(produced_qty)
     }
-
+ 
 @frappe.whitelist()
 def add_production_log_entry(job_card, time_slot, ok_shots, rej_shots, operator=None, rej_code=None, remarks=None,
                              create_qi=False, qi_template=None, qi_readings=None):
-
+ 
     if not job_card:
         frappe.throw(_("Job Card is required"))
-    
+   
     jc = frappe.get_doc("Job Card", job_card)
-    
+   
     # Validation: Check Job Card status
     if jc.status in ["Completed", "Cancelled"]:
         frappe.throw(_("Cannot add production log for a {0} Job Card.").format(jc.status))
-        
+       
     # Validation: Check Work Order status
     if jc.work_order:
         wo_status, wo_docstatus, shift = frappe.db.get_value("Work Order", jc.work_order, ["status", "docstatus", "shift"])
@@ -56,51 +57,42 @@ def add_production_log_entry(job_card, time_slot, ok_shots, rej_shots, operator=
             frappe.throw(_("Cannot add production log for a Draft Work Order."))
         if wo_status in ["Completed", "Stopped"]:
             frappe.throw(_("Cannot add production log for a {0} Work Order.").format(wo_status))
-
+ 
     today = nowdate()
-    
+   
     # Validation: Check against Job Card Qty To Manufacture
     # Standard Job Card quantity field is for_quantity; qty is used in some custom versions
     target_qty = flt(jc.get("for_quantity") or jc.get("qty") or jc.get("qty_to_manufacture") or 0)
-    
+   
     if target_qty > 0:
         # Sum all shots from all Daily Production Logs for this Job Card that are not cancelled
         # If adding to an existing draft log, its total_shots in DB is still the old total
         existing_total = frappe.db.sql("""
-            SELECT SUM(total_shots) 
-            FROM `tabDaily Production Log` 
+            SELECT SUM(total_shots)
+            FROM `tabDaily Production Log`
             WHERE job_card = %s AND docstatus < 2
         """, job_card)[0][0] or 0
-        
+       
         new_shots = flt(ok_shots) + flt(rej_shots)
         total_forecast = flt(existing_total) + new_shots
-
+ 
         if total_forecast > target_qty:
             frappe.throw(_("Cannot add production log. Total shots ({0}) would exceed Job Card Qty To Manufacture ({1})").format(
                 flt(total_forecast), flt(target_qty)
             ))
-    
+   
     # Resilience: Check for mold vs mould field names
     dpl_meta = frappe.get_meta("Daily Production Log")
     mould_field = "mould" if dpl_meta.has_field("mould") else "mold"
-    
+   
     # Try to find an existing Daily Production Log for this Job Card
     log_name = frappe.db.get_value("Daily Production Log", {
         "job_card": job_card,
         "docstatus": 0
     }, "name")
-    
+   
     if log_name:
         dpl = frappe.get_doc("Daily Production Log", log_name)
-        # Ensure Quality Inspection is linked if missing
-        if not dpl.quality_inspection:
-            qi = frappe.db.get_value("Quality Inspection", {"reference_name": job_card, "docstatus": ["<", 2]}, "name")
-            if not qi and jc.work_order:
-                qi = frappe.db.get_value("Quality Inspection", {"reference_name": jc.work_order, "docstatus": ["<", 2]}, "name")
-            if qi:
-                dpl.quality_inspection = qi
-                dpl.shift = shift
-                # Note: dpl.save() is called at the end of the function regardless
     else:
         # Create new Daily Production Log
         dpl = frappe.new_doc("Daily Production Log")
@@ -122,18 +114,18 @@ def add_production_log_entry(job_card, time_slot, ok_shots, rej_shots, operator=
                     dpl.operator = emp_list[0].get("employee")
             else:
                 dpl.operator = emp
-        
+       
         if dpl.operator and isinstance(dpl.operator, str):
             dpl.operator_name = frappe.db.get_value("Employee", dpl.operator, "employee_name")
-            
+           
         mould_val = jc.get("mould") or jc.get("mold")
         dpl.set(mould_field, mould_val)
-        
+       
         # Fetch Quality Inspection if exists for this Job Card
         qi = frappe.db.get_value("Quality Inspection", {"reference_name": job_card, "docstatus": ["<", 2]}, "name")
         if qi:
             dpl.shift = jc.get("custom_shift")
-        
+       
         # Fetch Item details
         item = frappe.get_doc("Item", jc.production_item)
         dpl.product_name = item.item_name
@@ -144,7 +136,7 @@ def add_production_log_entry(job_card, time_slot, ok_shots, rej_shots, operator=
         dpl.rev_no = item.get("rev_no")
         dpl.page_no = item.get("page_no")
         dpl.anti_static = item.get("anti_static")
-        
+       
         # Calculate Targets
         shift_hours = get_shift_hours(dpl.shift)
         if dpl.cycle_time and dpl.running_cavity:
@@ -153,19 +145,19 @@ def add_production_log_entry(job_card, time_slot, ok_shots, rej_shots, operator=
             dpl.hourly_target = math.floor(dpl.shift_target / shift_hours)
         else:
             dpl.shift_hours = 12.0
-        
+       
         # Fetch Mould details
         if mould_val:
             mould_doc = frappe.get_doc("Mould", mould_val)
             dpl.total_cavity = mould_doc.get("cavity_count")
-            dpl.running_cavity = mould_doc.get("cavity_count") 
+            dpl.running_cavity = mould_doc.get("cavity_count")
             if not dpl.shot_weight: dpl.shot_weight = mould_doc.get("shot_weight")
             if not dpl.runner_weight: dpl.runner_weight = mould_doc.get("runner_weight")
-            
+           
         # Raw Material and Masterbatch fallback mapping
         dpl.raw_material = item.get("raw_material")
         dpl.masterbatch = item.get("masterbatch")
-        
+       
         # Try to fetch raw materials from Job Card items if missing or to get batches
         if jc.items:
             for rm_row in jc.items:
@@ -180,20 +172,20 @@ def add_production_log_entry(job_card, time_slot, ok_shots, rej_shots, operator=
                         dpl.raw_material = rm_row.item_code
                     if rm_row.item_code == dpl.raw_material:
                         dpl.raw_material_batch_no = rm_row.batch_no
-
+ 
         if dpl.raw_material:
             dpl.raw_material_grade = frappe.db.get_value("Item", dpl.raw_material, "item_name")
         if dpl.masterbatch:
             dpl.masterbatch_grade = frappe.db.get_value("Item", dpl.masterbatch, "item_name")
-        
+       
         # Fetch Batch from Job Card main if available
         dpl.raw_material_batch_no = jc.get("batch_no")
         dpl.shift = shift or jc.get("custom_shift")
-        
+       
         # Fetch First Counter from Last Log
         # Use try-except because even if meta has 'mould', the DB column might be missing until migration
         try:
-            last_log = frappe.get_all("Daily Production Log", 
+            last_log = frappe.get_all("Daily Production Log",
                 filters={mould_field: mould_val, "machine_no": dpl.machine_no},
                 order_by="creation desc", limit=1)
             if last_log:
@@ -202,23 +194,23 @@ def add_production_log_entry(job_card, time_slot, ok_shots, rej_shots, operator=
             # Fallback to 'mold' if 'mould' fails, or vice versa
             alt_field = "mold" if mould_field == "mould" else "mould"
             try:
-                last_log = frappe.get_all("Daily Production Log", 
+                last_log = frappe.get_all("Daily Production Log",
                     filters={alt_field: mould_val, "machine_no": dpl.machine_no},
                     order_by="creation desc", limit=1)
                 if last_log:
                     dpl.first_counter = frappe.db.get_value("Daily Production Log", last_log[0].name, "last_counter")
             except Exception:
                 pass # Give up on fetching first counter if both fail
-
+ 
         dpl.insert()
-    
+   
     # Add entry to child table
     prev_total = 0
     if dpl.production_data:
         prev_total = flt(dpl.production_data[-1].total_shots)
-    
+   
     current_total = prev_total + flt(ok_shots) + flt(rej_shots)
-    
+   
     dpl.append("production_data", {
         "time_slot": time_slot,
         "ok_shots": flt(ok_shots),
@@ -227,17 +219,56 @@ def add_production_log_entry(job_card, time_slot, ok_shots, rej_shots, operator=
         "rej_code": rej_code,
         "remarks": remarks
     })
-    
+   
     row = dpl.production_data[-1]
-    
+   
     # Set shift if missing
     if not dpl.shift:
         dpl.shift = get_current_shift()
-
+ 
     # Update totals
     update_totals(dpl)
     dpl.save()
-
+ 
+    # Update Job Card total_completed_qty and process_loss_qty (Cumulative from all logs)
+    all_logs = frappe.get_all(
+        "Daily Production Log",
+        filters={"job_card": job_card, "docstatus": ["<", 2]},
+        fields=["total_ok_shots", "total_rej_shots", "name"],
+    )
+ 
+    total_ok_sum = 0
+    total_rej_sum = 0
+    for log in all_logs:
+        if log.name == dpl.name:
+            total_ok_sum += flt(dpl.total_ok_shots)
+            total_rej_sum += flt(dpl.total_rej_shots)
+        else:
+            total_ok_sum += flt(log.total_ok_shots)
+            total_rej_sum += flt(log.total_rej_shots)
+ 
+    # Fallback: If sum is zero but shots were provided, increment current quantities
+    if total_ok_sum == 0 and flt(ok_shots) > 0:
+        total_ok_sum = flt(jc.total_completed_qty) + flt(ok_shots)
+    if total_rej_sum == 0 and flt(rej_shots) > 0:
+        total_rej_sum = flt(jc.process_loss_qty) + flt(rej_shots)
+ 
+    # Cap process_loss_qty to avoid overproduction error if target exists
+    target_qty = flt(jc.get("for_quantity") or jc.get("qty") or jc.get("qty_to_manufacture") or 0)
+    adjusted_rej_sum = total_rej_sum
+    if target_qty > 0 and (total_ok_sum + total_rej_sum) > target_qty:
+        adjusted_rej_sum = max(0, target_qty - total_ok_sum)
+ 
+    jc.db_set("total_completed_qty", total_ok_sum)
+    jc.db_set("process_loss_qty", adjusted_rej_sum)
+ 
+    # Final confirmation message
+    frappe.msgprint(
+        _("Job Card {0}: Total Completed Quantity updated to {1}").format(
+            job_card, total_ok_sum
+        )
+    )
+ 
     if create_qi and qi_readings:
         try:
             # Re-fetch Job Card for fresh template info
@@ -246,7 +277,7 @@ def add_production_log_entry(job_card, time_slot, ok_shots, rej_shots, operator=
             template = qi_template or frappe.db.get_value("Item", item_code, ["in_process_inspection_template", "quality_inspection_template"], as_dict=True)
             if isinstance(template, dict):
                 template = template.in_process_inspection_template or template.quality_inspection_template
-            
+           
             qi = frappe.new_doc("Quality Inspection")
             qi.report_date = today
             qi.time_slot = time_slot
@@ -260,10 +291,10 @@ def add_production_log_entry(job_card, time_slot, ok_shots, rej_shots, operator=
             qi.reference_name = job_card
             qi.batch_no = str(jc.batch_no) if jc.batch_no else None
             qi.work_order = str(jc.work_order) if jc.work_order else None
-            
+           
             if template:
                 qi.quality_inspection_template = template
-
+ 
             # Set machine and mold if fields exist in QI
             qi_meta = frappe.get_meta("Quality Inspection")
             if qi_meta.has_field("machine_no"):
@@ -274,14 +305,14 @@ def add_production_log_entry(job_card, time_slot, ok_shots, rej_shots, operator=
                 qi.mold = dpl.mould
             elif mould_field == "mold" and qi_meta.has_field("mould"):
                 qi.mould = dpl.mold
-
+ 
             # Map provided readings for easy lookup
             if isinstance(qi_readings, str):
                 qi_readings = frappe.parse_json(qi_readings)
-            
+           
             # Key by specification for matching with template
             readings_map = {str(r.get("specification")): r for r in qi_readings if r.get("specification")}
-
+ 
             # Fetch parameters from Template to ensure sequence and correct types
             if template:
                 params = frappe.get_all("Item Quality Inspection Parameter",
@@ -289,7 +320,7 @@ def add_production_log_entry(job_card, time_slot, ok_shots, rej_shots, operator=
                     fields=["specification", "numeric", "parameter_group", "min_value", "max_value", "value", "sample_type", "sample_qty"],
                     order_by="idx"
                 )
-                
+               
                 for p in params:
                     spec = str(p.specification)
                     r = readings_map.get(spec) or {}
@@ -297,7 +328,7 @@ def add_production_log_entry(job_card, time_slot, ok_shots, rej_shots, operator=
                     is_p_numeric = p.numeric
                     min_val = flt(p.min_value) if is_p_numeric and p.min_value is not None else None
                     max_val = flt(p.max_value) if is_p_numeric and p.max_value is not None else None
-                    
+                   
                     reading_row = {
                         "specification": spec,
                         "status": "Accepted", # Default, will be recalculated
@@ -309,7 +340,7 @@ def add_production_log_entry(job_card, time_slot, ok_shots, rej_shots, operator=
                         "sample_type": r.get("sample_type") or p.sample_type,
                         "sample_qty": flt(r.get("sample_qty")) or flt(p.sample_qty)
                     }
-
+ 
                     # Determine if value is numeric
                     is_val_numeric = False
                     if val is not None and val != "":
@@ -318,12 +349,12 @@ def add_production_log_entry(job_card, time_slot, ok_shots, rej_shots, operator=
                             is_val_numeric = True
                         except (ValueError, TypeError):
                             is_val_numeric = False
-
+ 
                     if is_p_numeric:
                         # Numeric template -> store in reading_1, keep reading_value empty
                         reading_row["reading_1"] = cstr(val) if val is not None else ""
                         reading_row["reading_value"] = ""
-                        
+                       
                         if is_val_numeric:
                             f_val = flt(val)
                             # Automate status check
@@ -338,10 +369,10 @@ def add_production_log_entry(job_card, time_slot, ok_shots, rej_shots, operator=
                         # For non-numeric or mismatch, keep user status if provided
                         if r.get("status"):
                             reading_row["status"] = r.get("status")
-
+ 
                     if reading_row["status"] == "Rejected":
                         qi.status = "Rejected"
-
+ 
                     qi.append("readings", reading_row)
             else:
                 # Fallback to provided readings if no template (unlikely)
@@ -350,7 +381,7 @@ def add_production_log_entry(job_card, time_slot, ok_shots, rej_shots, operator=
                     if not spec: continue
                     is_p_numeric = 1 if r.get("numeric") or r.get("is_numeric") else 0
                     val = r.get("reading_value")
-                    
+                   
                     reading_row = {
                         "specification": str(spec),
                         "status": str(r.get("status") or "Accepted"),
@@ -358,7 +389,7 @@ def add_production_log_entry(job_card, time_slot, ok_shots, rej_shots, operator=
                         "sample_type": r.get("sample_type"),
                         "sample_qty": flt(r.get("sample_qty"))
                     }
-                    
+                   
                     if is_p_numeric:
                         reading_row["reading_1"] = cstr(val) if val is not None else ""
                         reading_row["reading_value"] = ""
@@ -368,7 +399,7 @@ def add_production_log_entry(job_card, time_slot, ok_shots, rej_shots, operator=
                     if reading_row["status"] == "Rejected":
                         qi.status = "Rejected"
                     qi.append("readings", reading_row)
-
+ 
             try:
                 # Re-check status: if any row is rejected, document status should be Rejected
                 qi.insert()
@@ -376,29 +407,29 @@ def add_production_log_entry(job_card, time_slot, ok_shots, rej_shots, operator=
             except Exception as e:
                 frappe.log_error(frappe.get_traceback(), "QI Insertion Error Traceback")
                 raise e
-
+ 
             # Link QI to the specific row in Production Shots Table
             row.quality_inspection = qi.name
             dpl.save()
-            
+           
             frappe.msgprint(_("Quality Inspection {0} created and linked. Status: {1}").format(qi.name, qi.status))
-
+ 
         except Exception as e:
             frappe.log_error(frappe.get_traceback(), "Production Log QI Error")
             frappe.msgprint(_("Warning: Production Log added, but failed to create Quality Inspection. Check Error Log: {0}").format(str(e)))
-
+ 
     return dpl.name
-
+ 
 def get_current_shift():
     now = now_datetime().time()
     shifts = frappe.get_all("Shift Type", fields=["name", "start_time", "end_time"])
-    
+   
     for s in shifts:
         if s.start_time and s.end_time:
             # Handle standard shifts and overnight shifts
             start = (datetime.min + s.start_time).time()
             end = (datetime.min + s.end_time).time()
-            
+           
             if start <= end:
                 if start <= now <= end:
                     return s.name
@@ -406,71 +437,71 @@ def get_current_shift():
                 if now >= start or now <= end:
                     return s.name
     return None
-
+ 
 def update_totals(dpl):
     total_ok = 0
     total_rej = 0
     for row in dpl.production_data:
         total_ok += flt(row.ok_shots)
         total_rej += flt(row.rej_shots)
-    
+   
     dpl.total_ok_shots = total_ok
     dpl.total_rej_shots = total_rej
     dpl.total_shots = total_ok + total_rej
-    
+   
     # Update last_counter
     dpl.last_counter = flt(dpl.first_counter or 0) + total_ok + total_rej
-    
+   
     # RM Consumption calculation (grams to kg)
     if dpl.get("shot_weight") or dpl.get("runner_weight"):
         s_wt = flt(dpl.get("shot_weight"))
         r_wt = flt(dpl.get("runner_weight"))
         dpl.rm_consumption = (s_wt + r_wt) * (total_ok + total_rej) / 1000
-
+ 
 @frappe.whitelist()
 def get_job_cards_for_work_order(work_order):
-    return frappe.get_all("Job Card", 
+    return frappe.get_all("Job Card",
         filters={
-            "work_order": work_order, 
+            "work_order": work_order,
             "docstatus": ["<", 2],
             "status": ["in", ["Open", "Work In Progress"]]
-        }, 
+        },
         fields=["name", "operation", "workstation"]
     )
-
+ 
 @frappe.whitelist()
 def get_last_time_slot(job_card):
     # Find the most recent Daily Production Log for this Job Card
-    last_log = frappe.db.get_value("Daily Production Log", 
-        {"job_card": job_card, "docstatus": ["<", 2]}, 
-        "name", 
+    last_log = frappe.db.get_value("Daily Production Log",
+        {"job_card": job_card, "docstatus": ["<", 2]},
+        "name",
         order_by="report_date desc, creation desc"
     )
-    
+   
     if last_log:
         # Get the last time slot from the production_data child table
-        last_slot = frappe.db.get_value("Production Shots Table", 
-            {"parent": last_log}, 
-            "time_slot", 
+        last_slot = frappe.db.get_value("Production Shots Table",
+            {"parent": last_log},
+            "time_slot",
             order_by="idx desc"
         )
         return last_slot
-    
+   
     return None
-
+ 
 @frappe.whitelist()
 def get_production_log_defaults(job_card):
     if not job_card:
         return {}
-    
+   
     # Get standard details (targets, RM, MB, batches, etc.)
     from mold_management.mold_management.doctype.daily_production_log.daily_production_log import get_job_card_details
     details = get_job_card_details(job_card)
-    
+   
     # Get next time slot
     last_slot = get_last_time_slot(job_card)
     next_slot = None
-    
+   
     slots = frappe.get_all("Production Time Slots", fields=["name"], order_by="idx")
     if slots:
         if last_slot:
@@ -484,28 +515,28 @@ def get_production_log_defaults(job_card):
                 next_slot = slots[0].name
         else:
             next_slot = slots[0].name
-
+ 
     defaults = {
         "next_time_slot": next_slot,
         "last_time_slot": last_slot
     }
     defaults.update(details)
     return defaults
-
+ 
 @frappe.whitelist()
 def get_production_logs(limit=50, name=None):
     filters = {}
     if name:
         filters["name"] = name
-        
+       
     logs = frappe.get_all("Daily Production Log", filters=filters, fields=["*"], order_by="creation desc", limit=limit)
     for log in logs:
-        log["production_data"] = frappe.get_all("Production Shots Table", 
-            filters={"parent": log.name}, 
-            fields=["*"], 
+        log["production_data"] = frappe.get_all("Production Shots Table",
+            filters={"parent": log.name},
+            fields=["*"],
             order_by="idx")
     return logs
-
+ 
 @frappe.whitelist()
 def get_qi_template_parameters(job_card=None, template=None):
     if not template and job_card:
@@ -514,29 +545,29 @@ def get_qi_template_parameters(job_card=None, template=None):
             res = frappe.db.get_value("Item", item_code, ["in_process_inspection_template", "quality_inspection_template"], as_dict=True)
             if res:
                 template = res.in_process_inspection_template or res.quality_inspection_template
-    
+   
     if not template:
         return []
-
+ 
     return frappe.get_all("Item Quality Inspection Parameter",
         filters={"parent": template},
         fields=["*"],
         order_by="idx") # Maintain sequence as per template
-
+ 
 @frappe.whitelist()
 def get_item_qi_details(job_card):
     item_code = frappe.db.get_value("Job Card", job_card, "production_item")
     if not item_code:
         return {}
-    
+   
     res = frappe.db.get_value("Item", item_code, ["in_process_inspection_template", "quality_inspection_template"], as_dict=True)
     template = None
     if res:
         template = res.in_process_inspection_template or res.quality_inspection_template
-    
+   
     if not template:
         return {}
-        
+       
     parameters = get_qi_template_parameters(template=template)
     return {
         "template": template,
