@@ -65,6 +65,7 @@ doctype_js = {
     ],
     "Stock Entry": ["public/js/on_stock_entry_fetched_work_order_item.js", "public/js/stock_entry_non_tock_items_allow.js"],
     "Quality Inspection": "public/js/quality_inspection.js",
+    "Production Plan": "public/js/production_plan.js",
 }
 
 
@@ -107,6 +108,9 @@ doc_events = {
     },
     "Quality Inspection": {
         "validate": "mold_management.mold_management.api.quality_inspection.validate_quality_inspection"
+    },
+    "Production Plan": {
+        "validate": "mold_management.api.production_plan.populate_operations_from_bom"
     }
 }
 

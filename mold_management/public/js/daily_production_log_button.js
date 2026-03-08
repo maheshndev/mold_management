@@ -10,7 +10,7 @@ frappe.ui.form.on("Job Card", {
 				__("Actions"),
 			);
 
-			// Override "Complete Job" to bypass the quantity prompt ONLY IF production logs with quantity exist
+			// Bypass "Complete Job" dialog if production logs exist (Optimized for v16/Develop)
 			setTimeout(() => {
 				frappe.db
 					.get_list("Daily Production Log", {
@@ -18,61 +18,162 @@ frappe.ui.form.on("Job Card", {
 						limit: 1,
 					})
 					.then((res) => {
-						const has_logs = res && res.length > 0;
-						const has_qty = flt(frm.doc.total_completed_qty) > 0;
-
-						if (has_logs && has_qty && frm.doc.status === "Work In Progress") {
+						if (res && res.length > 0) {
+							// Remove original button. Try multiple times if necessary in v16
 							frm.remove_custom_button(__("Complete Job"));
+
 							frm.add_custom_button(
 								__("Complete Job"),
 								function () {
-									// Calculate what should be passed to complete_job
-									// We want the total in time_logs to match frm.doc.total_completed_qty
-									const target_total = flt(frm.doc.total_completed_qty || 0);
-									const planned_qty = flt(
-										frm.doc.for_quantity || frm.doc.qty || 0,
-									);
+									frappe.dom.freeze(__("Completing Job Card..."));
 
-									// If we are already over target, we might need to cap it for validation
-									let complete_qty = target_total;
+									// Fetch latest stats to ensure accuracy (bypass local stale data)
+									frappe.call({
+										method: "mold_management.api.production_log_api.get_job_card_qty_stats",
+										args: { job_card: frm.doc.name },
+										callback: function (r) {
+											frappe.dom.unfreeze();
+											if (r.message) {
+												const stats = r.message;
+												const target_total = flt(stats.produced_qty || 0);
+												const planned_qty = flt(
+													frm.doc.for_quantity || frm.doc.qty || 0,
+												);
 
-									// Check if we already have time logs.
-									// If so, we only need to add the difference.
-									let existing_time_log_qty = 0;
-									if (frm.doc.time_logs) {
-										frm.doc.time_logs.forEach((log) => {
-											if (log.completed_qty)
-												existing_time_log_qty += flt(log.completed_qty);
-										});
-									}
+												let existing_time_log_qty = 0;
+												if (frm.doc.time_logs) {
+													frm.doc.time_logs.forEach((log) => {
+														if (log.completed_qty)
+															existing_time_log_qty += flt(
+																log.completed_qty,
+															);
+													});
+												}
 
-									const delta = target_total - existing_time_log_qty;
-									complete_qty = delta > 0 ? delta : 0;
+												let complete_qty =
+													target_total - existing_time_log_qty;
+												if (complete_qty < 0) complete_qty = 0;
 
-									// Final check to avoid overproduction error if target is strict
-									if (
-										planned_qty > 0 &&
-										existing_time_log_qty + complete_qty > planned_qty
-									) {
-										complete_qty = Math.max(
-											0,
-											planned_qty - existing_time_log_qty,
-										);
-									}
+												// Safety check for strict v16 validations
+												if (
+													planned_qty > 0 &&
+													existing_time_log_qty + complete_qty >
+														planned_qty
+												) {
+													complete_qty = Math.max(
+														0,
+														planned_qty - existing_time_log_qty,
+													);
+												}
 
-									console.log(
-										"Completing Job Card with qty:",
-										complete_qty,
-										"Target Total:",
-										target_total,
-									);
-									frm.events.complete_job(frm, "Complete", complete_qty);
+												console.log(
+													"Bypass Triggered: Target Total",
+													target_total,
+													"Complete Qty",
+													complete_qty,
+												);
+
+												if (target_total <= 0) {
+													frappe.msgprint(
+														__(
+															"No quantity recorded in Daily Production Logs yet. Please add production logs first.",
+														),
+													);
+													return;
+												}
+
+												// Set quantity fields on form to match server stats before completion
+												// This helps satisfy frontend validations in v16
+												frm.set_value("total_completed_qty", target_total);
+												if (stats.rejected_qty !== undefined) {
+													frm.set_value(
+														"process_loss_qty",
+														flt(stats.rejected_qty),
+													);
+												}
+
+												console.log(
+													"Attempting completion with Qty:",
+													complete_qty,
+												);
+												frappe.dom.freeze(__("Completing Job Card..."));
+
+												if (complete_qty > 0) {
+													// Call ERPNext's server-side completion method directly
+													frappe.call({
+														method: "erpnext.manufacturing.doctype.job_card.job_card.make_time_log",
+														args: {
+															job_card: frm.doc.name,
+															completed_qty: complete_qty,
+															status: "Complete",
+														},
+														callback: function (r) {
+															if (!r.exc) {
+																frm.reload_doc().then(() => {
+																	if (
+																		frm.doc.docstatus === 0 &&
+																		flt(
+																			frm.doc
+																				.total_completed_qty,
+																		) >= flt(planned_qty)
+																	) {
+																		frm.save("Submit").always(
+																			() => {
+																				frappe.dom.unfreeze();
+																			},
+																		);
+																	} else {
+																		frappe.dom.unfreeze();
+																	}
+																});
+																frappe.show_alert({
+																	message: __(
+																		"Job Card completion successful",
+																	),
+																	indicator: "green",
+																});
+															} else {
+																frappe.dom.unfreeze();
+															}
+														},
+														error: function () {
+															frappe.dom.unfreeze();
+														},
+													});
+												} else {
+													// Qty already met, just try to submit if not already
+													if (
+														frm.doc.docstatus === 0 &&
+														flt(target_total) >= flt(planned_qty)
+													) {
+														frm.set_value("status", "Completed");
+														frm.save("Submit").always(() => {
+															frappe.dom.unfreeze();
+														});
+													} else {
+														frappe.dom.unfreeze();
+														frappe.msgprint(
+															__(
+																"Job Card quantity already recorded.",
+															),
+														);
+													}
+												}
+											}
+										},
+										error: function () {
+											frappe.dom.unfreeze();
+											frappe.msgprint(
+												__("Error fetching production stats for bypass."),
+											);
+										},
+									});
 								},
 								null,
 							).addClass("btn-primary");
 						}
 					});
-			}, 50);
+			}, 150);
 		}
 
 		if (frm.doc.docstatus === 1) {
