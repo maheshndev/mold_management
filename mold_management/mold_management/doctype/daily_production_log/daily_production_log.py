@@ -1,8 +1,47 @@
 import frappe
 from frappe import _
+from frappe.model.document import Document
 from frappe.utils import nowdate, flt, now_datetime, cstr, time_diff
 from datetime import datetime, time
 import math
+
+class DailyProductionLog(Document):
+    def validate(self):
+        self.calculate_totals()
+        self.set_operator_name()
+
+    def set_operator_name(self):
+        if self.operator and not self.operator_name:
+            self.operator_name = frappe.db.get_value("Employee", self.operator, "employee_name")
+
+    def calculate_totals(self):
+        total_ok = 0
+        total_rej = 0
+        
+        for row in self.production_data:
+            # Update row total
+            row.total_shots = flt(row.ok_shots) + flt(row.rej_shots)
+            total_ok += flt(row.ok_shots)
+            total_rej += flt(row.rej_shots)
+        
+        self.total_ok_shots = total_ok
+        self.total_rej_shots = total_rej
+        self.total_shots = total_ok + total_rej
+        
+        # Update last_counter
+        self.last_counter = flt(self.first_counter or 0) + self.total_shots
+        
+        # Dynamic Target Calculation
+        if self.cycle_time and self.running_cavity:
+            shift_hours = get_shift_hours(self.shift)
+            self.shift_target = math.floor((shift_hours * 3600 / flt(self.cycle_time)) * flt(self.running_cavity))
+            self.hourly_target = math.floor(self.shift_target / shift_hours)
+
+        # RM Consumption calculation
+        if self.shot_weight or self.runner_weight:
+            s_wt = flt(self.shot_weight)
+            r_wt = flt(self.runner_weight)
+            self.rm_consumption = (s_wt + r_wt) * self.total_shots / 1000
  
 def get_shift_hours(shift_name):
     if not shift_name:
