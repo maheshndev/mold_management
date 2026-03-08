@@ -1,5 +1,4 @@
 import frappe
-frappe. Throwfrappe. Throwfrappe. Throwfrappe. Throwitem. Getitem. Getitem. Getitem. Getmath. Floormath. Floor
 from frappe import _
 from frappe.utils import nowdate, flt, now_datetime, cstr, time_diff
 from datetime import datetime, time
@@ -26,7 +25,13 @@ def get_job_card_qty_stats(job_card):
     target_qty = flt(jc.get("for_quantity") or jc.get("qty") or jc.get("qty_to_manufacture") or 0)
    
     produced_qty = frappe.db.sql("""
-        SELECT SUM(total_shots)
+        SELECT SUM(total_ok_shots)
+        FROM `tabDaily Production Log`
+        WHERE job_card = %s AND docstatus < 2
+    """, job_card)[0][0] or 0
+   
+    rejected_qty = frappe.db.sql("""
+        SELECT SUM(total_rej_shots)
         FROM `tabDaily Production Log`
         WHERE job_card = %s AND docstatus < 2
     """, job_card)[0][0] or 0
@@ -34,6 +39,7 @@ def get_job_card_qty_stats(job_card):
     return {
         "target_qty": flt(target_qty),
         "produced_qty": flt(produced_qty),
+        "rejected_qty": flt(rejected_qty),
         "remaining_qty": flt(target_qty) - flt(produced_qty)
     }
  
@@ -229,14 +235,12 @@ def add_production_log_entry(job_card, time_slot, ok_shots, rej_shots, operator=
     # Update totals
     update_totals(dpl)
     dpl.save()
- 
     # Update Job Card total_completed_qty and process_loss_qty (Cumulative from all logs)
     all_logs = frappe.get_all(
         "Daily Production Log",
         filters={"job_card": job_card, "docstatus": ["<", 2]},
         fields=["total_ok_shots", "total_rej_shots", "name"],
     )
- 
     total_ok_sum = 0
     total_rej_sum = 0
     for log in all_logs:
@@ -246,21 +250,21 @@ def add_production_log_entry(job_card, time_slot, ok_shots, rej_shots, operator=
         else:
             total_ok_sum += flt(log.total_ok_shots)
             total_rej_sum += flt(log.total_rej_shots)
- 
     # Fallback: If sum is zero but shots were provided, increment current quantities
     if total_ok_sum == 0 and flt(ok_shots) > 0:
         total_ok_sum = flt(jc.total_completed_qty) + flt(ok_shots)
     if total_rej_sum == 0 and flt(rej_shots) > 0:
         total_rej_sum = flt(jc.process_loss_qty) + flt(rej_shots)
- 
     # Cap process_loss_qty to avoid overproduction error if target exists
     target_qty = flt(jc.get("for_quantity") or jc.get("qty") or jc.get("qty_to_manufacture") or 0)
     adjusted_rej_sum = total_rej_sum
     if target_qty > 0 and (total_ok_sum + total_rej_sum) > target_qty:
         adjusted_rej_sum = max(0, target_qty - total_ok_sum)
  
-    jc.db_set("total_completed_qty", total_ok_sum)
-    jc.db_set("process_loss_qty", adjusted_rej_sum)
+    # We no longer db_set these here to avoid conflicts with Job Card completion logic/Time Logs
+    # The frontend "Complete Job" button will handle the actual completion via make_time_log
+    # jc.db_set("total_completed_qty", total_ok_sum)
+    # jc.db_set("process_loss_qty", adjusted_rej_sum)
  
     # Final confirmation message
     frappe.msgprint(
@@ -268,7 +272,6 @@ def add_production_log_entry(job_card, time_slot, ok_shots, rej_shots, operator=
             job_card, total_ok_sum
         )
     )
- 
     if create_qi and qi_readings:
         try:
             # Re-fetch Job Card for fresh template info

@@ -6,7 +6,7 @@ def validate_quality_inspection(doc, method):
 	"""
 	Hook for Quality Inspection 'validate' event.
 	1. Automates fetching of custom fields from the template.
-	2. Implements custom "Average" (Majority) rule and "Average" (Mean) calculation.
+	2. Implements custom "All Match" rule.
 	"""
 	if doc.quality_inspection_template:
 		fetch_custom_fields_from_template(doc)
@@ -72,7 +72,7 @@ def fetch_custom_fields_from_template(doc):
 def calculate_custom_inspection_status(doc):
 	"""
 	Iterates through readings and applies custom validation:
-	- 50% Majority Rule: Pass Count >= 50% of intended Sample Qty.
+	- All Match Rule: Pass Count == intended Sample Qty.
 	- Strict Field Selection:
 	    - Numeric: Reading 1 to N (N=sample_qty).
 	    - String: Reading Value (1st) + Reading 1 to N-1.
@@ -152,8 +152,8 @@ def calculate_custom_inspection_status(doc):
 				if is_ok:
 					pass_count += 1
 			
-			# Majority Rule (50% threshold of effective_qty)
-			if pass_count >= math.ceil(effective_qty * 0.5):
+			# All Match Rule (Require strictly all of effective_qty)
+			if pass_count == effective_qty:
 				row_accepted = True
 		
 		# 4. Final Status Update for Row
