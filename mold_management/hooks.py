@@ -55,13 +55,13 @@ doctype_js = {
     "Mould":["public/js/fetcehd_id_in_mould_code_field.js","public/js/add_manage_button_on_mould.js"],
     "Item": ["public/js/fetched_cavity_from_mould_on_item.js","public/js/if_fixed_asset_hide_customer_provided_item_checkbox.js","public/js/atleast_one_of_the_mould_checkbox_is_checked.js","public/js/is_mold_and_is_molding_show_hide_mandatory_mold_details_tab_fiedls.js"],
     # "Work Order": "public/js/auto_mold_generation_based_on_work_order.js",
-    "Job Card": ["public/js/mould_filter_applied_on_job_card.js","public/js/on_job_card_is_mold_checkbox_checked_then_mandatory_mould_field.js", "public/js/daily_production_log_button.js"],
+    "Job Card": ["public/js/mould_filter_applied_on_job_card.js","public/js/on_job_card_is_mold_checkbox_checked_then_mandatory_mould_field.js"],
     "Mould Maintenance Order": ["public/js/create_material_request_and_purchase_order_from_maintenance_order.js","public/js/on_mould_maintenance_order_fetched_total_shot_current_maximum.js"],
     "Mould Maintenance": ["public/js/calculate_amount_in_require_part_table.js","public/js/supplier_mandatory_when_maintenance_team_outsource.js","public/js/on_mould_maintenance_fetched_total_shot_current_maximum.js"],
     "Work Order": [
         "public/js/on_work_order_allow_non_stock_item.js",
         "public/js/work_order_routing_template.js", 
-        "public/js/daily_production_log_button.js",
+       
         "public/js/add_filter_for_mould_field_in_workorder.js"
     ],
     "Stock Entry": ["public/js/on_stock_entry_fetched_work_order_item.js", "public/js/stock_entry_non_tock_items_allow.js"],
@@ -80,15 +80,12 @@ scheduler_events = {
 doc_events = {
     "Job Card": {
         "on_submit": [
-            "mold_management.api.mould_shots_updated_on_jo_card_completed_qty.update_mould_usage",
-            "mold_management.api.dpl_sync.sync_dpl_on_job_card_submit"
-        ],
-        "on_cancel": "mold_management.api.dpl_sync.sync_dpl_on_job_card_cancel"
+            "mold_management.api.mould_shots_updated_on_jo_card_completed_qty.update_mould_usage"
+        ]
     },
     "Work Order": {
         "before_insert": "mold_management.api.production_plan.map_production_plan_operations",
-        "on_submit": "mold_management.api.dpl_sync.sync_dpl_on_work_order_submit",
-        "on_cancel": "mold_management.api.dpl_sync.sync_dpl_on_work_order_cancel"
+       
     },
     "Mould": {
         "on_update": "mold_management.api.if_current_usage_count_reach_90_trigger_notification.check_mould_usage"
