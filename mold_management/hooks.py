@@ -77,6 +77,7 @@ scheduler_events = {
     
 }
 
+
 doc_events = {
     "Job Card": {
         "on_submit": [
