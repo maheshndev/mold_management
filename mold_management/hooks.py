@@ -26,6 +26,7 @@ after_migrate = [
      "mold_management.patches.v0_1.create_tool_room_work_order_on_material_request.execute",
      "mold_management.patches.v0_1.create_is_customer_and_maintain_stock_fixed_asset_on_work_order.execute",
      "mold_management.patches.v0_1.add_work_order_routing_field_on_work_order.execute",
+     "mold_management.patches.v0_1.add_mould_to_work_order_operation.execute",
 
      # fields and section on item doctype
      "mold_management.patches.v0_1.add_mould_detail_tab_on_item_master.execute",
@@ -39,7 +40,12 @@ after_migrate = [
      "mold_management.patches.v0_1.add_is_mold_item_field_on_item.execute",
      "mold_management.patches.v0_1.add_is_moulding_item_checkbox_on_item.execute",
      "mold_management.patches.v0_1.add_other_than_mould_or_moulding_item.execute",
-     "mold_management.patches.v0_1.add_mould_in_workorder.execute"
+     "mold_management.patches.v0_1.add_mould_in_workorder.execute",
+     "mold_management.patches.v0_1.add_shift_field_to_work_order.execute",
+     "mold_management.patches.v0_1.add_sampling_fields_to_qi_template.execute",
+     "mold_management.patches.v0_1.add_fields_to_qir_quality_inspection.execute",
+     "mold_management.patches.v0_1.add_field_on_qi_time_slot.execute",
+     "mold_management.patches.v0_1.add_in_process_inspection_template_to_item.execute"
 
     
 ]
@@ -49,16 +55,18 @@ doctype_js = {
     "Mould":["public/js/fetcehd_id_in_mould_code_field.js","public/js/add_manage_button_on_mould.js"],
     "Item": ["public/js/fetched_cavity_from_mould_on_item.js","public/js/if_fixed_asset_hide_customer_provided_item_checkbox.js","public/js/atleast_one_of_the_mould_checkbox_is_checked.js","public/js/is_mold_and_is_molding_show_hide_mandatory_mold_details_tab_fiedls.js"],
     # "Work Order": "public/js/auto_mold_generation_based_on_work_order.js",
-    "Job Card": ["public/js/mould_filter_applied_on_job_card.js","public/js/on_job_card_is_mold_checkbox_checked_then_mandatory_mould_field.js", "public/js/daily_production_log_button.js"],
+    "Job Card": ["public/js/mould_filter_applied_on_job_card.js","public/js/on_job_card_is_mold_checkbox_checked_then_mandatory_mould_field.js"],
     "Mould Maintenance Order": ["public/js/create_material_request_and_purchase_order_from_maintenance_order.js","public/js/on_mould_maintenance_order_fetched_total_shot_current_maximum.js"],
     "Mould Maintenance": ["public/js/calculate_amount_in_require_part_table.js","public/js/supplier_mandatory_when_maintenance_team_outsource.js","public/js/on_mould_maintenance_fetched_total_shot_current_maximum.js"],
     "Work Order": [
         "public/js/on_work_order_allow_non_stock_item.js",
         "public/js/work_order_routing_template.js", 
-        "public/js/daily_production_log_button.js",
+       
         "public/js/add_filter_for_mould_field_in_workorder.js"
     ],
     "Stock Entry": ["public/js/on_stock_entry_fetched_work_order_item.js", "public/js/stock_entry_non_tock_items_allow.js"],
+    "Quality Inspection": "public/js/quality_inspection.js",
+    "Production Plan": "public/js/production_plan.js",
 }
 
 
@@ -69,9 +77,16 @@ scheduler_events = {
     
 }
 
+
 doc_events = {
-   "Job Card": {
-        "on_submit": "mold_management.api.mould_shots_updated_on_jo_card_completed_qty.update_mould_usage"
+    "Job Card": {
+        "on_submit": [
+            "mold_management.api.mould_shots_updated_on_jo_card_completed_qty.update_mould_usage"
+        ]
+    },
+    "Work Order": {
+        "before_insert": "mold_management.api.production_plan.map_production_plan_operations",
+       
     },
     "Mould": {
         "on_update": "mold_management.api.if_current_usage_count_reach_90_trigger_notification.check_mould_usage"
@@ -90,15 +105,13 @@ doc_events = {
     },
     "Mould Maintenance Order": {
         "on_update": "mold_management.api.reset_current_shot_zero.reset_mould_usage_on_submit"
+    },
+    "Quality Inspection": {
+        "validate": "mold_management.mold_management.api.quality_inspection.validate_quality_inspection"
+    },
+    "Production Plan": {
+        "validate": "mold_management.api.production_plan.populate_operations_from_bom"
     }
-    
-    # "Stock Entry": {
-    #     "on_submit": [
-    #         "mold_management.api.mould_record_generation_on_stock_entry.create_mould_on_stock_entry",
-    #         # "mold_management.api.create_asset_on_stock_entry_submit.create_pr_and_asset_from_stock_entry"
-    #     ]
-    # }
-
 }
 
 override_doctype_class = {
