@@ -11,9 +11,7 @@ def execute():
             "options": "Sample Type",
             "insert_after": "specification",
             "in_list_view": 1,
-            "columns": 2,
-            "fetch_from": "quality_inspection_template.sample_type"
-
+            "columns": 2
         },
         {
             "fieldname": "sample_qty",
@@ -21,23 +19,20 @@ def execute():
             "fieldtype": "Float",
             "insert_after": "sample_type",
             "in_list_view": 1,
-            "columns": 1,
-            "fetch_from": "quality_inspection_template.sample_qty"
+            "columns": 1
         },
         {
             "fieldname": "criteria_type",
             "label": "Criteria Type",
             "fieldtype": "Select",
             "options": "Equals\nAverage\nMin-Max\nMax\nMin\nNot Equal",
-            "insert_after": "sample_qty",
-            "fetch_from": "quality_inspection_template.criteria_type"
+            "insert_after": "sample_qty"
         },
         {
             "fieldname": "avg",
             "label" : "Average",
             "fieldtype": "Data",
-            "insert_after": "criteria_type",
-            "fetch_from": "quality_inspection_template.avg"
+            "insert_after": "criteria_type"
         }
 
     ]
