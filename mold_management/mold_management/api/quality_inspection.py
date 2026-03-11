@@ -39,28 +39,28 @@ def fetch_custom_fields_from_template(doc):
 	for row in doc.readings:
 		param_data = params_map.get(row.specification)
 		if param_data:
-			# Update both custom and standard fields if they are blank/0
-			if not row.get("sample_type"):
+			# Update both custom and standard fields if they are blank/None (avoiding overwrite)
+			if row.get("sample_type") is None or row.get("sample_type") == "":
 				row.sample_type = param_data.sample_type
 				modified = True
-			if not row.get("sample_qty"):
+			if flt(row.get("sample_qty")) == 0:
 				row.sample_qty = flt(param_data.sample_qty)
 				modified = True
-			if not row.get("criteria_type"):
+			if row.get("criteria_type") is None or row.get("criteria_type") == "":
 				row.criteria_type = param_data.criteria_type
 				modified = True
-			if not row.get("avg"):
+			if row.get("avg") is None or row.get("avg") == "":
 				row.avg = param_data.avg
 				modified = True
 			
 			# Ensure standard numeric fields are also populated correctly
-			if not row.get("min_value"):
+			if flt(row.get("min_value")) == 0 and flt(param_data.min_value) != 0:
 				row.min_value = flt(param_data.min_value)
 				modified = True
-			if not row.get("max_value"):
+			if flt(row.get("max_value")) == 0 and flt(param_data.max_value) != 0:
 				row.max_value = flt(param_data.max_value)
 				modified = True
-			if not row.get("value"):
+			if row.get("value") is None or row.get("value") == "":
 				row.value = param_data.value
 				modified = True
 			if row.get("numeric") is None: # Numeric is a Check (0/1)
