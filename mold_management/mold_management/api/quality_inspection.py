@@ -23,9 +23,10 @@ def fetch_custom_fields_from_template(doc):
 		return
 
 	# Fetch parameters from Template including standard and custom fields
-	params = frappe.get_list("Item Quality Inspection Parameter",
+	params = frappe.get_all("Item Quality Inspection Parameter",
 		filters={"parent": template},
-		fields=["specification", "sample_type", "sample_qty", "criteria_type", "avg", "min_value", "max_value", "value", "numeric"]
+		fields=["specification", "sample_type", "sample_qty", "criteria_type", "avg", "min_value", "max_value", "value", "numeric"],
+		ignore_permissions=True
 	)
 
 	if not params:
@@ -84,13 +85,7 @@ def calculate_custom_inspection_status(doc):
 	sample_size = flt(doc.sample_size or 0)
 	
 	for row in doc.readings:
-		# 1. Sample Size Validation
 		row_sample_qty = flt(row.get("sample_qty") or 0)
-		if row_sample_qty > sample_size:
-			frappe.throw(
-				_("Row #{0}: Sample Qty ({1}) cannot be greater than Sample Size ({2})")
-				.format(row.idx, row_sample_qty, sample_size)
-			)
 
 		is_numeric_param = cint(row.numeric)
 		effective_qty = int(row_sample_qty) if row_sample_qty > 0 else 1
