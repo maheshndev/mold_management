@@ -52,3 +52,4 @@ mold_management.patches.v0_1.add_operations_table_to_production_plan
 mold_management.patches.v0_1.remove_workstation_mould_from_sub_assembly
 mold_management.patches.v0_1.fix_nested_table_in_production_plan
 mold_management.patches.v0_1.move_operations_table_in_sub_assembly
+mold_management.patches.v0_1.add_mould_to_work_order_operation

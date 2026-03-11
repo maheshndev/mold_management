@@ -80,13 +80,14 @@ scheduler_events = {
 
 doc_events = {
     "Job Card": {
+        "before_insert": "mold_management.api.production_plan.map_mould_to_job_card",
         "on_submit": [
             "mold_management.api.mould_shots_updated_on_jo_card_completed_qty.update_mould_usage"
         ]
     },
     "Work Order": {
         "before_insert": "mold_management.api.production_plan.map_production_plan_operations",
-       
+        "validate": "mold_management.api.production_plan.map_production_plan_operations",
     },
     "Mould": {
         "on_update": "mold_management.api.if_current_usage_count_reach_90_trigger_notification.check_mould_usage"
