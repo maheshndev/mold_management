@@ -139,7 +139,7 @@ frappe.pages["in-process-inspectio"].on_page_load = function (wrapper) {
 		if (template_name) {
 			parameters = await frappe
 				.call({
-					method: "mold_management.api.production_log_api.get_qi_template_parameters",
+					method: "yash_customization.api.production_log_api.get_qi_template_parameters",
 					args: { template: template_name },
 				})
 				.then((r) => r.message || []);

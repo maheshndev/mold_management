@@ -28,7 +28,7 @@ function fetch_custom_fields(frm) {
 	if (!frm.doc.quality_inspection_template) return;
 
 	frappe.call({
-		method: "mold_management.api.production_log_api.get_qi_template_parameters",
+		method: "yash_customization.api.production_log_api.get_qi_template_parameters",
 		args: {
 			template: frm.doc.quality_inspection_template,
 		},
