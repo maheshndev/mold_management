@@ -1,5 +1,15 @@
 {
   "dependencies": {
-    
-  }
+    "frappe-ui": "^0.1.193"
+  },
+  "name": "mold_management",
+  "version": "1.0.0",
+  "description": "Mold Management For Frappe Manufacturing",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC"
 }

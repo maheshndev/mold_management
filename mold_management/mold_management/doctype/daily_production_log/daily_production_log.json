@@ -165,7 +165,7 @@
    "label": "Page No"
   },
   {
-   "fetch_from": "quality_inspection.custom_shift",
+   "fetch_from": "operator.default_shift",
    "fieldname": "shift",
    "fieldtype": "Link",
    "label": "Shift Details",
@@ -347,7 +347,7 @@
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2025-08-26 18:11:57.896670",
+ "modified": "2025-08-28 15:07:46.270937",
  "modified_by": "Administrator",
  "module": "Mold Management",
  "name": "Daily Production Log",

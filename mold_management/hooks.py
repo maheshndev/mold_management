@@ -294,3 +294,8 @@ doc_events = {
 
 }
 
+# doc_events = {
+#     "Job Card": {
+#         "on_submit": "mold_management.mold_management.doctype.daily_production_log.create_daily_production_log"
+#     }
+# }

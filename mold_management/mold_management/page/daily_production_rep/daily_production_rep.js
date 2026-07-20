@@ -106,17 +106,14 @@ frappe.pages['daily-production-rep'].on_page_load = function (wrapper) {
                     <th>Rej Code</th>
                     <th>Remarks</th>
                 </tr>
-                ${(doc.production_data || []).map(row => `
-                    <tr>
-                        <td>1 ${row.time_slot || ""}</td>
-                        <td>2 ${row.ok_shots || ""}</td>
-                        <td>3 ${row.rej_shots || ""}</td>
-                        <td>4 ${row.total_shots || ""}</td>
-                        <td>5 ${row.rej_code || ""}</td>
-                        <td>6 ${row.remarks || ""}</td>
-                    </tr>
-                `).join("")}
-                
+                ${doc.production_data ? doc.production_data.map(row => `<tr>
+                    <td>${row.time_slot || ""}</td>
+                    <td>${row.ok_shots || ""}</td>
+                    <td>${row.rej_shots || ""}</td>
+                    <td>${row.total_shots || ""}</td>
+                    <td>${row.rej_code || ""}</td>
+                    <td>${row.remarks || ""}</td>
+                </tr>`).join("") : ""}
             </table>
 
             <!-- Summary -->

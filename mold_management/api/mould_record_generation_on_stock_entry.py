@@ -47,6 +47,17 @@ def create_mould_on_stock_entry(doc, method):
                     "mould_life": getattr(wo, "tool_life", 0)
                 })
                 mould.insert(ignore_permissions=True)
+                # Create corresponding Asset record
+                try:
+                    asset = frappe.get_doc({
+                        "doctype": "Asset",
+                        "asset_name": mould.mould_name or mould.name,
+                        "item_code": mould.part_code,
+                        "mould": mould.name
+                    })
+                    asset.insert(ignore_permissions=True)
+                except Exception as e:
+                    frappe.log_error(message=str(e), title="Asset creation failed for Mould")
                 created += 1
 
             message = f"{created} Mould record(s) created for Work Order {wo.name}"

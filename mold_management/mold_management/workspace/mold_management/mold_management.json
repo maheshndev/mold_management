@@ -102,10 +102,20 @@
    "link_type": "DocType",
    "onboard": 0,
    "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Activity Type",
+   "link_count": 0,
+   "link_to": "Activity Type",
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Link"
   }
  ],
- "modified": "2025-12-08 14:32:33.689533",
- "modified_by": "Administrator",
+ "modified": "2026-01-02 13:38:10.941613",
+ "modified_by": "admin@demo.localhost",
  "module": "Mold Management",
  "name": "Mold Management",
  "number_cards": [],
